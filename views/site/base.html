@@ -19,10 +19,10 @@
 			<div class="site-topbar">
 				<div class="site-topbar__navigation">
 					<a href="/">Главная</a>
-					<a href="/">Галерея</a>
-					<a href="/">Бложе</a>
-					<a href="/">Портфолио</a>
-					<a href="/">Storage</a>
+					<a href="/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif >Галерея</a>
+					<a href="/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif >Бложе</a>
+					<a href="/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif >Портфолио</a>
+					<a href="/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif >Storage</a>
 
 					<div class="floating-clear"></div>
 				</div>
