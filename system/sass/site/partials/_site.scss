@@ -1,0 +1,189 @@
+$topbar_size: 40px;
+$footer_size: 30px;
+$header_height: 200px;
+$border_padding: 10px;
+$footer_copy_color: #666;
+$header_auth_color: #666;
+
+body, html {
+	height: 100%;
+	min-height: 100%;
+}
+
+body {
+	background: #FFF;
+	font-size: $font_default_size;
+}
+
+body, input, textarea {
+	font-family: $font_default_family;
+	font-size: $font_default_size;
+}
+
+.site-topbar__wrapper {
+	@include background_rgba(250, 250, 250, .8);
+	width: 100%;
+
+	@include respond_to(screen_wide) {
+		position: fixed;
+		top: 0px;
+		left: 0px;
+	}
+}
+
+	.site-topbar {
+		min-width: $screen_phone;
+		max-width: $screen_wide;
+
+		@include respond_to(screen_wide) {
+			margin: auto;
+			width: $screen_wide;
+			height: $topbar_size;
+		}
+	}
+
+	.site-topbar__navigation {
+		display: block;
+		line-height: $topbar_size;
+		white-space: nowrap;
+
+		@include respond_to(screen_wide) {
+			height: $topbar_size;
+			float: left;
+			text-align: left;
+		}
+	}
+
+		.site-topbar__navigation a {
+			display: block;
+			height: $topbar_size;
+			padding: 0px $border_padding;
+			float: left;
+			color: $link_color_default;
+		}
+
+			.site-topbar__navigation a:hover {
+				text-decoration: underline;
+				@include background_rgba(220, 220, 220, .8);
+			}
+
+	.site-topbar__auth {
+		display: block;
+		height: $topbar_size;
+		line-height: $topbar_size;
+		padding: 0px $border_padding;
+		color: $header_auth_color;
+
+		@include respond_to(screen_wide) {
+			float: right;
+			text-align: right;
+		}
+	}
+
+.site-header {
+	@include respond_to(screen_wide) {
+		padding-top: $topbar_size;
+	}
+}
+
+	.site-header__photo {
+		background: url('/images/header.jpg') repeat-x 50% 50%;
+		height: $header_height;
+	}
+
+.site-content {
+	padding-bottom: $footer_size;
+
+	@include respond_to(screen_phone) {
+		padding-bottom: $footer_size * 2;
+	}
+}
+
+	.site-content__container {
+		min-width: $screen_phone;
+		max-width: $screen_wide;
+		padding: 0px $border_padding;
+
+		@include respond_to(screen_wide) {
+			margin: auto;
+			width: $screen_wide;
+		}
+	}
+
+.site-footer__wrapper {
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	width: 100%;
+	overflow: hidden;
+	height: $footer_size;
+
+	@include respond_to(screen_phone) {
+		height: $footer_size * 2;
+	}
+}
+
+	.site-footer {
+		min-width: $screen_phone;
+		max-width: $screen_wide;
+		height: $footer_size * 2;
+
+		@include respond_to(screen_tablet) {
+			height: $footer_size;
+		}
+
+		@include respond_to(screen_wide) {
+			margin: auto;
+			width: $screen_wide;
+			height: $footer_size;
+		}
+	}
+
+	.site-footer__copy {
+		height: $footer_size;
+		line-height: $footer_size;
+		text-align: center;
+		color: $footer_copy_color;
+
+		@include respond_to(screen_tablet) {
+			text-align: left;
+			float: left;
+			padding-left: $border_padding;
+		}
+
+		@include respond_to(screen_wide) {
+			text-align: left;
+			float: left;
+			padding-left: $border_padding;
+		}
+	}
+
+	.site-footer__lang {
+		height: $footer_size;
+		line-height: $footer_size;
+		text-align: center;
+
+		@include respond_to(screen_tablet) {
+			text-align: right;
+			float: right;
+			padding-right: $border_padding;
+		}
+
+		@include respond_to(screen_wide) {
+			text-align: right;
+			float: right;
+			padding-right: $border_padding;
+		}
+	}
+
+		.site-footer__lang a {
+			color: $link_color_default;
+		}
+
+		.site-footer__lang a:hover {
+			text-decoration: underline;
+		}
+
+.floating-clear {
+	clear: both;
+}
