@@ -18,25 +18,21 @@
 		<div class="site__wrapper">
 		<div class="site-topbar__wrapper">
 			<div class="site-topbar">
-				<div class="site-topbar__navigation">
-					<a href="/@lang/" @if ($current_menu == "landing") class="site-topbar__navigation-current" @endif>
-						@lang("site.menu_landing")
-					</a><a href="/@lang/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif>
-						@lang("site.menu_gallery")
-					</a><a href="/@lang/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif>
-						@lang("site.menu_blog")
-					</a><a href="/@lang/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif>
-						@lang("site.menu_portfolio")
-					</a><a href="/@lang/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif>
-						@lang("site.menu_storage")
-					</a>
-
-					<div class="floating-clear"></div>
-				</div>
-
-				<div class="site-topbar__auth">
-					Войти через
-				</div>
+				<ul class="site-topbar__navigation">
+					<li @if ($current_menu == "landing") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/">@lang("site.menu_landing")</a>
+					</li><li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/gallery/">@lang("site.menu_gallery")</a>
+					</li><li @if ($current_menu == "blog") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/blog/">@lang("site.menu_blog")</a>
+					</li><li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/portfolio/">@lang("site.menu_portfolio")</a>
+					</li><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
+					</li><li class="site-topbar__navigation--right">
+						<a href="#" onclick="return false;">@lang("site.menu_signin")</a>
+					</li>
+				</ul>
 
 				<div class="floating-clear"></div>
 			</div>
@@ -48,13 +44,13 @@
 				<div class="site-header__contacts-wrapper">
 					<div class="site-header__contacts">
 						<a href="mailto:me@ferg.in"><img src="/images/site/contacts/mail.png" /></a>
-						<a href="https://github.com/ferggren"><img src="/images/site/contacts/github.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://github.com/ferggren"><img src="/images/site/contacts/github.png" /></a>
 						<a href="skype:ferggren?chat"><img src="/images/site/contacts/skype.png" /></a>
-						<a href="https://instagram.com/ferggren/"><img src="/images/site/contacts/instagram.png" /></a>
-						<a href="https://telegram.me/ferggren"><img src="/images/site/contacts/telegram.png" /></a>
-						<a href="https://vk.com/id4867738"><img src="/images/site/contacts/vk.png" /></a>
-						<a href="https://www.facebook.com/ferggren"><img src="/images/site/contacts/facebook.png" /></a>
-						<a href="https://steamcommunity.com/id/ferggren/"><img src="/images/site/contacts/steam.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://instagram.com/ferggren/"><img src="/images/site/contacts/instagram.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://telegram.me/ferggren"><img src="/images/site/contacts/telegram.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://vk.com/id4867738"><img src="/images/site/contacts/vk.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://www.facebook.com/ferggren"><img src="/images/site/contacts/facebook.png" /></a>
+						<a target="_blank" rel="nofollow noopener noreferrer" href="https://steamcommunity.com/id/ferggren/"><img src="/images/site/contacts/steam.png" /></a>
 					</div>
 				</div>
 				@else

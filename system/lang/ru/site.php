@@ -13,6 +13,7 @@ $strings = array(
     'menu_blog' => 'Бложе',
     'menu_portfolio' => 'Портфолио',
     'menu_storage' => 'Storage',
+    'menu_signin' => 'Вход',
 
     'swap_lang' => 'English version',
 );

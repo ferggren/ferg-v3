@@ -5,7 +5,6 @@ $site_content_offset_top: 20px;
 
 $header_height: 150px;
 
-$topbar_auth_color: #FFF;
 $topbar_menu_color: #FFF;
 $topbar_menu_color_hover: #222;
 $topbar_bg_color: (21, 21, 21, .8);
@@ -64,28 +63,15 @@ body, input, textarea {
 		display: block;
 		line-height: $topbar_size;
 
-		@include respond_to(screen_wide) {
-			height: $topbar_size;
-			float: left;
-			text-align: left;
-		}
-
 		@include respond_to(screen_phone) {
 			text-align: center;
 		}
 	}
 
-		.site-topbar__navigation a:hover, .site-topbar__navigation-current {
-			@include background_rgba(255, 255, 255, .8);
-			color: $topbar_menu_color_hover !important;
-		}
-
-		.site-topbar__navigation a {
+		.site-topbar__navigation li {
 			display: inline-block;
-			height: $topbar_size;
-			padding: 0px $window_padding;
-			color: $topbar_menu_color;
-
+			line-height: $topbar_size;
+			
 			@include respond_to(screen_tablet) {
 				float: left;
 			}
@@ -95,26 +81,27 @@ body, input, textarea {
 			}
 		}
 
-	.site-topbar__auth {
-		display: block;
-		height: $topbar_size;
-		line-height: $topbar_size;
-		padding: 0px $window_padding;
-		color: $topbar_auth_color;
+		.site-topbar__navigation--right {
+			@include respond_to(screen_tablet) {
+				float: right !important;
+			}
 
-		@include respond_to(screen_phone) {
-			text-align: center;
+			@include respond_to(screen_wide) {
+				float: right !important;
+			}
 		}
 
-		@include respond_to(screen_tablet) {
-			text-align: right;
-		}
+			.site-topbar__navigation a {
+				display: inline-block;
+				height: $topbar_size;
+				padding: 0px $window_padding;
+				color: $topbar_menu_color;
+			}
 
-		@include respond_to(screen_wide) {
-			float: right;
-			text-align: right;
-		}
-	}
+			.site-topbar__navigation a:hover, .site-topbar__navigation--current a {
+				@include background_rgba(255, 255, 255, .8);
+				color: $topbar_menu_color_hover !important;
+			}
 
 .site-header {
 	min-width: $screen_phone;
