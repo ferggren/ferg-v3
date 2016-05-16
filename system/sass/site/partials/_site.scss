@@ -203,10 +203,20 @@ body, input, textarea {
 
 		.site-footer__lang a {
 			color: $link_color_default;
+			display: inline-block;
+			line-height: $footer_size;
+			position: relative;
+			padding-left: 30px;
 		}
 
 		.site-footer__lang a:hover {
 			text-decoration: underline;
+		}
+
+		.site-footer__lang a img {
+			position: absolute;
+			top: ($footer_size / 2) - 8;
+			left: 0px;
 		}
 
 .floating-clear {

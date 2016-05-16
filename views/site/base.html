@@ -54,7 +54,26 @@
 		<div class="site-footer__wrapper">
 			<div class="site-footer">
 				<div class="site-footer__lang">
-					<a href="/en/">English version</a>
+					@eval
+					$lang = Lang::getLang() == 'ru' ? 'en' : 'ru';
+					$url = '/' . $lang . '/';
+
+					if (isset($_SERVER['REQUEST_URI'])) {
+						$url = preg_replace(
+							'#^/(?:ru|en)/(.*+)$#',
+							'/' . $lang . '/$1',
+							$_SERVER['REQUEST_URI']
+						);
+					}
+					@endeval
+					<a href="{{$url}}">
+						<img src="/images/site/{{$lang}}.png" />
+						@if (Lang::getLang() == 'ru')
+							English version
+						@else
+							Русская версия
+						@endif
+					</a>
 				</div>
 
 				<div class="site-footer__copy">
