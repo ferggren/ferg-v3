@@ -9,7 +9,7 @@
 		<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/">
 		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/">
 
-        <title>@section('site_title')ferg.in@show</title>
+        <title>@section('site_title')@lang("site.title")@show</title>
 
         <link href="/css/site.css?v=@build_hash" rel="stylesheet">
 	</head>
@@ -18,11 +18,11 @@
 		<div class="site-topbar__wrapper">
 			<div class="site-topbar">
 				<div class="site-topbar__navigation">
-					<a href="/@lang/">Главная</a>
-					<a href="/@lang/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif >Галерея</a>
-					<a href="/@lang/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif >Бложе</a>
-					<a href="/@lang/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif >Портфолио</a>
-					<a href="/@lang/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif >Storage</a>
+					<a href="/@lang/" @if ($current_menu == "landing") class="site-topbar__navigation-current" @endif>@lang("site.menu_landing")</a>
+					<a href="/@lang/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif>@lang("site.menu_gallery")</a>
+					<a href="/@lang/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif>@lang("site.menu_blog")</a>
+					<a href="/@lang/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif>@lang("site.menu_portfolio")</a>
+					<a href="/@lang/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif>@lang("site.menu_storage")</a>
 
 					<div class="floating-clear"></div>
 				</div>
@@ -68,11 +68,7 @@
 					@endeval
 					<a href="{{$url}}">
 						<img src="/images/site/{{$lang}}.png" />
-						@if (Lang::getLang() == 'ru')
-							English version
-						@else
-							Русская версия
-						@endif
+						@lang("site.swap_lang")
 					</a>
 				</div>
 

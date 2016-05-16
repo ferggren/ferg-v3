@@ -1,0 +1,19 @@
+<?php
+$strings = array(
+    'title' => 'ferg.in',
+
+    'title_landing' => '',
+    'title_gallery' => 'Gallery',
+    'title_blog' => 'Blog',
+    'title_portfolio' => 'Portfolio',
+    'title_storage' => 'Storage',
+
+    'menu_landing' => 'Home',
+    'menu_gallery' => 'Gallery',
+    'menu_blog' => 'Blog',
+    'menu_portfolio' => 'Portfolio',
+    'menu_storage' => 'Storage',
+
+    'swap_lang' => 'Русская версия',
+);
+?>

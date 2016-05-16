@@ -1,12 +1,21 @@
-$topbar_size: 40px;
+$topbar_size: 30px;
 $footer_size: 40px;
+$window_padding: 10px;
+$site_content_offset_top: 20px;
+
 $header_photo_height_phone: 150px;
 $header_photo_height_tablet: 200px;
 $header_photo_height_wide: 250px;
-$window_padding: 10px;
+
+$topbar_auth_color: #FFF;
+$topbar_menu_color: #FFF;
+$topbar_menu_color_hover: #222;
+$topbar_bg_color: (21, 21, 21, .8);
+
+$footer_bg_color: (240, 240, 240, .8);
 $footer_copy_color: #666;
-$header_auth_color: #666;
-$site_content_offset_top: 20px;
+$footer_lang_color: $link_color_default;
+$footer_lang_color_hover: $link_color_default;
 
 body, html {
 	height: 100%;
@@ -24,7 +33,7 @@ body, input, textarea {
 }
 
 .site-topbar__wrapper {
-	@include background_rgba(255, 255, 255, .8);
+	@include background_rgba(nth($topbar_bg_color, 1), nth($topbar_bg_color, 2), nth($topbar_bg_color, 3), nth($topbar_bg_color, 4));
 	min-width: $screen_phone;
 	width: 100%;
 
@@ -58,24 +67,25 @@ body, input, textarea {
 		}
 	}
 
+		.site-topbar__navigation a:hover, .site-topbar__navigation-current {
+			@include background_rgba(255, 255, 255, .8);
+			color: $topbar_menu_color_hover !important;
+		}
+
 		.site-topbar__navigation a {
 			display: block;
 			height: $topbar_size;
 			padding: 0px $window_padding;
 			float: left;
-			color: $link_color_default;
+			color: $topbar_menu_color;
 		}
-
-			.site-topbar__navigation a:hover, .site-topbar__navigation-current {
-				@include background_rgba(220, 220, 220, .8);
-			}
 
 	.site-topbar__auth {
 		display: block;
 		height: $topbar_size;
 		line-height: $topbar_size;
 		padding: 0px $window_padding;
-		color: $header_auth_color;
+		color: $topbar_auth_color;
 
 		@include respond_to(screen_wide) {
 			float: right;
@@ -95,7 +105,7 @@ body, input, textarea {
 		background: url('/images/header.jpg');
 		background-size: cover;
 		background-repeat: no-repeat;
-		background-position: 0% 60%;
+		background-position: 0% 50%;
 		opacity: .95;
 		min-width: $screen_phone;
 		
@@ -141,7 +151,7 @@ body, input, textarea {
 	overflow: hidden;
 	height: $footer_size;
 	min-width: $screen_phone;
-	@include background_rgba(240, 240, 240, .8);
+	@include background_rgba(nth($footer_bg_color, 1), nth($footer_bg_color, 2), nth($footer_bg_color, 3), nth($footer_bg_color, 4));
 
 	@include respond_to(screen_phone) {
 		height: $footer_size * 2;
@@ -202,7 +212,7 @@ body, input, textarea {
 	}
 
 		.site-footer__lang a {
-			color: $link_color_default;
+			color: $footer_lang_color;
 			display: inline-block;
 			line-height: $footer_size;
 			position: relative;
@@ -210,6 +220,7 @@ body, input, textarea {
 		}
 
 		.site-footer__lang a:hover {
+			color: #footer_lang_color_hover;
 			text-decoration: underline;
 		}
 
