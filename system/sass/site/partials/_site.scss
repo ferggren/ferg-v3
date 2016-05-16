@@ -126,7 +126,7 @@ body, input, textarea {
 		min-width: $screen_phone;
 		max-width: $screen_wide;
 		text-align: right;
-		height: $header_height;
+		height: 44px + $window_padding;
 		padding-top: $header_height - 44px - $window_padding;
 
 		@include respond_to(screen_phone) {
