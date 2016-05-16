@@ -9,20 +9,27 @@
 		<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/">
 		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/">
 
-        <title>@section('site_title')@lang("site.title")@show</title>
+		<title>@section('site_title')@lang("site.title")@show</title>
 
-        <link href="/css/site.css?v=@build_hash" rel="stylesheet">
+		<link href="/css/site.css?v=@build_hash" rel="stylesheet">
 	</head>
 
 	<body>
+		<div class="site__wrapper">
 		<div class="site-topbar__wrapper">
 			<div class="site-topbar">
 				<div class="site-topbar__navigation">
-					<a href="/@lang/" @if ($current_menu == "landing") class="site-topbar__navigation-current" @endif>@lang("site.menu_landing")</a>
-					<a href="/@lang/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif>@lang("site.menu_gallery")</a>
-					<a href="/@lang/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif>@lang("site.menu_blog")</a>
-					<a href="/@lang/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif>@lang("site.menu_portfolio")</a>
-					<a href="/@lang/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif>@lang("site.menu_storage")</a>
+					<a href="/@lang/" @if ($current_menu == "landing") class="site-topbar__navigation-current" @endif>
+						@lang("site.menu_landing")
+					</a><a href="/@lang/gallery/" @if ($current_menu == "gallery") class="site-topbar__navigation-current" @endif>
+						@lang("site.menu_gallery")
+					</a><a href="/@lang/blog/" @if ($current_menu == "blog") class="site-topbar__navigation-current" @endif>
+						@lang("site.menu_blog")
+					</a><a href="/@lang/portfolio/" @if ($current_menu == "portfolio") class="site-topbar__navigation-current" @endif>
+						@lang("site.menu_portfolio")
+					</a><a href="/@lang/storage/" @if ($current_menu == "storage") class="site-topbar__navigation-current" @endif>
+						@lang("site.menu_storage")
+					</a>
 
 					<div class="floating-clear"></div>
 				</div>
@@ -37,7 +44,25 @@
 
 		<div class="site-header">
 			<div class="site-header__photo">
-				
+				@if ($current_menu == "landing")
+				<div class="site-header__contacts-wrapper">
+					<div class="site-header__contacts">
+						<a href="mailto:me@ferg.in"><img src="/images/site/contacts/mail.png" /></a>
+						<a href="https://github.com/ferggren"><img src="/images/site/contacts/github.png" /></a>
+						<a href="skype:ferggren?chat"><img src="/images/site/contacts/skype.png" /></a>
+						<a href="https://instagram.com/ferggren/"><img src="/images/site/contacts/instagram.png" /></a>
+						<a href="https://telegram.me/ferggren"><img src="/images/site/contacts/telegram.png" /></a>
+						<a href="https://vk.com/id4867738"><img src="/images/site/contacts/vk.png" /></a>
+						<a href="https://www.facebook.com/ferggren"><img src="/images/site/contacts/facebook.png" /></a>
+						<a href="https://steamcommunity.com/id/ferggren/"><img src="/images/site/contacts/steam.png" /></a>
+					</div>
+				</div>
+				@else
+				<div class="site-header__title-wrapper">
+					<div class="site-header__title">
+						{{Lang::get('site.menu_' . $current_menu)}}
+					</div>
+				@endif
 			</div>
 		</div>
 
@@ -78,6 +103,7 @@
 
 				<div class="floating-clear"></div>
 			</div>
+		</div>
 		</div>
 	</body>
 </html>

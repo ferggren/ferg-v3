@@ -3,9 +3,7 @@ $footer_size: 40px;
 $window_padding: 10px;
 $site_content_offset_top: 20px;
 
-$header_photo_height_phone: 150px;
-$header_photo_height_tablet: 200px;
-$header_photo_height_wide: 250px;
+$header_height: 150px;
 
 $topbar_auth_color: #FFF;
 $topbar_menu_color: #FFF;
@@ -32,10 +30,17 @@ body, input, textarea {
 	font-size: $font_default_size;
 }
 
+.site__wrapper {
+	max-width: 100%;
+    min-height: 100%;
+    position: relative;
+}
+
 .site-topbar__wrapper {
 	@include background_rgba(nth($topbar_bg_color, 1), nth($topbar_bg_color, 2), nth($topbar_bg_color, 3), nth($topbar_bg_color, 4));
 	min-width: $screen_phone;
 	width: 100%;
+	z-index: 10;
 
 	@include respond_to(screen_wide) {
 		position: fixed;
@@ -58,12 +63,15 @@ body, input, textarea {
 	.site-topbar__navigation {
 		display: block;
 		line-height: $topbar_size;
-		white-space: nowrap;
 
 		@include respond_to(screen_wide) {
 			height: $topbar_size;
 			float: left;
 			text-align: left;
+		}
+
+		@include respond_to(screen_phone) {
+			text-align: center;
 		}
 	}
 
@@ -73,11 +81,18 @@ body, input, textarea {
 		}
 
 		.site-topbar__navigation a {
-			display: block;
+			display: inline-block;
 			height: $topbar_size;
 			padding: 0px $window_padding;
-			float: left;
 			color: $topbar_menu_color;
+
+			@include respond_to(screen_tablet) {
+				float: left;
+			}
+
+			@include respond_to(screen_wide) {
+				float: left;
+			}
 		}
 
 	.site-topbar__auth {
@@ -86,6 +101,14 @@ body, input, textarea {
 		line-height: $topbar_size;
 		padding: 0px $window_padding;
 		color: $topbar_auth_color;
+
+		@include respond_to(screen_phone) {
+			text-align: center;
+		}
+
+		@include respond_to(screen_tablet) {
+			text-align: right;
+		}
 
 		@include respond_to(screen_wide) {
 			float: right;
@@ -108,27 +131,70 @@ body, input, textarea {
 		background-position: 0% 50%;
 		opacity: .95;
 		min-width: $screen_phone;
-		
-		@include respond_to(screen_phone) {
-			height: $header_photo_height_phone;
-		}
+		height: $header_height;
+	}
 
-		@include respond_to(screen_tablet) {
-			height: $header_photo_height_tablet;
+	.site-header__contacts-wrapper {
+		position: relative;
+		min-width: $screen_phone;
+		max-width: $screen_wide;
+		text-align: right;
+		height: $header_height;
+		padding-top: $header_height - 44px - $window_padding;
+
+		@include respond_to(screen_phone) {
+			text-align: center;
 		}
 
 		@include respond_to(screen_wide) {
-			height: $header_photo_height_wide;
+			width: $screen_wide;
+			margin: auto;
 		}
 	}
 
+		.site-header__contacts {
+			line-height: 10px;
+			padding: 10px 10px;
+			border-radius: 10px;
+			display: inline-block;
+			@include background_rgba(66, 66, 66, .5);
+
+			@include respond_to(screen_tablet) {
+				margin-right: $window_padding;
+			}
+		}
+
+			.site-header__contacts a img {
+				width: 24px;
+				height: 24px;
+				opacity: .9;
+			}
+
+	.site-header__title-wrapper {
+		height: 50px;
+		padding: 50px 0px;
+		text-align: center;
+	}
+
+		.site-header__title {
+			font-size: 30px;
+			line-height: 30px;
+			padding: 10px 30px;
+			border-radius: 10px;
+			color: #EEE;
+			text-align: center;
+			display: inline-block;
+			@include background_rgba(66, 66, 66, .7);
+			letter-spacing: 2px;
+		}
+
 .site-content {
 	min-width: $screen_phone;
-	padding-bottom: $footer_size;
+	padding-bottom: $footer_size + 10px;
 	padding-top: $site_content_offset_top;
 
 	@include respond_to(screen_phone) {
-		padding-bottom: $footer_size * 2;
+		padding-bottom: ($footer_size * 2) + 10px;
 	}
 }
 
