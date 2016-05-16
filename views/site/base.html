@@ -81,7 +81,7 @@
 
 					if (isset($_SERVER['REQUEST_URI'])) {
 						$url = preg_replace(
-							'#^/(?:ru|en)/(.*+)$#',
+							'#^/(?:ru/|en/)?(.*+)$#',
 							'/' . $lang . '/$1',
 							$_SERVER['REQUEST_URI']
 						);
