@@ -8,6 +8,7 @@ $header_height: 150px;
 $topbar_menu_color: #FFF;
 $topbar_menu_color_hover: #222;
 $topbar_bg_color: (21, 21, 21, .8);
+$topbar_font_size: 12px;
 
 $footer_bg_color: (240, 240, 240, .8);
 $footer_copy_color: #666;
@@ -61,7 +62,6 @@ body, input, textarea {
 
 	.site-topbar__navigation {
 		display: block;
-		line-height: $topbar_size;
 
 		@include respond_to(screen_phone) {
 			text-align: center;
@@ -70,13 +70,15 @@ body, input, textarea {
 
 		.site-topbar__navigation li {
 			display: inline-block;
-			line-height: $topbar_size;
+			height: $topbar_size;
 			
 			@include respond_to(screen_tablet) {
+				display: block;
 				float: left;
 			}
 
 			@include respond_to(screen_wide) {
+				display: block;
 				float: left;
 			}
 		}
@@ -92,10 +94,12 @@ body, input, textarea {
 		}
 
 			.site-topbar__navigation a {
-				display: inline-block;
+				display: block;
 				height: $topbar_size;
+				line-height: $topbar_size;
 				padding: 0px $window_padding;
 				color: $topbar_menu_color;
+				font-size: $topbar_font_size;
 			}
 
 			.site-topbar__navigation a:hover, .site-topbar__navigation--current a {
