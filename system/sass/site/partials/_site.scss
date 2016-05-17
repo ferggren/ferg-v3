@@ -116,13 +116,23 @@ body, input, textarea {
 }
 
 	.site-header__photo {
-		background: url('/images/header.jpg');
 		background-size: cover;
 		background-repeat: no-repeat;
-		background-position: 0% 50%;
 		opacity: .95;
 		min-width: $screen_phone;
 		height: $header_height;
+
+		@include respond_to(screen_phone) {
+			background-image: url('/images/site/header_phone.jpg');
+		}
+
+		@include respond_to(screen_tablet) {
+			background-image: url('/images/site/header_tablet.jpg');
+		}
+
+		@include respond_to(screen_wide) {
+			background-image: url('/images/site/header_wide.jpg');
+		}
 	}
 
 	.site-header__contacts-wrapper {

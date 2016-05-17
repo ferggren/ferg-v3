@@ -39,6 +39,7 @@
 		</div>
 
 		<div class="site-header">
+			@if ($current_menu == "landing")
 			<div class="site-header__photo">
 				@if ($current_menu == "landing")
 				<div class="site-header__contacts-wrapper">
@@ -58,8 +59,10 @@
 					<div class="site-header__title">
 						{{Lang::get('site.menu_' . $current_menu)}}
 					</div>
+				</div>
 				@endif
 			</div>
+			@endif
 		</div>
 
 		<div class="site-content">
