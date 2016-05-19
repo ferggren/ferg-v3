@@ -5,13 +5,17 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
-		<link rel="alternate" hreflang="x-default" href="//ferg.in/"> 
-		<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/">
-		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/">
+		<link rel="alternate" hreflang="x-default" href="//ferg.in/" /> 
+		<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/" />
+		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/" />
 
 		<title>@section('site_title')@lang("site.title")@show</title>
 
-		<link href="/css/site.css?v=@build_hash" rel="stylesheet">
+		<link href="/v_@build_hash/css/site.css" rel="stylesheet" />
+
+        <script src="/v_@build_hash/js/rocky.js"></script>
+        <script src="/v_@build_hash/js/lang.js"></script>
+        <script src="/v_@build_hash/lang/site_@lang.js"></script>
 	</head>
 
 	<body>
