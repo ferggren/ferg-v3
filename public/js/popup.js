@@ -13,45 +13,57 @@
      *  Create a popup window with custom content
      *  Window is placed on top of any other window
      * 
-     *  @param {object} content Window content
-     *  @param {string} title Optional window title
-     *  @param {requestCallback} onclose Callback to be called when window will be closed by user
+     *  @param {object} data List of window options
+     *                       content - Window content, string or dom element 
+     *                       title - Window title
+     *                       onclose - When user closes window onclose callback will be called
      *  @return {number} Window id
      */
-    createWindow: function(content, title, onclose) {
-        if (typeof onclose != 'function') {
-            onclose = function() {};
+    createWindow: function(window) {
+        if (typeof window != 'object') {
+            window = {};
         }
 
-        if (typeof title != 'string') {
-            title = '';
+        if (typeof window.onclose != 'function') {
+            window.onclose = function() {};
         }
 
-        if (typeof content != 'object') {
-            var _content = document.createElement('div');
-            _content.innerHTML = content;
-
-            content = _content;
+        if (typeof window.title != 'string') {
+            window.title = '';
         }
 
-        var popup = document.createElement('div');
-        popup.className = 'popup__window';
+        if (typeof window.content != 'object') {
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = window.content;
 
-        if (title.length) {
+            window.content = wrapper;
+        }
+
+        var popup_window = document.createElement('div');
+        popup_window.className = 'popup__window';
+
+        if (window.title.length) {
             var window_title = document.createElement('div');
             window_title.className = 'popup__window-title';
-            window_title.innerHTML = title;
+            window_title.innerHTML = window.title;
 
-            popup.appendChild(window_title);
+            popup_window.appendChild(window_title);
         }
 
         var window_content = document.createElement('div');
         window_content.className = 'popup__window-content';
-        window_content.appendChild(content);
+        window_content.appendChild(window.content);
 
-        popup.appendChild(window_content);
+        popup_window.appendChild(window_content);
 
-        return Popup.createPopup(popup, onclose);
+        var ret = Popup.createPopup({
+            content: popup_window,
+            onclose: window.onclose
+        });
+
+        window = null;
+
+        return ret;
     },
 
     /**
@@ -67,42 +79,50 @@
     /**
      *  Create a raw popup with custom content
      * 
-     *  @param {object} content Popup content
-     *  @param {requestCallback} onclose Callback to be called when window will be closed by user
+     * 
+     *  @param {object} data List of popup options
+     *                       content - Window content, string or dom element 
+     *                       onclose - When user closes window onclose callback will be called
      *  @return {number} Popup id
      */
-    createPopup: function(content, onclose) {
+    createPopup: function(popup) {
+        if (typeof popup != 'object') {
+            popup = {};
+        }
+
         Popup.__init();
         Popup.__createShadow();
 
-        if (typeof content != 'object') {
-            var _content = document.createElement('div');
-            _content.innerHTML = content;
+        if (typeof popup.content != 'object') {
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = popup.content;
 
-            content = _content;
+            popup.content = wrapper;
         }
 
-        if (typeof onclose != 'function') {
-            onclose = function() {};
+        if (typeof popup.onclose != 'function') {
+            popup.onclose = function() {};
         }
 
         var container = document.createElement('div');
         container.className = 'popup__container';
-        container.appendChild(content);
+        container.appendChild(popup.content);
 
-        var popup = {
+        var popup_data = {
             id: Popup.__getNextId(),
             container: container,
-            onclose: onclose,
+            onclose: popup.onclose,
         };
 
         document.body.appendChild(container);
 
-        Popup.__popups[popup.id] = popup;
+        Popup.__popups[popup_data.id] = popup_data;
         Popup.__updatePopups();
         Popup.__resize();
 
-        return popup.id;
+        popup = null;
+
+        return popup_data.id;
     },
 
     /**
@@ -153,7 +173,7 @@
         var container = Popup.__popups[popup_id].container;
 
         if (by_user && Popup.__popups[popup_id].onclose) {
-            var ret = Popup.__popups[popup_id].onclose();
+            var ret = Popup.__popups[popup_id].onclose(popup_id);
 
             if (ret === false) {
                 return;
