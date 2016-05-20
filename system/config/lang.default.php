@@ -25,6 +25,7 @@ $config = array(
         // site prefix (site_en.js & site_ru.js)
         'site' => array(
             // list of lang files
+            'site',
             'ajax',
         ),
     ),

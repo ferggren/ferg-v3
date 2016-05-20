@@ -16,7 +16,10 @@
 		<script src="/v_@build_hash/js/rocky.js"></script>
 		<script src="/v_@build_hash/js/popup.js"></script>
 		<script src="/v_@build_hash/js/lang.js"></script>
+		<script src="/v_@build_hash/js/app.js"></script>
 		<script src="/v_@build_hash/js/lang/site_@lang.js"></script>
+
+		<script>Lang.setLang('{{Lang::getLang()}}');</script>
 	</head>
 
 	<body>
@@ -35,7 +38,7 @@
 					</li><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
 					</li><li class="site-topbar__navigation--right">
-						<a href="#" onclick="return false;">@lang("site.menu_signin")</a>
+						<a onclick="App.showLoginWindow();">@lang("site.menu_signin")</a>
 					</li>
 				</ul>
 

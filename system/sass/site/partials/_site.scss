@@ -100,6 +100,7 @@ body, input, textarea {
 				padding: 0px $window_padding;
 				color: $topbar_menu_color;
 				font-size: $topbar_font_size;
+				cursor: pointer;
 			}
 
 			.site-topbar__navigation a:hover, .site-topbar__navigation--current a {

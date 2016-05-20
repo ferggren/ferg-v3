@@ -1,0 +1,18 @@
+.popup__oauth {
+	
+}
+
+	.popup__oauth-method {
+		display: inline-block;
+		margin-right: 10px;
+		opacity: .9;
+	}
+
+	.popup__oauth-method:hover {
+		opacity: 1;
+	}
+
+	.popup__oauth-method img {
+		width: 40px;
+		height: 40px;
+	}
