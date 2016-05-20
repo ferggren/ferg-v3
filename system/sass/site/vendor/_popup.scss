@@ -1,0 +1,33 @@
+.popup__container {
+	position: fixed;
+}
+
+	.popup__window {
+		background: #FFF;
+		padding: 15px;
+		min-width: 270px;
+		margin: 10px;
+	}
+
+	.popup__window-title {
+		font-size: 20px;
+		line-height: 20px;
+		color: #666;
+		margin: 0px 0px 10px 0px;
+		font-weight: bold;
+		letter-spacing: 1px;
+	}
+
+	.popup__window-content {
+
+	}
+
+.popup__shadow {
+	background: #666;
+	background: rgba(0, 0, 0, .3);
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+}

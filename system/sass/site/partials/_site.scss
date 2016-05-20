@@ -140,8 +140,8 @@ body, input, textarea {
 		min-width: $screen_phone;
 		max-width: $screen_wide;
 		text-align: right;
-		height: 44px + $window_padding;
-		padding-top: $header_height - 44px - $window_padding;
+		height: 46px + $window_padding;
+		padding-top: $header_height - 46px - $window_padding;
 
 		@include respond_to(screen_phone) {
 			text-align: center;
@@ -166,9 +166,13 @@ body, input, textarea {
 		}
 
 			.site-header__contacts a img {
-				width: 24px;
-				height: 24px;
-				opacity: .9;
+				width: 26px;
+				height: 26px;
+				opacity: .85;
+			}
+
+			.site-header__contacts a img:hover {
+				opacity: 1;
 			}
 
 	.site-header__title-wrapper {
