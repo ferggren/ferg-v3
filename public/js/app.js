@@ -17,8 +17,6 @@ var App = {
 
             var link = document.createElement('a');
             link.href = '/oauth/init/' + method;
-            link.target = '_blank';
-            link.rel = 'nofollow noopener noreferrer';
             link.className = 'popup__oauth-method'
 
             var img = document.createElement('img');
