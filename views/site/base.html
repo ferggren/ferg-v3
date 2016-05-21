@@ -17,9 +17,12 @@
 		<script src="/v_@build_hash/js/popup.js"></script>
 		<script src="/v_@build_hash/js/lang.js"></script>
 		<script src="/v_@build_hash/js/app.js"></script>
+		<script src="/v_@build_hash/js/storage.js"></script>
 		<script src="/v_@build_hash/js/lang/site_@lang.js"></script>
 
 		<script>Lang.setLang('{{Lang::getLang()}}');</script>
+
+		@if(Config::get('app.debug'))<script>Rocky.enableDebug();</script>@endif
 	</head>
 
 	<body>

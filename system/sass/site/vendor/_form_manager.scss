@@ -1,0 +1,23 @@
+.nice-form {
+
+}
+
+	.nice-form__error {
+		line-height: 20px;
+		height: 20px;
+		border-radius: 3px;
+		padding: 7px 10px;
+		background: #FFF4F4;
+	}
+
+	.nice-form__success {
+
+	}
+
+	.nice-form__loader {
+		min-width: 220px;
+		height: 34px;
+		text-align: center;
+		vertical-align: middle;
+		background: url('/images/form_manager/loader.gif') 50% 50% no-repeat;
+	}

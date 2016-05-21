@@ -5,5 +5,53 @@
 @stop
 
 @section('site_content')
-Storage
+<div id="__storage">
+	<div class="nice-form__loader"></div>
+</div>
+
+<br /><br />
+
+<button id="__storage_call">Select photo</button>
+
+<script>
+	new Storage({
+		container: "__storage",
+
+		onselect: function(file) {
+			console.log('inline select', file);
+		},
+
+		onupload: function(file) {
+			console.log('inline upload', file);
+		},
+
+
+	});
+
+	document.getElementById('__storage_call').onclick = function() {
+		var container = document.createElement('div');
+
+		var popup = Popup.createWindow({
+			content: container,
+		});
+
+		new Storage({
+			container: container,
+
+			onselect: function(file) {
+				console.log('popup click', file);
+			},
+
+			onupload: function(file) {
+				console.log('popup upload', file);
+			},
+
+			media: ['photo', 'video'],
+			photo_protection: true,
+			upload_access: "public",
+			group_upload: "storage",
+			group_display: "storage",
+		});
+	}
+</script>
 @stop

@@ -1,0 +1,39 @@
+$storage_filters_width: 200px;
+
+.storage__wrapper {
+
+}
+
+.storage__filters-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		min-width: $storage_filters_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		min-width: $storage_filters_width;
+	}
+
+	@include respond_to(screen_phone) {
+		
+	}
+}
+
+	.storage__filters {
+		border: 1px solid #CCC;
+	}
+
+.storage__files-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $storage_filters_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $storage_filters_width;
+	}
+}
+
+	.storage__files {
+		border: 1px solid #CCC;
+	}
