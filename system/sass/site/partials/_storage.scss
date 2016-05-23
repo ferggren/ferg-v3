@@ -1,4 +1,5 @@
 $storage_filters_width: 200px;
+$storage_filters_margin: 20px;
 
 .storage__wrapper {
 
@@ -14,26 +15,77 @@ $storage_filters_width: 200px;
 		float: right;
 		min-width: $storage_filters_width;
 	}
-
-	@include respond_to(screen_phone) {
-		
-	}
 }
 
 	.storage__filters {
-		border: 1px solid #CCC;
+
+	}
+
+	.storage__filters-spacing {
+		line-height: 1px;
+		background: #CCC;
+		height: 1px;
+		margin: 9px 0px;
+	}
+
+	.storage__filters-group {
+		@include respond_to(screen_phone) {
+			text-align: center;
+		}
+	}
+		.storage__filter {
+			height: 24px;
+			line-height: 24px;
+			display: block;
+			cursor: pointer;
+			padding: 0px 10px;
+			margin: 0px 0px 5px 0px;
+			border-radius: 3px;
+
+			@include respond_to(screen_phone) {
+				margin: 0px 5px 5px 5px;
+				display: inline-block;
+			}
+		}
+
+		.storage__filter:hover, .storage__filter--selected {
+			background: #EEE;
+		}
+
+	.storage__filters-group--media {
+		.storage__filter {
+			position: relative;
+			padding: 0px 10px 0px 30px;
+		}
+
+		.storage__filter img {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 2px;
+			left: 4px;
+			opacity: .8;
+		}
 	}
 
 .storage__files-wrapper {
 	@include respond_to(screen_wide) {
-		margin-right: $storage_filters_width;
+		margin-right: $storage_filters_width + $storage_filters_margin;
+		min-width: $screen_tablet - $storage_filters_width - $storage_filters_margin - 60px;
 	}
 
 	@include respond_to(screen_tablet) {
-		margin-right: $storage_filters_width;
+		margin-right: $storage_filters_width + $storage_filters_margin;
+		min-width: $screen_tablet - $storage_filters_width - $storage_filters_margin - 60px;
 	}
 }
 
 	.storage__files {
-		border: 1px solid #CCC;
+		@include respond_to(screen_wide) {
+			min-width: 220px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
 	}

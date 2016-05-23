@@ -27,6 +27,7 @@ $config = array(
             // list of lang files
             'site',
             'ajax',
+            'storage',
         ),
     ),
 );

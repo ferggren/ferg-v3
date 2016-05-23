@@ -87,6 +87,21 @@ function Storage(storage) {
     this.group_upload = storage.group_upload;
     this.group_display = storage.group_display;
     this.media = storage.media;
+    this.media_stats = {};
+    this.groups = {};
+
+    this.files_page = 1;
+    this.files_pages = 1;
+    this.files_total = 0;
+
+    this.filter_orderby = 'newest';
+    this.filter_media = 'all';
+
+    if (this.media.length == 1) {
+        this.filter_media = this.media[1];
+    }
+
+    this.filter_group = this.group_display ? this.group_display : 'all';
 
     this.init();
 }
@@ -107,15 +122,20 @@ Storage.prototype = {
         Rocky.ajax({
             url: '/ajax/storage/getStats',
 
-            success: function(stats) {
-                that.stats = stats;
+            success: function(response) {
+                that.media_stats = response.media;
+                that.groups = response.groups;
                 that.makeStorageWrapper();
                 that.showFilters();
                 that.loadFiles();
+
+                that = null;
             },
 
             error: function(error) {
                 that.container.innerHTML = '<div class="nice-form__error">' + error + '</div>';
+
+                that = null;
             },
 
             data: {
@@ -166,15 +186,221 @@ Storage.prototype = {
      *  Show all filters
      */
     showFilters: function() {
-        console.log('filters');
-        this.filters_wrapper.innerHTML = 'filters';
+        this.filters_wrapper.innerHTML = '';
+
+        if (this.showFilters_order()) {
+            this.addFiltersSpacing();
+        }
+
+        if (this.showFilters_media()) {
+            this.addFiltersSpacing();
+        }
+
+        if (this.showFilters_groups()) {
+            this.addFiltersSpacing();
+        }
+    },
+
+    /**
+     *  Show order filters
+     *
+     *  @return {number} Amount of shown filters
+     */
+    showFilters_order: function() {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'storage__filters-group storage__filters-group--orderby';
+
+        var filters = ['newest', 'popular'];
+
+        for (var filter in filters) {
+            filter = filters[filter];
+
+            this.addFilterButton({
+                wrapper: wrapper,
+                filter_type: 'orderby',
+                filter_value: filter,
+                title: Lang.get('storage.orderby_' + filter),
+                selected: this.filter_orderby == filter,
+            });
+        }
+
+        this.filters_wrapper.appendChild(wrapper);
+
+        return 2;
+    },
+
+    /**
+     *  Show media filters
+     *
+     *  @return {number} Amount of shown filters
+     */
+    showFilters_media: function() {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'storage__filters-group storage__filters-group--media';
+
+        if (this.media.length > 1) {
+            var total = 0;
+            for (var media in this.media_stats) {
+                total += this.media_stats[media];
+            }
+
+            this.addFilterButton({
+                wrapper: wrapper,
+                filter_type: 'media',
+                filter_value: 'all',
+                amount: total,
+                title: Lang.get('storage.media_all'),
+                selected: this.filter_media == 'all',
+            });
+        }
+
+        for (var media in this.media_stats) {
+            this.addFilterButton({
+                wrapper: wrapper,
+                filter_type: 'media',
+                filter_value: media,
+                amount: this.media_stats[media],
+                title: Lang.get('storage.media_' + media),
+                selected: this.filter_media == media,
+            });
+        }
+
+        this.filters_wrapper.appendChild(wrapper);
+
+        return 1 + Object.keys(this.media_stats).length;
+    },
+
+    /**
+     *  Show user groups filters
+     *
+     *  @return {number} Amount of shown filters
+     */
+    showFilters_groups: function() {
+        if (!Object.keys(this.groups).length) {
+            return 0;
+        }
+    },
+
+    /**
+     *  Add spacing to filters
+     */
+    addFiltersSpacing: function() {
+        var spacing = document.createElement('div');
+        spacing.className = 'storage__filters-spacing';
+        this.filters_wrapper.appendChild(spacing);
+    },
+
+    /**
+     *  Add filter button
+     *
+     *  @param {object} info Button info
+     *                       wrapper - Parent wrapper
+     *                       filter_type - Type of a filter
+     *                       filter_value - Value of a filter
+     *                       amount - Amount of files belongs to filter
+     *                       title - Title of a filter
+     *                       selected - Is filter current
+     */
+    addFilterButton: function(info) {
+        var that = this;
+
+        var button = document.createElement('a');
+        button.className = 'storage__filter';
+        button.setAttribute('filter_type', info.filter_type);
+        button.setAttribute('filter_value', info.filter_value);
+
+        if (info.filter_type == 'media') {
+            var img = document.createElement('img');
+            img.src = '/images/site/storage/media_' + info.filter_value + '.png';
+
+            button.appendChild(img);
+        }
+
+        button.appendChild(document.createTextNode(info.title));
+
+        if (info.selected) {
+            button.className += ' storage__filter--selected';
+        }
+
+        button.onclick = function() {
+            that.setFilter(
+                this.getAttribute('filter_type'),
+                this.getAttribute('filter_value')
+            );
+        };
+
+        info.wrapper.appendChild(button);
+    },
+
+    /**
+     *  Change current filter
+     *
+     *  @param {string} filter Filters type
+     *  @param {string} value Filters value
+     */
+    setFilter: function(filter, value) {
+        filter = 'filter_' + filter;
+
+        if (typeof this[filter] == 'undefined') {
+            return;
+        }
+
+        this.files_page = 1;
+        this.files_pages = 1;
+
+        this[filter] = value;
+        this.showFilters();
+        this.loadFiles();
     },
 
     /**
      *  Load files with current filters
      */
     loadFiles: function() {
-        console.log('load files');
-        this.files_wrapper.innerHTML = 'files';
+        var that = this;
+        this.files_wrapper.innerHTML = '<div class="nice-form__loader"></div>';
+
+        Rocky.ajax({
+            url: '/ajax/storage/getFiles',
+
+            success: function(response) {
+                that.files_page = response.page;
+                that.files_pages = response.pages;
+                that.files_total = response.total;
+                that.files = response.files;
+
+                that.showFiles();
+                that = null;
+            },
+
+            error: function(error) {
+                that.files_wrapper.innerHTML = '<div class="nice-form__error">' + error + '</div>';
+                that = null;
+            },
+
+            data: {
+                admin_mode: this.admin_mode,
+                media: this.filter_media,
+                group: this.filter_group,
+                orderby: this.filter_orderby,
+                page: this.page,
+                pages: this.pages,
+            },
+        });
+    },
+    /**
+     *  Show loaded user files
+     */
+    showFiles: function() {
+        this.files_wrapper.innerHTML = '';
+
+        if (!this.files_total) {
+            var error = document.createElement('div');
+            error.className = 'nice-form__success';
+            error.innerHTML = Lang.get('storage.error_files_not_found');
+
+            this.files_wrapper.appendChild(error);
+            return;
+        }
     },
 }
