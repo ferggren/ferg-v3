@@ -10,6 +10,9 @@ $strings = array(
     'media_source' => 'Исходники',
     'media_archive' => 'Архивы',
     'media_other' => 'Остальное',
+
+    'file_upload' => 'Кликните или перенесите файлы для загрузки',
+    'file_uploading' => 'Загрузка файла...',
     
     'error_files_not_found' => 'Файлы не найдены',
 );

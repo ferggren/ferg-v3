@@ -67,8 +67,12 @@ function Storage(storage) {
     if (typeof storage.admin_mode == 'undefined') {
         storage.admin_mode = false;
     }
-    
     storage.admin_mode = !!storage.admin_mode;
+
+    if (typeof storage.multiple == 'undefined') {
+        storage.multiple = true;
+    }
+    storage.multiple = !!storage.multiple;
 
     if (typeof storage.group_upload != 'string') {
         storage.group_upload = false;
@@ -89,6 +93,7 @@ function Storage(storage) {
     this.media = storage.media;
     this.media_stats = {};
     this.groups = {};
+    this.multiple = storage.multiple;
 
     this.files_page = 1;
     this.files_pages = 1;
@@ -125,9 +130,10 @@ Storage.prototype = {
             success: function(response) {
                 that.media_stats = response.media;
                 that.groups = response.groups;
-                that.makeStorageWrapper();
+                that.makeStorageWrappers();
                 that.showFilters();
                 that.loadFiles();
+                that.watchUpload();
 
                 that = null;
             },
@@ -148,11 +154,18 @@ Storage.prototype = {
     /**
      *  Make DOM containers
      */
-    makeStorageWrapper: function() {
+    makeStorageWrappers: function() {
         this.container.innerHTML = '';
 
         var storage_wrapper = document.createElement('div');
         storage_wrapper.className = 'storage__wrapper';
+
+        var upload = document.createElement('div');
+        upload.className = 'storage__upload';
+        upload.innerHTML = Lang.get('storage.file_upload');
+
+        var uploads = document.createElement('div');
+        uploads.className = 'storage__uploads';
 
         var filters_wrapper = document.createElement('div');
         filters_wrapper.className = 'storage__filters-wrapper';
@@ -169,6 +182,8 @@ Storage.prototype = {
         var clear = document.createElement('div');
         clear.className = 'floating-clear';
 
+        storage_wrapper.appendChild(upload);
+        storage_wrapper.appendChild(uploads);
         storage_wrapper.appendChild(filters_wrapper);
         storage_wrapper.appendChild(files_wrapper);
         storage_wrapper.appendChild(clear);
@@ -180,6 +195,8 @@ Storage.prototype = {
 
         this.files_wrapper = files;
         this.filters_wrapper = filters;
+        this.upload_wrapper = upload;
+        this.uploads_wrapper = uploads;
     },
 
     /**
@@ -388,13 +405,14 @@ Storage.prototype = {
             },
         });
     },
+
     /**
      *  Show loaded user files
      */
     showFiles: function() {
         this.files_wrapper.innerHTML = '';
 
-        if (!this.files_total) {
+        if (!this.files.length) {
             var error = document.createElement('div');
             error.className = 'nice-form__success';
             error.innerHTML = Lang.get('storage.error_files_not_found');
@@ -402,5 +420,156 @@ Storage.prototype = {
             this.files_wrapper.appendChild(error);
             return;
         }
+    },
+
+    watchUpload: function() {
+        var that = this;
+
+        this.upload_wrapper.addEventListener(
+            'drop',
+            function(e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+
+                this.className = 'storage__upload';
+
+                if (!e.dataTransfer || !e.dataTransfer.files) {
+                    return false;
+                }
+
+                var files = e.dataTransfer.files;
+
+                for (var i = 0; i < files.length; i++) {
+                    var form = new FormData();
+                    form.append('upload', files[i]);
+                    that.uploadFile(form);
+                }
+            },
+            false
+        );
+
+        this.upload_wrapper.addEventListener(
+            'dragenter',
+            function(e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+
+                this.className = 'storage__upload storage__upload--hover';
+            },
+            false
+        );
+
+        this.upload_wrapper.addEventListener(
+            'dragover',
+            function(e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+            },
+            false
+        );
+
+        this.upload_wrapper.addEventListener(
+            'dragleave',
+            function(e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+
+                this.className = 'storage__upload';
+            },
+            false
+        );
+
+        this.upload_wrapper.onclick = function() {
+            that.showUploadForm();
+        }
+    },
+
+    showUploadForm: function() {
+        var that = this;
+
+        var form = document.createElement('form');
+        var input = document.createElement('input');
+        input.name = 'upload';
+        input.multiple = false;
+        input.type = 'file';
+
+        if (this.filter_media == 'photo') {
+            input.accept = 'image/*';
+        }
+
+        if (this.filter_media == 'audio') {
+            input.accept = 'audio/*';
+        }
+
+        if (this.filter_media == 'video') {
+            input.accept = 'video/*';
+        }
+
+        form.appendChild(input);
+        input.click();
+
+        input.onchange = function() {
+            var form_data = new FormData(form);
+            that.uploadFile(form_data);
+
+            form_data = null;
+        }
+    },
+
+    uploadFile: function(form_data) {
+        var that = this;
+
+        form_data.append('media', this.filter_media);
+
+        var upload_name = Lang.get('storage.file_uploading');
+
+        if (form_data.get) {
+            var file = form_data.get('upload');
+
+            if (file && file.name) {
+                upload_name = file.name;
+            }
+        }
+
+        var uploader = document.createElement('div');
+        uploader.className = 'storage__uploads-file';
+
+        var progress = document.createElement('div');
+        progress.className = 'storage__uploads-progress';
+        progress.style.width = '0%';
+
+        var title = document.createElement('div');
+        title.className = 'storage__uploads-title';
+        title.innerHTML = upload_name;
+
+        uploader.appendChild(progress);
+        uploader.appendChild(title);
+
+        this.uploads_wrapper.appendChild(uploader);
+
+        Rocky.ajax({
+            url: '/ajax/storage/upload',
+            data: form_data,
+
+            success: function(file) {
+                that.uploads_wrapper.removeChild(uploader);
+                Popup.createWindow({
+                    content: file
+                });
+            },
+
+            error: function(error) {
+                that.uploads_wrapper.removeChild(uploader);
+                Popup.createWindow({
+                    content: error
+                });
+            },
+
+            progress: function(loaded, total) {
+                var percents = Math.floor((loaded / total) * 100);
+                progress.style.width = percents + '%';
+                title.innerHTML = upload_name + '(' + percents + '%)';
+            },
+        });
     },
 }

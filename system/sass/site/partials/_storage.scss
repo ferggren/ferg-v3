@@ -5,6 +5,50 @@ $storage_filters_margin: 20px;
 
 }
 
+.storage__upload {
+	text-align: center;
+	line-height: 20px;
+	font-size: 14px;
+	padding: 30px 0px;
+	color: #999;
+	background: #f5f5f5;
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+
+	.storage__upload--hover, .storage__upload:hover {
+		background: #EEE !important;
+	}
+
+.storage__uploads {
+
+}
+
+	.storage__uploads-file {
+		height: 20px;
+		margin-bottom: 15px;
+		position: relative;
+		text-align: center;
+		background: #f5f5f5;
+	}
+
+	.storage__uploads-progress {
+		position: absolute;
+		height: 20px;
+		top: 0px;
+		left: 0px;
+		background: #B9D0A3;
+	}
+
+	.storage__uploads-title {
+		position: absolute;
+		height: 20px;
+		width: 100%;
+		text-align: center;
+		line-height: 20px;
+		font-size: 12px;
+	}
+
 .storage__filters-wrapper {
 	@include respond_to(screen_wide) {
 		float: right;

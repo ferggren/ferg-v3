@@ -56,6 +56,11 @@ class AjaxStorage_Controller extends AjaxController {
         ));
     }
 
+    public function actionUpload() {
+        return $this->jsonSuccess();
+        print_r($_FILES);
+    }
+
     /**
      * Validate user media
      *
