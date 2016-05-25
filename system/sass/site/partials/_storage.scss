@@ -5,51 +5,61 @@ $storage_filters_margin: 20px;
 
 }
 
-.storage__upload {
-	text-align: center;
-	line-height: 20px;
-	font-size: 14px;
-	padding: 30px 0px;
-	color: #999;
-	background: #f5f5f5;
-	margin-bottom: 15px;
-	cursor: pointer;
-}
-
-	.storage__upload--hover, .storage__upload:hover {
-		background: #EEE !important;
-	}
-
-.storage__uploads {
+.storage__uploader {
 
 }
 
-	.storage__uploads-file {
-		height: 20px;
-		margin-bottom: 15px;
-		position: relative;
-		text-align: center;
-		background: #f5f5f5;
-	}
-
-	.storage__uploads-progress {
+	.storage__uploader form {
 		position: absolute;
-		height: 20px;
+		margin-left: -9999px;
 		top: 0px;
-		left: 0px;
-		background: #B9D0A3;
 	}
 
-	.storage__uploads-title {
-		position: absolute;
-		height: 20px;
-		width: 100%;
+	.storage__upload {
 		text-align: center;
 		line-height: 20px;
-		font-size: 12px;
+		font-size: 14px;
+		padding: 30px 0px;
+		color: #999;
+		background: #f5f5f5;
+		margin-bottom: 15px;
+		cursor: pointer;
 	}
 
-.storage__filters-wrapper {
+		.storage__upload--hover, .storage__upload:hover {
+			background: #EEE !important;
+		}
+
+	.storage__uploads {
+
+	}
+
+		.storage__uploads-file {
+			height: 20px;
+			margin-bottom: 15px;
+			position: relative;
+			text-align: center;
+			background: #f5f5f5;
+		}
+
+		.storage__uploads-progress {
+			position: absolute;
+			height: 20px;
+			top: 0px;
+			left: 0px;
+			background: #B9D0A3;
+		}
+
+		.storage__uploads-title {
+			position: absolute;
+			height: 20px;
+			width: 100%;
+			text-align: center;
+			line-height: 20px;
+			font-size: 12px;
+		}
+
+.storage__options-wrapper {
 	@include respond_to(screen_wide) {
 		float: right;
 		min-width: $storage_filters_width;
@@ -61,23 +71,23 @@ $storage_filters_margin: 20px;
 	}
 }
 
-	.storage__filters {
+	.storage__options {
 
 	}
 
-	.storage__filters-spacing {
+	.storage__options-spacing {
 		line-height: 1px;
 		background: #CCC;
 		height: 1px;
 		margin: 9px 0px;
 	}
 
-	.storage__filters-group {
+	.storage__options-group {
 		@include respond_to(screen_phone) {
 			text-align: center;
 		}
 	}
-		.storage__filter {
+		.storage__option {
 			height: 24px;
 			line-height: 24px;
 			display: block;
@@ -92,17 +102,17 @@ $storage_filters_margin: 20px;
 			}
 		}
 
-		.storage__filter:hover, .storage__filter--selected {
+		.storage__option:hover, .storage__option--selected {
 			background: #EEE;
 		}
 
-	.storage__filters-group--media {
-		.storage__filter {
+	.storage__options-group--media {
+		.storage__option {
 			position: relative;
 			padding: 0px 10px 0px 30px;
 		}
 
-		.storage__filter img {
+		.storage__option img {
 			position: absolute;
 			width: 20px;
 			height: 20px;

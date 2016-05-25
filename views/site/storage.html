@@ -14,7 +14,7 @@
 <button id="__storage_call">Select photo</button>
 
 <script>
-	new Storage({
+	var storage = new Storage({
 		container: "__storage",
 
 		onselect: function(file) {
@@ -24,19 +24,13 @@
 		onupload: function(file) {
 			console.log('inline upload', file);
 		},
-
-
 	});
 
 	document.getElementById('__storage_call').onclick = function() {
 		var container = document.createElement('div');
-
-		var popup = Popup.createWindow({
-			content: container,
-		});
-
-		new Storage({
+		var storage = new Storage({
 			container: container,
+			admin_mode: false,
 
 			onselect: function(file) {
 				console.log('popup click', file);
@@ -46,11 +40,25 @@
 				console.log('popup upload', file);
 			},
 
-			media: ['photo', 'video'],
-			photo_protection: true,
-			upload_access: "public",
-			group_upload: "storage",
-			group_display: "storage",
+			upload: {
+				media: ['photo', 'video'],
+				photo_protection: true,
+				access: "public",
+				group: "storage",
+			},
+
+			display: {
+				media: ['photo'],
+				group: 'storage',
+				show_groups: true,
+			},
+		});
+
+		var popup = Popup.createWindow({
+			content: container,
+			onclose: function() {
+				storage.destroy();
+			}
 		});
 	}
 </script>

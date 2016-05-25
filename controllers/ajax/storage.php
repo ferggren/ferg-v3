@@ -7,6 +7,15 @@ class AjaxStorage_Controller extends AjaxController {
         return $this->jsonError('access_denied');
     }
 
+    public function actionGetGroups() {
+        usleep(rand(100000, 400000));
+        if (!is_array($groups = $this->loadUserGroups())) {
+            return $this->jsonError('internal_server_error');
+        }
+
+        return $this->jsonSuccess($groups);
+    }
+
     /**
      *  Return statistic
      *  Media - number of user files of each media type
@@ -48,6 +57,7 @@ class AjaxStorage_Controller extends AjaxController {
      *  Return files info
      */
     public function actionGetFiles() {
+        usleep(rand(100000, 400000));
         return $this->jsonSuccess(array(
             'files' => array(),
             'page' => 1,
@@ -57,8 +67,60 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     public function actionUpload() {
-        return $this->jsonSuccess();
-        print_r($_FILES);
+        // Is file uploaded?
+        if (!isset($_FILES) || !is_array($_FILES)) {
+            return $this->jsonError(
+                Lang::get('storage.error_file_not_uploaded')
+            );
+        }
+
+        if (!isset($_FILES['upload']) || !is_array($_FILES['upload'])) {
+            return $this->jsonError(
+                Lang::get('storage.error_file_not_uploaded')
+            );
+        }
+
+        $upload = $_FILES['upload'];
+
+        // Any errors here?
+        if (isset($upload['error']) && $upload['error']) {
+            // No arrays are allowed here
+            if (is_array($upload['error'])) {
+                return $this->jsonError(
+                    Lang::get('storage.error_file_upload_error')
+                );
+            }
+
+            $error = $upload['error'];
+
+            if ($error == UPLOAD_ERR_NO_FILE) {
+                return $this->jsonError(
+                    Lang::get('storage.error_file_not_uploaded')
+                );
+            }
+
+            if ($error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE) {
+                return $this->jsonError(
+                    Lang::get('storage.error_file_is_too_big')
+                );
+            }
+
+            return $this->jsonError(
+                Lang::get('storage.error_file_not_uploaded')
+            );
+        }
+
+        foreach (array('name', 'tmp_name', 'size') as $field) {
+            if (isset($upload[$field]) && !is_array($upload[$field])) {
+                continue;
+            }
+
+            return $this->jsonError(
+                Lang::get('storage.error_file_upload_error')
+            );
+        }
+
+        return $this->jsonSuccess($upload['name'].' - ' . $upload['size']);
     }
 
     /**

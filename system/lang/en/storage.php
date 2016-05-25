@@ -11,9 +11,15 @@ $strings = array(
     'media_archive' => 'Archive',
     'media_other' => 'Other',
 
+    'groups_all' => 'All',
+    'groups_groupless' => 'Without group',
+
     'file_upload' => 'Click or drop file to upload',
     'file_uploading' => 'File uploading...',
     
     'error_files_not_found' => 'No files was found',
+    'error_file_upload_error' => 'File upload error',
+    'error_file_not_uploaded' => 'There is no file was uploaded',
+    'error_file_is_too_big' => 'File size is too big',
 );
 ?>
