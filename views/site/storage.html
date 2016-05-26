@@ -11,8 +11,41 @@
 
 <br /><br />
 
-<button id="__storage_call">Select photo</button>
+<button id="__storage_photo">Select photo</button>
+<button id="__storage_all">Select file</button>
 
+<div>
+	<br /><br /><br /><br /><br /><br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+	some text<br />
+
+</div>
 <script>
 	var storage = new Storage({
 		container: "__storage",
@@ -26,7 +59,7 @@
 		},
 	});
 
-	document.getElementById('__storage_call').onclick = function() {
+	document.getElementById('__storage_photo').onclick = function() {
 		var container = document.createElement('div');
 		var storage = new Storage({
 			container: container,
@@ -50,6 +83,33 @@
 			display: {
 				media: ['photo'],
 				group: 'storage',
+				show_groups: true,
+			},
+		});
+
+		var popup = Popup.createWindow({
+			content: container,
+			onclose: function() {
+				storage.destroy();
+			}
+		});
+	}
+
+	document.getElementById('__storage_all').onclick = function() {
+		var container = document.createElement('div');
+		var storage = new Storage({
+			container: container,
+			admin_mode: false,
+
+			onselect: function(file) {
+				console.log('popup click', file);
+			},
+
+			onupload: function(file) {
+				console.log('popup upload', file);
+			},
+
+			display: {
 				show_groups: true,
 			},
 		});

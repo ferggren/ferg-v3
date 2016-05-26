@@ -19,7 +19,8 @@
 	}
 
 	.popup__window-content {
-
+		overflow-y: scroll;
+		overflow-x: hidden;
 	}
 
 .popup__shadow {

@@ -19,49 +19,55 @@
      *                       onclose - When user closes window onclose callback will be called
      *  @return {number} Window id
      */
-    createWindow: function(window) {
-        if (typeof window != 'object') {
-            window = {};
+    createWindow: function(options) {
+        if (typeof options != 'object') {
+            options = {};
         }
 
-        if (typeof window.onclose != 'function') {
-            window.onclose = function() {};
+        if (typeof options.onclose != 'function') {
+            options.onclose = function() {};
         }
 
-        if (typeof window.title != 'string') {
-            window.title = '';
+        if (typeof options.title != 'string') {
+            options.title = '';
         }
 
-        if (typeof window.content != 'object') {
+        if (typeof options.content != 'object') {
             var wrapper = document.createElement('div');
-            wrapper.innerHTML = window.content;
+            wrapper.innerHTML = options.content;
 
-            window.content = wrapper;
+            options.content = wrapper;
         }
 
         var popup_window = document.createElement('div');
         popup_window.className = 'popup__window';
 
-        if (window.title.length) {
+        if (options.title.length) {
             var window_title = document.createElement('div');
             window_title.className = 'popup__window-title';
-            window_title.innerHTML = window.title;
+            window_title.innerHTML = options.title;
 
             popup_window.appendChild(window_title);
         }
 
         var window_content = document.createElement('div');
         window_content.className = 'popup__window-content';
-        window_content.appendChild(window.content);
+        window_content.appendChild(options.content);
+
+        var max_height = window.innerHeight;
+
+        if (!isNaN(max_height)) {
+            window_content.style.maxHeight = (max_height - 50) + 'px';
+        }
 
         popup_window.appendChild(window_content);
 
         var ret = Popup.createPopup({
             content: popup_window,
-            onclose: window.onclose
+            onclose: options.onclose
         });
 
-        window = null;
+        options = null;
 
         return ret;
     },
@@ -222,6 +228,7 @@
         }
 
         document.body.appendChild(shadow);
+        document.body.style.overflow = 'hidden';
     },
 
     /**
@@ -235,6 +242,7 @@
         }
 
         shadow.parentNode.removeChild(shadow);
+        document.body.style.overflow = 'scroll';
     },
 
     /**
