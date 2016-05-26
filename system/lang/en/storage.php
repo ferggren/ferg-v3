@@ -1,6 +1,6 @@
 <?php
 $strings = array(
-    'orderby_newest' => 'Newest',
+    'orderby_newest' => 'Latest',
     'orderby_popular' => 'Popular',
     'media_all' => 'All',
     'media_photo' => 'Photo',
@@ -21,6 +21,7 @@ $strings = array(
     'upload_file_uploading' => 'Uploading',
     'upload_file_success' => 'Uploaded',
     
+    'error_files_not_uploaded_yet' => 'Files not uploaded yet',
     'error_files_not_found' => 'No files was found',
     'error_file_upload_error' => 'File upload error',
     'error_file_not_uploaded' => 'There is no file was uploaded',

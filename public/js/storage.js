@@ -1279,7 +1279,13 @@ StorageFiles.prototype = {
         if (!this.files.length) {
             var error = document.createElement('div');
             error.className = 'nice-form__success';
-            error.innerHTML = Lang.get('storage.error_files_not_found');
+
+            if (this.total == 0) {
+                error.innerHTML = Lang.get('storage.error_files_not_uploaded_yet');
+            }
+            else {
+                error.innerHTML = Lang.get('storage.error_files_not_found');
+            }
 
             this.container.appendChild(error);
             return;
