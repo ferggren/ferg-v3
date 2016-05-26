@@ -15,7 +15,11 @@ $strings = array(
     'groups_groupless' => 'Без категории',
 
     'file_upload' => 'Кликните или перенесите файлы для загрузки',
-    'file_uploading' => 'Загрузка файла...',
+
+    'upload_file_placeholder' => 'Файл',
+    'upload_file_scheduled' => 'Загрузка... ',
+    'upload_file_uploading' => 'Загрузка',
+    'upload_file_success' => 'Загружен',
     
     'error_files_not_found' => 'Файлы не найдены',
     'error_file_upload_error' => 'Ошибка загрузки файла',

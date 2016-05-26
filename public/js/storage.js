@@ -288,19 +288,13 @@ var StorageUploader = function(container, storage, options) {
     this.uploads = false;
     this.form_file = false;
 
+    this.uploads_queue = {};
+
     this.__init();
 };
 
 StorageUploader.prototype = {
     destroy: function() {
-        var elements = [
-            'container',
-            'uploader',
-            'uploads',
-            'form',
-            'form_file',
-        ];
-
         if (this.uploader && this.uploader.removeEventListener) {
             this.uploader.removeEventListener(
                 'drop',
@@ -323,6 +317,14 @@ StorageUploader.prototype = {
             );
         }
 
+        var elements = [
+            'container',
+            'uploader',
+            'uploads',
+            'form',
+            'form_file',
+        ];
+
         for (var element in elements) {
             element = elements[element];
 
@@ -336,13 +338,19 @@ StorageUploader.prototype = {
                 this[element].__parent = null;
             }
 
-            if (this[element].parentNode) {
+            if (this[element].parentNode && this[element].parentNode.removeChild) {
                 this[element].parentNode.removeChild(this[element]);
             }
 
             this[element].onchange = null;
             this[element].onclick = null;
             this[element] = null;
+        }
+
+        if (this.uploads_queue) {
+            for (var upload_id in this.uploads_queue) {
+                this.__uploadRemove(upload_id);
+            }
         }
 
         this.storage = null;
@@ -533,7 +541,9 @@ StorageUploader.prototype = {
         if (!this.container) { return; }
 
         var that = this;
-        var upload_name = Lang.get('storage.file_uploading');
+
+        var upload_name = false;
+        var upload_id = false;
 
         if (form_data.get) {
             var file = form_data.get('upload');
@@ -543,54 +553,266 @@ StorageUploader.prototype = {
             }
         }
 
-        var uploader = document.createElement('div');
-        uploader.className = 'storage__uploads-file';
-
-        var progress = document.createElement('div');
-        progress.className = 'storage__uploads-progress';
-        progress.style.width = '0%';
-
-        var title = document.createElement('div');
-        title.className = 'storage__uploads-title';
-        title.innerHTML = upload_name;
-
-        uploader.appendChild(progress);
-        uploader.appendChild(title);
-
-        this.container.appendChild(uploader);
-
-        Rocky.ajax({
+        var request_id = Rocky.ajax({
             url: '/ajax/storage/upload',
             data: form_data,
 
             success: function(file) {
                 if (!that.container) return;
 
-                that.container.removeChild(uploader);
+                that.__uploadSuccess(upload_id, file);
 
-                Popup.createWindow({
-                    content: file
-                });
+                that = null;
+                upload_id = null;
             },
 
             error: function(error) {
                 if (!that.container) return;
 
-                that.container.removeChild(uploader);
+                that.__uploadError(upload_id, error);
 
-                Popup.createWindow({
-                    content: error
-                });
+                that = null;
+                upload_id = null;
             },
 
             progress: function(loaded, total) {
-                var percents = Math.floor((loaded / total) * 100);
-                progress.style.width = percents + '%';
-                title.innerHTML = upload_name + '(' + percents + '%)';
+                that.__uploadUpdateProgress(upload_id, loaded, total);
             },
 
-            async: true,
+            async: false,
         });
+
+        upload_id = this.__uploadCreate(upload_name, request_id);
+    },
+
+    __uploadCreate: function(file_name, request_id) {
+        if (typeof this.uploads_queue == 'undefined') {
+            return false;
+        }
+
+        var upload_id = 0;
+
+        for (var i = 0; ; ++i) {
+            if (typeof this.uploads_queue[i] == 'object') {
+                continue;
+            }
+
+            upload_id = i;
+            break;
+        }
+
+        var uploader = document.createElement('div');
+        uploader.className = 'storage__uploads-file';
+        uploader.__parent = this;
+        uploader.setAttribute('upload_id', upload_id)
+        uploader.onclick = this.__uploadOnClick;
+
+        var progress = document.createElement('div');
+        progress.className = 'storage__uploads-progress';
+
+        var title = document.createElement('div');
+        title.className = 'storage__uploads-title';
+
+        uploader.appendChild(progress);
+        uploader.appendChild(title);
+        this.uploads.appendChild(uploader);
+
+        this.uploads_queue[upload_id] = {
+            uploader: uploader,
+            progress: progress,
+            title: title,
+            file_name: file_name,
+            request_id: request_id,
+            status: 'scheduled',
+            error: false,
+            loaded: 0,
+            total: 0,
+        };
+
+        this.__uploadUpdate(upload_id);
+
+        return upload_id;
+    },
+
+    __uploadUpdate: function(upload_id) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        var upload = this.uploads_queue[upload_id];
+
+        var title = upload.file_name;
+        if (!title) {
+            title = Lang.get('storage.upload_file_placeholder');
+        }
+        title += ' - ';
+
+        if (upload.status == 'scheduled') {
+            title += Lang.get('storage.upload_file_scheduled');
+
+            upload.progress.style.display = 'none';
+            upload.title.innerHTML = title;
+        }
+        else if (upload.status == 'uploading') {
+            var percents = 0;
+            if (upload.total) {
+                percents = Math.floor((upload.loaded / upload.total) * 100);
+            }
+
+            title += Lang.get('storage.upload_file_uploading');
+            title += ' (' + percents + '%)';
+
+            upload.progress.style.display = 'block';
+            upload.progress.style.width = percents + '%';
+            upload.title.innerHTML = title;
+        }
+        else if (upload.status == 'success') {
+            title += Lang.get('storage.upload_file_success');
+
+            upload.progress.style.display = 'block';
+            upload.progress.style.width = '100%';
+            upload.title.innerHTML = title;
+        }
+        else if (upload.status == 'error') {
+            title += upload.error;
+
+            upload.progress.style.display = 'block';
+            upload.progress.style.width = '100%';
+            upload.progress.className += ' storage__uploads-progress--error';
+            upload.title.innerHTML = title;
+        }
+
+        upload = null;
+    },
+
+    __uploadUpdateProgress: function(upload_id, loaded, total) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        this.uploads_queue[upload_id].status = 'uploading';
+        this.uploads_queue[upload_id].loaded = loaded;
+        this.uploads_queue[upload_id].total = total;
+
+        this.__uploadUpdate(upload_id);
+    },
+
+    __uploadSuccess: function(upload_id, file) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        this.uploads_queue[upload_id].status = 'success';
+        this.__uploadUpdate(upload_id);
+
+        for (var callback in this.callbacks) {
+            this.callbacks[callback](file);
+        }
+    },
+
+    __uploadError: function(upload_id, error) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        this.uploads_queue[upload_id].status = 'error';
+        this.uploads_queue[upload_id].error = error;
+
+        this.__uploadUpdate(upload_id);
+    },
+
+    __uploadAbort: function(upload_id) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        var request_id = this.uploads_queue[upload_id].request_id;
+
+        if (typeof request_id == 'undefined') {
+            return;
+        }
+
+        if (request_id === false || request_id === null) {
+            return;
+        }
+
+        Rocky.ajaxAbort(request_id);
+
+        this.uploads_queue[upload_id].request_id = null;
+        request_id = null;
+    },
+
+    __uploadRemove: function(upload_id) {
+        if (typeof this.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        this.__uploadAbort(upload_id);
+
+        var upload = this.uploads_queue[upload_id];
+        this.uploads_queue[upload_id] = null;
+
+        if (upload.uploader.parentNode && upload.uploader.parentNode.removeChild) {
+            upload.uploader.parentNode.removeChild(upload.uploader);
+        }
+
+        upload.uploader.onclick = null;
+        upload.uploader.__parent = null;
+
+        for (var key in upload) {
+            upload[key] = null;
+        }
+
+        upload = null;
+    },
+
+    __uploadOnClick: function() {
+        if (!this.__parent) {
+            return;
+        }
+
+        var upload_id = parseInt(this.getAttribute('upload_id'));
+
+        if (typeof this.__parent.uploads_queue != 'object') {
+            return;
+        }
+
+        if (typeof this.__parent.uploads_queue[upload_id] != 'object') {
+            return;
+        }
+
+        var status = this.__parent.uploads_queue[upload_id].status;
+
+        if (status == 'scheduled' || status == 'uploading') {            
+            this.__parent.__uploadAbort(upload_id);
+        }
+        else {
+            this.__parent.__uploadRemove(upload_id);
+        }
     },
 }
 
@@ -723,6 +945,8 @@ StorageDisplayOptions.prototype = {
             data: {
                 admin_mode: this.options.admin_mode
             },
+
+            async: true,
         });
     },
 
@@ -1040,6 +1264,8 @@ StorageFiles.prototype = {
                 page: this.page,
                 pages: this.pages,
             },
+
+            async: true,
         });
     },
 

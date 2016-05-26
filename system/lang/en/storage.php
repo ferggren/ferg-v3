@@ -15,7 +15,11 @@ $strings = array(
     'groups_groupless' => 'Without group',
 
     'file_upload' => 'Click or drop file to upload',
-    'file_uploading' => 'File uploading...',
+
+    'upload_file_placeholder' => 'File',
+    'upload_file_scheduled' => 'Uploading... ',
+    'upload_file_uploading' => 'Uploading',
+    'upload_file_success' => 'Uploaded',
     
     'error_files_not_found' => 'No files was found',
     'error_file_upload_error' => 'File upload error',
