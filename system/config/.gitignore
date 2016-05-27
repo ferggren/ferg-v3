@@ -2,4 +2,5 @@ app.php
 database.php
 auth.php
 lang.php
+storage.php
 !.gitignore

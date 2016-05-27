@@ -141,7 +141,7 @@ $storage_filters_margin: 20px;
 
 	.storage__files {
 		@include respond_to(screen_wide) {
-			min-width: 220px;
+			min-width: 420px;
 		}
 
 		@include respond_to(screen_tablet) {

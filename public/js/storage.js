@@ -4,7 +4,7 @@ var Storage = function(options) {
 
 Storage.prototype = {
     media_valid: [
-        'photo',
+        'image',
         'video',
         'audio',
         'document',
@@ -25,10 +25,12 @@ Storage.prototype = {
 
             this[key].destroy();
             this[key] = null;
+            delete this[key];
         }
 
         for (var container in this.containers) {
             this.containers[container] = null;
+            delete this.containers[container];
         }
 
         this.containers = null;
@@ -47,7 +49,7 @@ Storage.prototype = {
             this.uploader = new StorageUploader(
                 this.containers.uploader,
                 this,
-                this.options.uploader
+                this.options.upload
             );
 
             this.display = new StorageDisplayOptions(
@@ -131,11 +133,6 @@ Storage.prototype = {
 
     __validateUpload: function(options) {
         var upload = (typeof options.upload == 'object') ? options.upload : {};
-
-        if (typeof upload.photo_protection == 'undefined') {
-            upload.photo_protection = false;
-        }
-        upload.photo_protection = !!upload.photo_protection;
 
         if (typeof upload.access == 'undefined') {
             upload.access = 'public';
@@ -226,11 +223,19 @@ Storage.prototype = {
     },
 
     __onFileSelect: function(file) {
-        console.log("onFileSelect", file);
+        if (typeof this.options.onselect != 'function') {
+            return;
+        }
+
+        this.options.onselect(file);
     },
 
     __onFileUpload: function(file) {
-        console.log("onUpload", file);
+        if (typeof this.options.onupload != 'function') {
+            return;
+        }
+
+        this.options.onupload(file);
     },
 
     __makeContainers: function() {
@@ -345,6 +350,7 @@ StorageUploader.prototype = {
             this[element].onchange = null;
             this[element].onclick = null;
             this[element] = null;
+            delete this[element];
         }
 
         if (this.uploads_queue) {
@@ -553,6 +559,10 @@ StorageUploader.prototype = {
             }
         }
 
+        form_data.append('file_access', this.options.access);
+        form_data.append('file_group', this.options.group ? this.options.group : '');
+        form_data.append('file_media', this.options.media.join(','));
+
         var request_id = Rocky.ajax({
             url: '/ajax/storage/upload',
             data: form_data,
@@ -635,11 +645,11 @@ StorageUploader.prototype = {
     },
 
     __uploadUpdate: function(upload_id) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
@@ -690,11 +700,11 @@ StorageUploader.prototype = {
     },
 
     __uploadUpdateProgress: function(upload_id, loaded, total) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
@@ -706,11 +716,11 @@ StorageUploader.prototype = {
     },
 
     __uploadSuccess: function(upload_id, file) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
@@ -723,11 +733,11 @@ StorageUploader.prototype = {
     },
 
     __uploadError: function(upload_id, error) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
@@ -738,11 +748,11 @@ StorageUploader.prototype = {
     },
 
     __uploadAbort: function(upload_id) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
@@ -758,23 +768,25 @@ StorageUploader.prototype = {
 
         Rocky.ajaxAbort(request_id);
 
-        this.uploads_queue[upload_id].request_id = null;
+        this.uploads_queue[upload_id].request_id = false;
         request_id = null;
     },
 
     __uploadRemove: function(upload_id) {
-        if (typeof this.uploads_queue != 'object') {
+        if (!this.uploads_queue) {
             return;
         }
 
-        if (typeof this.uploads_queue[upload_id] != 'object') {
+        if (!this.uploads_queue[upload_id]) {
             return;
         }
 
         this.__uploadAbort(upload_id);
 
         var upload = this.uploads_queue[upload_id];
+
         this.uploads_queue[upload_id] = null;
+        delete this.uploads_queue[upload_id];
 
         if (upload.uploader.parentNode && upload.uploader.parentNode.removeChild) {
             upload.uploader.parentNode.removeChild(upload.uploader);
@@ -785,6 +797,7 @@ StorageUploader.prototype = {
 
         for (var key in upload) {
             upload[key] = null;
+            delete upload[key];
         }
 
         upload = null;
@@ -797,11 +810,11 @@ StorageUploader.prototype = {
 
         var upload_id = parseInt(this.getAttribute('upload_id'));
 
-        if (typeof this.__parent.uploads_queue != 'object') {
+        if (!this.__parent.uploads_queue) {
             return;
         }
 
-        if (typeof this.__parent.uploads_queue[upload_id] != 'object') {
+        if (!this.__parent.uploads_queue[upload_id]) {
             return;
         }
 
@@ -1217,6 +1230,10 @@ StorageFiles.prototype = {
             that.__loadFiles();
         })
 
+        this.storage.uploader.onupload(function(file) {
+            that.__checkUpload(file);
+        });
+
         this.__loadFiles();
     },
 
@@ -1291,6 +1308,40 @@ StorageFiles.prototype = {
             return;
         }
 
+        var current_media = this.storage.display.getMedia();
+
+        if (current_media.length == 1 && current_media[0] == 'image') {
+            console.log('IMAGES');
+        }
+
         console.log(this.files);
+    },
+
+    __checkUpload: function(file) {
+        if (this.page != 1) {
+            return;
+        }
+
+        if (!file.media) {
+            return;
+        }
+
+        var found = false;
+        var current_media = this.storage.display.getMedia();
+
+        for (var media in current_media) {
+            if (current_media[media] != file.media) {
+                continue;
+            }
+
+            found = true;
+            break;
+        }
+
+        if (!found) {
+            return;
+        }
+
+        this.__loadFiles();
     },
 }

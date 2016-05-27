@@ -3,7 +3,7 @@ $strings = array(
     'orderby_newest' => 'Latest',
     'orderby_popular' => 'Popular',
     'media_all' => 'All',
-    'media_photo' => 'Photo',
+    'media_image' => 'Image',
     'media_video' => 'Video',
     'media_audio' => 'Audio',
     'media_document' => 'Documents',
@@ -26,5 +26,8 @@ $strings = array(
     'error_file_upload_error' => 'File upload error',
     'error_file_not_uploaded' => 'There is no file was uploaded',
     'error_file_is_too_big' => 'File size is too big',
+    'error_filename_too_big' => 'File name is too big',
+    'error_file_is_empty' => 'File is empty',
+    'error_incorrect_media_type' => 'Incorrect fyle media type',
 );
 ?>

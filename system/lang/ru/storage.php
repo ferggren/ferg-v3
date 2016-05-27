@@ -3,7 +3,7 @@ $strings = array(
     'orderby_newest' => 'Последние',
     'orderby_popular' => 'Популярные',
     'media_all' => 'Все',
-    'media_photo' => 'Фото',
+    'media_image' => 'Изображения',
     'media_video' => 'Видео',
     'media_audio' => 'Аудио',
     'media_document' => 'Документы',
@@ -26,5 +26,8 @@ $strings = array(
     'error_file_upload_error' => 'Ошибка загрузки файла',
     'error_file_not_uploaded' => 'Файл не был загружен',
     'error_file_is_too_big' => 'Размер файла слишком большой',
+    'error_filename_too_big' => 'Имя файла слишком большое',
+    'error_file_is_empty' => 'Файл пустой',
+    'error_incorrect_media_type' => 'Некорректный тип файла',
 );
 ?>
