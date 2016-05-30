@@ -51,7 +51,7 @@ class AjaxStorage_Controller extends AjaxController {
             $media = self::__loadMediaStats($media, true);
         }
         else {
-            $groups = self::__loadUserGroups();
+            $groups = self::__loadGroupsStats();
             $media = self::__loadMediaStats($media);
         }
 
@@ -174,7 +174,7 @@ class AjaxStorage_Controller extends AjaxController {
         // create entry
         $file = new Database('storage_files');
         $file->user_id = $file_info['user_id'];
-        $file->user_group_id = $file_info['group_id'];
+        $file->group_id = $file_info['group_id'];
         $file->file_hash = $file_info['hash'];
         $file->file_name = $file_info['name'];
         $file->file_media = $file_info['media'];
@@ -244,10 +244,10 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     /**
-     *  Return statistics about user files groups
+     *  Return user groups
      *
      *  @return {array} List of user groups
-     */
+    */
     protected static function __loadUserGroups() {
         if (!User::isAuthenticated()) {
             return array();
@@ -273,6 +273,61 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     /**
+     *  Return user groups statistics
+     *
+     * 
+     */
+    protected static function __loadGroupsStats() {
+        if (!User::isAuthenticated()) {
+            return array();
+        }
+
+        if (!is_array($groups = self::__loadUserGroups())) {
+            return array();
+        }
+
+        if (!count($groups)) {
+            return array();
+        }
+
+        $map = array(
+            '0' => 'groupless',
+        );
+
+        foreach ($groups as $group) {
+            $map[$group['id']] = $group['name'];
+        }
+
+        $res = Database::query(
+            'SELECT
+                COUNT(*) as count,
+                group_id
+            FROM
+                storage_files
+            WHERE
+                user_id = "'.Database::escape(User::get_user_id()).'"
+            GROUP BY
+                group_id'
+        );
+
+        if (!$res || !is_array($res)) {
+            return array();
+        }
+
+        $stats = array();
+
+        foreach ($res as $stat) {
+            if (!isset($map[$stat['group_id']])) {
+                continue;
+            }
+
+            $stats[$map[$stat['group_id']]] = (int)$stat['count'];
+        }
+
+        return $stats;
+    }
+
+    /**
      *  Return user/global media types statistics
      *
      *  @param {array} user_media List of media types
@@ -280,18 +335,50 @@ class AjaxStorage_Controller extends AjaxController {
      *  @return {array} List of media types with statistics
      */
     protected static function __loadMediaStats($user_media, $global = false) {
-        $media_stats = array();
+        $stats = array();
+
+        if (!count($user_media) || !User::isAuthenticated()) {
+            return $stats;
+        }
+
+        if (!User::hasAccess('admin')) {
+            $global = false;
+        }
+
+        $where = array();
 
         foreach ($user_media as $media) {
-            $media_stats[$media] = 0;
+            $stats[$media] = 0;
+            $where[] = '"' . Database::escape($media) . '"';
         }
 
-        if (!User::isAuthenticated()) {
-            return $media_stats;
+        $where = 'file_media IN (' . implode(',', $where) . ')';
+
+        if (!$global) {
+            $where .= ' AND user_id = "'.Database::escape(User::get_user_id()).'" ';
         }
 
-        print_r($media_stats);
-        exit;
+        $res = Database::query(
+            'SELECT
+                COUNT(*) as count,
+                file_media
+            FROM
+                storage_files
+            WHERE
+                ' . $where . '
+            GROUP BY
+                file_media'
+        );
+
+        if (!$res || !is_array($res)) {
+            return array();
+        }
+
+        foreach ($res as $stat) {
+            $stats[$stat['file_media']] = (int)$stat['count'];
+        }
+
+        return $stats;
     }
 
     /**

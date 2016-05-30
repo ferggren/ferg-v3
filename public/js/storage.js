@@ -835,6 +835,10 @@ var StorageDisplayOptions = function(container, storage, options) {
     this.options = options;
     this.callbacks = [];
     this.groups = [];
+    this.stats = {
+        media: {},
+        groups: {},
+    };
 
     this.__init();
 };
@@ -854,6 +858,7 @@ StorageDisplayOptions.prototype = {
         this.groups = null;
         this.options = null;
         this.callbacks = null;
+        this.stats = null;
     },
 
     getOrderBy: function() {
@@ -916,7 +921,10 @@ StorageDisplayOptions.prototype = {
             this.option_media = media[0];
         }
 
+        this.__loadStats();
+
         if (this.options.show_groups) {
+            this.__showOptions();
             this.__loadGroups();
         }
         else {
@@ -924,13 +932,48 @@ StorageDisplayOptions.prototype = {
         }
     },
 
-    __loadGroups: function() {
+    __loadStats: function() {
         if (!this.container) {
             return;
         }
 
         var that = this;
-        this.container.innerHTML = '<div class="nice-form__loader"></div>';
+
+        Rocky.ajax({
+            url: '/ajax/storage/getStats',
+
+            success: function(stats) {
+                if (!that.container) {
+                    that = null;
+                    return;
+                }
+
+                that.__processStats(stats);
+                that = null;
+            },
+
+            error: function(error) {
+                that = null;
+            },
+
+            data: {
+                admin_mode: this.options.admin_mode
+            },
+
+            async: true,
+        });
+    },
+
+    __loadGroups: function() {
+        if (!this.container) {
+            return;
+        }
+
+        if (this.options.admin_mode) {
+            return;
+        }
+
+        var that = this;
 
         Rocky.ajax({
             url: '/ajax/storage/getGroups',
@@ -946,12 +989,6 @@ StorageDisplayOptions.prototype = {
             },
 
             error: function(error) {
-                if (!that.container) {
-                    that = null;
-                    return;
-                }
-
-                that.container.innerHTML = '<div class="nice-form__error">' + error + '</div>';
                 that = null;
             },
 
@@ -979,6 +1016,13 @@ StorageDisplayOptions.prototype = {
         }
 
         this.groups = Object.keys(user_groups);
+        this.__showOptions();
+    },
+
+    __processStats: function(stats) {
+        this.stats.groups = stats.groups;
+        this.stats.media = stats.media;
+
         this.__showOptions();
     },
 
@@ -1053,6 +1097,7 @@ StorageDisplayOptions.prototype = {
                 wrapper: wrapper,
                 option_type: 'media',
                 option_value: 'all',
+                amount: this.__getMediaTotal(),
                 title: Lang.get('storage.media_all'),
                 selected: this.option_media == 'all',
             });
@@ -1065,6 +1110,7 @@ StorageDisplayOptions.prototype = {
                 wrapper: wrapper,
                 option_type: 'media',
                 option_value: media,
+                amount: this.stats.media[media] ? this.stats.media[media] : 0,
                 title: Lang.get('storage.media_' + media),
                 selected: this.option_media == media,
             });
@@ -1091,21 +1137,21 @@ StorageDisplayOptions.prototype = {
         var wrapper = document.createElement('div');
         wrapper.className = 'storage__options-group storage__options-group--groups';
 
-        if (this.groups.length) {
-            this.__appendOptionButton({
-                wrapper: wrapper,
-                option_type: 'group',
-                option_value: 'all',
-                title: Lang.get('storage.groups_all'),
-                selected: this.option_group == 'all',
-            });
-        }
+        this.__appendOptionButton({
+            wrapper: wrapper,
+            option_type: 'group',
+            option_value: 'all',
+            amount: this.__getMediaTotal(),
+            title: Lang.get('storage.groups_all'),
+            selected: this.option_group == 'all',
+        });
 
         this.__appendOptionButton({
             wrapper: wrapper,
             option_type: 'group',
             option_value: 'groupless',
             title: Lang.get('storage.groups_groupless'),
+            amount: this.stats.groups.groupless ? this.stats.groups.groupless : 0,
             selected: this.option_group == 'groupless',
         });
 
@@ -1117,6 +1163,7 @@ StorageDisplayOptions.prototype = {
                 option_type: 'group',
                 option_value: group,
                 title: group,
+                amount: this.stats.groups[group] ? this.stats.groups[group] : 0,
                 selected: this.option_group == group,
             });
         }
@@ -1139,6 +1186,12 @@ StorageDisplayOptions.prototype = {
         }
 
         button.appendChild(document.createTextNode(info.title));
+
+        if (typeof info.amount != 'undefined' && info.amount > 0) {
+            var amount = document.createElement('span');
+            amount.innerHTML = info.amount;
+            button.appendChild(amount);
+        }
 
         if (info.selected) {
             button.className += ' storage__option--selected';
@@ -1173,6 +1226,20 @@ StorageDisplayOptions.prototype = {
         }
 
         self = null;
+    },
+
+    __getMediaTotal: function() {
+        if (!Object.keys(this.stats.media).length) {
+            return 0;
+        }
+
+        var total = 0;
+
+        for (var media in this.stats.media) {
+            total += this.stats.media[media];
+        }
+
+        return total;
     },
 }
 
