@@ -11,6 +11,14 @@ $strings = array(
     'media_archive' => 'Archive',
     'media_other' => 'Other',
 
+    'size_byte' => '%size% Byte',
+    'size_kilobyte' => '%size% Kb',
+    'size_megabyte' => '%size% Mb',
+    'size_gigabyte' => '%size% Gb',
+
+    'file_not_downloaded' => '',
+    'file_downloads' => '%downloads% pluralize(%downloads% "download" "downloads")',
+
     'groups_all' => 'All',
     'groups_groupless' => 'Without group',
 

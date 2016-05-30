@@ -64,15 +64,114 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     /**
-     *  Return files info
+     *  Get files list
      */
     public function actionGetFiles() {
-        return $this->jsonSuccess(array(
+        $ret = array(
             'files' => array(),
             'page' => 1,
             'pages' => 1,
             'total' => 0,
-        ));
+            'rpp' => Config::get('storage.results_per_page'),
+        );
+
+        $search = self::__validateSearch();
+
+        if (!User::isAuthenticated()) {
+            return $this->jsonSuccess($ret);
+        }
+
+        // Nothing to return
+        if (!count($search['media'])) {
+            return $this->jsonSuccess($ret);
+        }
+
+        // where query
+        $where = array();
+
+        // User id & user group
+        if (!$search['admin_mode']) {
+            $where[] = 'user_id = "' . Database::escape(User::get_user_id()) . '"';
+
+            if ($search['group_id'] !== false) {
+                $where[] = 'group_id = "' . Database::escape($search['group_id']) . '"';
+            }
+        }
+
+        // media
+        $where_media = array();
+        foreach ($search['media'] as $media) {
+            $where_media[] = '"' . Database::escape($media) . '"';
+        }
+
+        $where[] = 'file_media IN (' . implode(',', $where_media) . ')';
+        $where[] = 'file_deleted = "0"';
+        $where = implode(' AND ', $where);
+
+        // Count, pages & page
+        $count = Database::query(
+            'SELECT
+                COUNT(*) as count
+            FROM
+                storage_files
+            WHERE
+                ' . $where
+        );
+
+        if (!isset($count[0]['count']) || !$count[0]['count']) {
+            return $this->jsonSuccess($ret);
+        }
+
+        $count = (int)$count[0]['count'];
+        $rpp = $ret['rpp'];
+        $pages = (int)($count / $rpp);
+        if (($pages * $rpp) < $count) ++$pages;
+
+        if ($search['page'] > $pages) {
+            $search['page'] = $pages;
+        }
+
+        // Files
+        $files = Database::query(
+            'SELECT
+                *
+            FROM
+                storage_files
+            WHERE
+                ' . $where . '
+            ORDER BY
+                ' . ($search['orderby'] == 'popular' ? 'file_downloads' : 'file_id') . '
+                DESC 
+            LIMIT
+                ' . (($search['page'] - 1) * $rpp) . ', ' . $rpp
+        );
+
+        if (!count($files)) {
+            return $this->jsonSuccess($ret);
+        }
+
+        $ret['page'] = $search['page'];
+        $ret['pages'] = $pages;
+        $ret['total'] = $count;
+
+        foreach ($files as $file) {
+            $file = new StorageFile($file);
+
+            if (!$file->exists()) {
+                // wtf?
+                continue;
+            }
+
+            if ($file->isDeleted()) {
+                continue;
+            }
+
+            $info = $file->getInfo();
+
+            $ret['files'][] = $file->getInfo();
+        }
+
+        return $this->jsonSuccess($ret);
     }
 
     /**
@@ -190,8 +289,18 @@ class AjaxStorage_Controller extends AjaxController {
 
         $file->save();
 
+        $file = new StorageFile($file);
+
+        if (!$file->exists()) {
+            return $this->jsonError(
+                Lang::get('storage.error_file_upload_error')
+            );
+        }
+
+        $info = $file->getInfo();
+
         // return file info
-        return $this->jsonSuccess($upload['name'].' - ' . $upload['size']);
+        return $this->jsonSuccess($info);
     }
 
     public function actionGetFileStats() {
@@ -306,6 +415,7 @@ class AjaxStorage_Controller extends AjaxController {
                 storage_files
             WHERE
                 user_id = "'.Database::escape(User::get_user_id()).'"
+                AND file_deleted = "0"
             GROUP BY
                 group_id'
         );
@@ -347,16 +457,19 @@ class AjaxStorage_Controller extends AjaxController {
 
         $where = array();
 
+        if (!$global) {
+            $where[] = 'user_id = "'.Database::escape(User::get_user_id()).'"';
+        }
+
+        $where_media = array();
         foreach ($user_media as $media) {
             $stats[$media] = 0;
-            $where[] = '"' . Database::escape($media) . '"';
+            $where_media[] = '"' . Database::escape($media) . '"';
         }
 
-        $where = 'file_media IN (' . implode(',', $where) . ')';
-
-        if (!$global) {
-            $where .= ' AND user_id = "'.Database::escape(User::get_user_id()).'" ';
-        }
+        $where[] = 'file_media IN (' . implode(',', $where_media) . ')';
+        $where[] = 'file_deleted = "0"';
+        $where = implode(' AND ', $where);
 
         $res = Database::query(
             'SELECT
@@ -570,6 +683,77 @@ class AjaxStorage_Controller extends AjaxController {
         }
 
         return $path;
+    }
+    /**
+     *  Validate search data
+     *
+     *  @return {array} Search params
+     */
+    protected static function __validateSearch() {
+        // validate data
+        $fields = array(
+            'media',
+            'group',
+            'orderby',
+            'page',
+        );
+
+        $info = array();
+        foreach ($fields as $field) {
+            $info[$field] = false;
+
+            if (!isset($_POST[$field])) {
+                continue;
+            }
+
+            if (!is_numeric($_POST[$field]) && !is_string($_POST[$field])) {
+                continue;
+            }
+
+            $value = $_POST[$field];
+
+            if (!preg_match('#^[0-9a-zA-Z_,-]++$#', $value)) {
+                continue;
+            }
+
+            $info[$field] = $value;
+        }
+
+        // admin mode
+        $info['admin_mode'] = false;
+        if (isset($_POST['admin_mode']) &&
+            $_POST['admin_mode'] &&
+            User::hasAccess('admin')
+            ) {
+            $info['admin_mode'] = true;
+        }
+
+        // group id
+        $info['group_id'] = $info['group'] == 'groupless' ? 0 : false;
+        if ($info['group']) {
+            foreach (self::__loadUserGroups() as $group) {
+                if ($group['name'] != $info['group']) {
+                    continue;
+                }
+
+                $info['group_id'] = $group['id'];
+                break;
+            }
+        }
+
+        // orderby
+        $info['orderby'] = $info['orderby'] == 'newest' ? 'newest' : 'popular';
+
+        // media
+        $info['media'] = self::__validateMedia($info['media']);
+
+        // page
+        $info['page'] = is_int($info['page']) ? ((int)$info['page']) : 1;
+        if ($info['page'] <= 0 || $info['page'] >= 200) {
+            $info['page'] = 1;
+        }
+
+        return $info;
     }
 }
 ?>

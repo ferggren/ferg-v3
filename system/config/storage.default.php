@@ -27,5 +27,11 @@ $config = array(
 
     // Storage salt
     'salt' => 'Some salt here',
+
+    // Results per page
+    'results_per_page' => 10,
+
+    // Download domain
+    'domain' => 'example.com',
 );
 ?>

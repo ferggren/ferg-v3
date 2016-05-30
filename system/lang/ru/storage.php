@@ -10,6 +10,14 @@ $strings = array(
     'media_source' => 'Исходники',
     'media_archive' => 'Архивы',
     'media_other' => 'Остальное',
+
+    'size_byte' => '%size% Байт',
+    'size_kilobyte' => '%size% Кб',
+    'size_megabyte' => '%size% Мб',
+    'size_gigabyte' => '%size% Гб',
+
+    'file_not_downloaded' => '',
+    'file_downloads' => '%downloads% rupluralize(%downloads% "загрузка" "загрузки" "загрузок")',
     
     'groups_all' => 'Все',
     'groups_groupless' => 'Без категории',

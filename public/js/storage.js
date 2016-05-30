@@ -907,6 +907,8 @@ StorageDisplayOptions.prototype = {
             return;
         }
 
+        var that = this;
+
         this.option_orderby = 'newest';
         this.option_media = 'all';
         this.option_group = 'all';
@@ -930,6 +932,34 @@ StorageDisplayOptions.prototype = {
         else {
             this.__showOptions();
         }
+
+        this.storage.uploader.onupload(function(file) {
+            that.__checkUpload(file);
+        });
+    },
+
+    __checkUpload: function(file) {
+        if (!this.container) {
+            return false;
+        }
+
+        if (this.stats.groups && file.group != false && file.group.length) {
+            if (typeof this.stats.groups[file.group] == 'undefined') {
+                this.stats.groups[file.group] = 0;
+            }
+
+            ++this.stats.groups[file.group];
+        }
+
+        if (this.stats.media && file.media) {
+            if (typeof this.stats.media[file.media] == 'undefined') {
+                this.stats.media[file.media] = 0;
+            }
+
+            ++this.stats.media[file.media];
+        }
+
+        this.__showOptions();
     },
 
     __loadStats: function() {
@@ -1251,6 +1281,7 @@ var StorageFiles = function(container, storage, options) {
     this.page = 1;
     this.pages = 1;
     this.total = 0;
+    this.rpp = 0;
     this.files = [];
 
     this.__init();
@@ -1294,7 +1325,7 @@ StorageFiles.prototype = {
         var that = this;
 
         this.storage.display.onchange(function() {
-            that.__loadFiles();
+            that.__checkDisplay();
         })
 
         this.storage.uploader.onupload(function(file) {
@@ -1325,6 +1356,7 @@ StorageFiles.prototype = {
                 that.pages = response.pages;
                 that.total = response.total;
                 that.files = response.files;
+                that.rpp = response.rpp;
 
                 that.__showFiles();
                 that = null;
@@ -1346,7 +1378,6 @@ StorageFiles.prototype = {
                 group: this.storage.display.getGroup(),
                 orderby: this.storage.display.getOrderBy(),
                 page: this.page,
-                pages: this.pages,
             },
 
             async: true,
@@ -1376,12 +1407,102 @@ StorageFiles.prototype = {
         }
 
         var current_media = this.storage.display.getMedia();
+        var show_preview = false;
 
         if (current_media.length == 1 && current_media[0] == 'image') {
-            console.log('IMAGES');
+            show_preview = true;
         }
 
-        console.log(this.files);
+        for (var file in this.files) {
+            file = this.files[file];
+
+            if (file.preview && show_preview) {
+                this.__addFile(file, true);
+            }
+            else {
+                this.__addFile(file);
+            }
+
+            this.__addFileSeparator();
+        }
+
+        if (this.pages > 1) {
+            this.__addPaginator();
+        }
+    },
+
+    __addFile: function(file, show_preview) {
+        if (typeof show_preview == 'undefined') {
+            show_preview = false;
+        }
+        show_preview = file.preview ? show_preview : false;
+        show_preview = !!show_preview;
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'storage__file-wrapper';
+
+        if (show_preview) {
+            wrapper.className += ' storage__file-wrapper--preview';
+            wrapper.style.backgroundImage = "url('/images/test.png')";
+        }
+
+        var ico = document.createElement('img');
+        ico.className = 'storage__file-ico';
+        ico.src = '/images/site/storage/media_' + file.media + '.png';
+
+        wrapper.appendChild(ico);
+
+        var date = document.createElement('div');
+        date.className = 'storage__file-date';
+        date.innerHTML = file.uploaded;
+
+        wrapper.appendChild(date);
+
+        var title = document.createElement('a');
+        title.className = 'storage__file-title';
+        title.innerHTML = App.escape(file.name);
+        title.setAttribute('file_id', file.id);
+        title.onclick = function() {
+            console.log(this.getAttribute('file_id'));
+        }
+
+        wrapper.appendChild(title);
+
+        var info = document.createElement('div');
+        info.className = 'storage__file-info';
+
+        wrapper.appendChild(info);
+
+        var size = document.createElement('span');
+        size.className = 'storage__file-size';
+        size.innerHTML = this.__makeNiceSize(file.size);
+        info.appendChild(size);
+
+        if (this.__makeNiceDownloads(file.downloads)) {
+            info.appendChild(document.createTextNode(', '));
+
+            var downloads = document.createElement('a');
+            downloads.className = 'storage__file-downloads';
+            downloads.innerHTML = this.__makeNiceDownloads(file.downloads);
+
+            info.appendChild(downloads);
+        }
+
+        this.container.appendChild(wrapper);
+    },
+
+    __addFileSeparator: function() {
+        if (!this.container) {
+            return;
+        }
+
+        var separator = document.createElement('div');
+        separator.className = 'storage__files-separator';
+        this.container.appendChild(separator);
+    },
+
+    __addPaginator: function() {
+        console.log(this.page, this.pages);
     },
 
     __checkUpload: function(file) {
@@ -1411,4 +1532,54 @@ StorageFiles.prototype = {
 
         this.__loadFiles();
     },
+
+    __last_group: false,
+    __last_media: false,
+    __checkDisplay: function() {
+        var group = this.storage.display.getGroup();
+        var media = this.storage.display.getMedia().join(',');
+
+        if (this.__last_group != group || this.__last_media != media) {
+            this.page = 1;
+        }
+
+        this.__last_group = group;
+        this.__last_media = media;
+
+        this.__loadFiles();
+    },
+
+    __makeNiceSize: function(size) {
+        var sizes = [
+            'byte',
+            'kilobyte',
+            'megabyte',
+            'gigabyte',
+        ];
+
+        for (var i = 0; i < sizes.length; ++i) {
+            if (size > 1024) {
+                size = size / 1024;
+                continue;
+            }
+
+            return Lang.get('storage.size_' + sizes[i], {
+                'size' : (Math.round(size * 100) / 100),
+            });
+        }
+
+        return Lang.get('storage.size_' + sizes[sizes.length - 1], {
+            'size' : (Math.round(size * 100) / 100),
+        });
+    },
+
+    __makeNiceDownloads: function(downloads) {
+        if (downloads <= 0) {
+            return Lang.get('storage.file_not_downloaded');
+        }
+
+        return Lang.get('storage.file_downloads', {
+            downloads: downloads,
+        });
+    }
 }
