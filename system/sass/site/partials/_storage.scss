@@ -182,7 +182,7 @@ $storage_filters_margin: 20px;
 		.storage__file-wrapper--preview {
 			background-size: cover;
 			background-repeat: no-repeat;
-			padding: 90px 0px 0px 00px;
+			padding: 90px 0px 0px 0px;
 			line-height: 20px;
 			color: #EEE;
 		}
@@ -194,6 +194,7 @@ $storage_filters_margin: 20px;
 		top: 3px;
 		left: 3px;
 		opacity: .9;
+		cursor: pointer;
 	}
 
 		.storage__file-wrapper:hover .storage__file-ico {
@@ -209,7 +210,12 @@ $storage_filters_margin: 20px;
 		white-space: nowrap;
 		cursor: pointer;
 		display: block;
+		color: #666 !important;
 	}
+
+		.storage__file-wrapper--preview .storage__file-title {
+			color: #EEE !important;
+		}
 
 		.storage__file-title:hover {
 			text-decoration: underline;

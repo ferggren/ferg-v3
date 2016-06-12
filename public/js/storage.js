@@ -1283,6 +1283,7 @@ var StorageFiles = function(container, storage, options) {
     this.total = 0;
     this.rpp = 0;
     this.files = [];
+    this.files_nodes = [];
 
     this.__init();
 };
@@ -1296,6 +1297,8 @@ StorageFiles.prototype = {
                 this.container.parentNode.removeChild(this.container);
             }
         }
+
+        this.__clearFilesNodes();
 
         this.container = null;
         this.storage = null;
@@ -1321,7 +1324,6 @@ StorageFiles.prototype = {
     },
 
     __init: function() {
-
         var that = this;
 
         this.storage.display.onchange(function() {
@@ -1333,6 +1335,39 @@ StorageFiles.prototype = {
         });
 
         this.__loadFiles();
+    },
+
+    __clearFilesNodes: function() {
+        if (typeof this.files_nodes != 'object') {
+            return;
+        }
+
+        var nodes = ['node_title', 'node_downloads', 'node_ico'];
+
+        for (var file_nodes in this.files_nodes) {
+            file_nodes = this.files_nodes[file_nodes];
+
+            for (var node in nodes) {
+                node = nodes[node];
+
+                if (!file_nodes[node] || typeof file_nodes[node] != 'object') {
+                    file_nodes[node] = null;
+                    continue;
+                }
+
+                file_nodes[node].onclick = null;
+                file_nodes[node].__parent = null;
+                file_nodes[node].setAttribute('file_id', null);
+
+                if (file_nodes[node].parentNode && file_nodes[node].parentNode.removeChild) {
+                    file_nodes[node].parentNode.removeChild(file_nodes[node]);
+                }
+
+                file_nodes[node] = null;
+            }
+        }
+
+        this.files_nodes = [];
     },
 
     __loadFiles: function() {
@@ -1406,6 +1441,8 @@ StorageFiles.prototype = {
             return;
         }
 
+        this.__clearFilesNodes();
+
         var current_media = this.storage.display.getMedia();
         var show_preview = false;
 
@@ -1449,6 +1486,9 @@ StorageFiles.prototype = {
         var ico = document.createElement('img');
         ico.className = 'storage__file-ico';
         ico.src = '/images/site/storage/media_' + file.media + '.png';
+        ico.setAttribute('file_id', file.id);
+        ico.__parent = this;
+        ico.onclick = this.__fileNodeOnClick;
 
         wrapper.appendChild(ico);
 
@@ -1462,9 +1502,10 @@ StorageFiles.prototype = {
         title.className = 'storage__file-title';
         title.innerHTML = App.escape(file.name);
         title.setAttribute('file_id', file.id);
-        title.onclick = function() {
-            console.log(this.getAttribute('file_id'));
-        }
+        title.href = file.link_download;
+        title.target = '_blank';
+        title.__parent = this;
+        title.onclick = this.__fileNodeOnClick;
 
         wrapper.appendChild(title);
 
@@ -1478,6 +1519,7 @@ StorageFiles.prototype = {
         size.innerHTML = this.__makeNiceSize(file.size);
         info.appendChild(size);
 
+        var downloads = false;
         if (this.__makeNiceDownloads(file.downloads)) {
             info.appendChild(document.createTextNode(', '));
 
@@ -1486,9 +1528,19 @@ StorageFiles.prototype = {
             downloads.innerHTML = this.__makeNiceDownloads(file.downloads);
 
             info.appendChild(downloads);
+
+            downloads.setAttribute('file_id', file.id);
+            downloads.__parent = this;
+            downloads.onclick = this.__downloadsNodeOnClick;
         }
 
         this.container.appendChild(wrapper);
+
+        this.files_nodes.push({
+            node_title: title,
+            node_ico: ico,
+            node_downloads: downloads,
+        });
     },
 
     __addFileSeparator: function() {
@@ -1581,5 +1633,52 @@ StorageFiles.prototype = {
         return Lang.get('storage.file_downloads', {
             downloads: downloads,
         });
-    }
+    },
+
+    __fileNodeOnClick: function() {
+        if (typeof this.__parent != 'object') {
+            return true;
+        }
+
+        this.__parent.__onFileSelect(
+            this.getAttribute('file_id')
+        );
+
+        return false;
+    },
+
+    __downloadsNodeOnClick: function() {
+        if (typeof this.__parent != 'object') {
+            return;
+        }
+
+        this.__parent.__showDownloads(
+            this.getAttribute('file_id')
+        );
+    },
+
+    __onFileSelect: function(file_id) {
+        var file = false;
+
+        for (var i in this.files) {
+            if (this.files[i].id != file_id) {
+                continue;
+            }
+
+            file = this.files[i];
+            break;
+        }
+
+        if (!file) {
+            return false;
+        }
+
+        for (var callback in this.callbacks) {
+            this.callbacks[callback](file);
+        }
+    },
+
+    __showDownloads: function(file_id) {
+        console.log(file_id);
+    },
 }

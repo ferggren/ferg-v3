@@ -94,8 +94,7 @@ class StorageFile {
             return false;
         }
 
-        $link  = isSecureConnection() ? 'https' : 'http';
-        $link .= '://' . Config::get('storage.domain');
+        $link = self::__makeLinkAddress();
         $link .= '/dl/';
         $link .= $this->file['file_hash'];
 
@@ -257,5 +256,26 @@ class StorageFile {
         }
 
         return $groups[$group_id] = $group[0]->group_name;
+    }
+
+    protected static function __makeLinkAddress() {
+        $link  = isSecureConnection() ? 'https' : 'http';
+        $link .= '://' . Config::get('storage.domain');
+
+        $port = 80;
+
+        if (isset($_SERVER['SERVER_PORT']) && preg_match('#^\d{1,5}$#', $_SERVER['SERVER_PORT'])) {
+            $port = (int)$_SERVER['SERVER_PORT'];
+        }
+
+        if (isset($_SERVER['HTTP_HOST']) && preg_match('#:(\d{1,5})$#', $_SERVER['HTTP_HOST'], $data)) {
+            $port = (int)$data[1];
+        }
+
+        if ($port != 80) {
+            $link .= ':' . $port;
+        }
+
+        return $link;
     }
 }
