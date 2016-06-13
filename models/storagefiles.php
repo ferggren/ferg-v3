@@ -30,10 +30,18 @@ class StorageFiles extends Database {
         }
 
         if ($this->file_preview) {
-            if ($link = $this->getPreviewLink()) {
-                $info['link_preview'] = $link;
-            }
-            else {
+            $info['link_preview'] = $this->getPreviewLink(
+                array(
+                    'crop' => true,
+                    'width' => 600,
+                    'height' => 200,
+                    'align' => 'center',
+                    'valign' => 'middle',
+                )
+            );
+
+            if (!$info['link_preview']) {
+                $info['link_preview'] = false;
                 $info['file_preview'] = false;
             }
         }
@@ -68,7 +76,13 @@ class StorageFiles extends Database {
             return false;
         }
 
-        return false;
+        if (!($link = StoragePreview::makePreviewLink($this, $options))) {
+            return false;
+        }
+
+        $link = self::__makeSiteAddress() . $link;
+
+        return $link;
     }
 
     /**
@@ -99,7 +113,7 @@ class StorageFiles extends Database {
      *  Update downloads counter
      */
     public function updateDownloads() {
-        if (!$this->file_deleted) {
+        if ($this->file_deleted) {
             return false;
         }
 

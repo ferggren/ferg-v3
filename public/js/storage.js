@@ -1482,9 +1482,9 @@ StorageFiles.prototype = {
         var wrapper = document.createElement('div');
         wrapper.className = 'storage__file-wrapper';
 
-        if (show_preview) {
+        if (show_preview && file.link_preview) {
             wrapper.className += ' storage__file-wrapper--preview';
-            wrapper.style.backgroundImage = "url('/images/test.png')";
+            wrapper.style.backgroundImage = "url('" + file.link_preview + "')";
         }
 
         var ico = document.createElement('img');

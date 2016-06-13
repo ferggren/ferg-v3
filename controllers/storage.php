@@ -13,12 +13,17 @@ class Storage_Controller extends BaseController {
      *  File download
      */
     public function actionDownload($file_hash) {
-        // check file
+        if (self::__bruteforceIsFound()) {
+            return self::__errorRedirect();
+        }
+
         if (!($file = self::__getFile($file_hash))) {
+            self::__bruteforceIncrease();
             return self::__errorRedirect();
         }
 
         if (!$file->userHasAccess()) {
+            self::__bruteforceIncrease();
             return self::__errorRedirect();
         }
 
@@ -28,7 +33,7 @@ class Storage_Controller extends BaseController {
 
         // if modified - ok
         if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE']) {
-            self::enableHTTPCaching();
+            self::__enableHTTPCaching();
             header("HTTP/1.0 304 Not Modified");
             exit;
         }
@@ -54,28 +59,78 @@ class Storage_Controller extends BaseController {
             $content_type = 'text/' . ($ext ? $ext : 'plain');
         }
 
-        self::enableHTTPCaching();
+        self::__enableHTTPCaching();
 
         // file redirect
         header('Content-type: ' . $content_type);
         header('Content-Length: ' . filesize(ROOT_PATH . $file->file_path));
         header('Content-Disposition: filename="' . $filename . '"');
-        header("X-Accel-Redirect: " . $file->file_path);
+        header('X-Accel-Redirect: ' . $file->file_path);
     }
 
     /**
      *  File preview
      */
-    public function actionPreview($file_hash) {
-        var_dump('preview');
-        exit;
+    public function actionPreview() {
+        $options = func_get_args();
+
+        if (!is_array($options) || count($options) < 2) {
+            return self::__errorRedirect();
+        }
+
+        $file_hash = array_shift($options);
+        $file_sign = array_pop($options);
+
+        if (!preg_match('#^[0-9a-zA-Z_-]{8,10}$#', $file_hash)) {
+            return self::__errorRedirect();
+        }
+
+        if (!preg_match('#^[0-9a-zA-Z_-]{6,10}$#', $file_sign)) {
+            return self::__errorRedirect();
+        }
+
+        if (self::__bruteforceIsFound()) {
+            return self::__errorRedirect();
+        }
+
+        if (!($file = self::__getFile($file_hash))) {
+            self::__bruteforceIncrease();
+            return self::__errorRedirect();
+        }
+
+        $options = StoragePreview::parsePreviewOptions($options);
+
+        if (!StoragePreview::checkPreviewSign($file, $options, $file_sign)) {
+            return self::__errorRedirect();
+        }
+
+        // if modified - ok
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE']) {
+            self::__enableHTTPCaching();
+            header('HTTP/1.0 304 Not Modified');
+            exit;
+        }
+
+        $preview = StoragePreview::makePreview($file, $options);
+
+        if (!$preview) {
+            return self::__errorRedirect();
+        }
+
+        self::__enableHTTPCaching();
+
+        // file redirect
+        header('Content-type: image/jpeg');
+        header('Content-Length: ' . filesize(ROOT_PATH . $preview));
+        header('Content-Disposition: filename="preview.jpg"');
+        header('X-Accel-Redirect: ' . $preview);
     }
 
     /**
      *  Redirect to a default action
      */
     protected static function __errorRedirect() {
-        self::disableHTTPCaching();
+        self::__disableHTTPCaching();
         header('Location: /storage/');
         exit;
     }
@@ -116,17 +171,58 @@ class Storage_Controller extends BaseController {
     /**
      *  Disable browser caching
      */
-    protected static function disableHTTPCaching() {
+    protected static function __disableHTTPCaching() {
         disableBrowserCaching();
     }
 
     /**
      *  Enable browser caching
      */
-    protected static function enableHTTPCaching() {
+    protected static function __enableHTTPCaching() {
         header('ETag: ""');
         header('Last-Modified: '.gmdate('D, d M Y H:i:s', time()) . ' GMT');
         header('Expires: '.gmdate('D, d M Y H:i:s', time() + (60 * 60 * 24 * 7)) . ' GMT');
         header('Cache-Control: max-age=259200');
+    }
+
+    /**
+     *  Check if user try to brute force files id's
+     *
+     *  @return {boolean} Bruteforce check status
+     */
+    protected static function __bruteforceIsFound() {
+        if (!($ip = Session::getSessionIp())) {
+            return false;
+        }
+
+        $ip = ip2decimal($ip);
+
+        Database::query(
+            'DELETE FROM
+                storage_bruteforce_protection
+            WHERE
+                attempt_time < ' . (time() - 14600)
+        );
+
+        $count = Database::from('storage_bruteforce_protection');
+        $count->where('attempt_ip', '=', $ip);
+
+        return $count->count() > 10;
+    }
+
+    /**
+     *  Increase brute force attempts counter
+     */
+    protected static function __bruteforceIncrease() {
+        if (!($ip = Session::getSessionIp())) {
+            return false;
+        }
+
+        $ip = ip2decimal($ip);
+
+        $res = new Database('storage_bruteforce_protection');
+        $res->attempt_ip = $ip;
+        $res->attempt_time = time();
+        $res->save();
     }
 }
