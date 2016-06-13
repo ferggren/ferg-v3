@@ -1,0 +1,61 @@
+$paginator_height: 24px;
+$color_active: #666;
+$color_inactive: #CCC;
+$color_hover: #000;
+
+.paginator__wrapper {
+	height: $paginator_height;
+	line-height: $paginator_height;
+	width: 100%;
+	position: relative;
+}
+
+.paginator__button {
+	display: inline-block;
+	cursor: pointer;
+	color: $color_active;
+	border-radius: 3px;
+
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-ms-user-select: none;
+}
+
+	.paginator__button:hover, .paginator__button--current {
+		color: $color_hover !important;
+	}
+
+	.paginator__button--inactive, .paginator__button--inactive:hover {
+		color: $color_inactive !important;
+	}
+
+.paginator__prev {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+	.paginator__prev .paginator__button {
+		padding-right: 20px;
+	}
+
+.paginator__pages {
+	text-align: center;
+}
+
+	.paginator__pages .paginator__button {
+		padding: 0px 4px;
+		margin: 0px 4px;
+	}
+
+.paginator__next {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+
+	.paginator__next .paginator__button {
+		padding-left: 20px;
+	}
