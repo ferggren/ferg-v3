@@ -748,7 +748,13 @@ class AjaxStorage_Controller extends AjaxController {
         $info['media'] = self::__validateMedia($info['media']);
 
         // page
-        $info['page'] = is_int($info['page']) ? ((int)$info['page']) : 1;
+        if (preg_match('#^[0-9]{1,5}$#', $info['page'])) {
+            $info['page'] = (int)$info['page'];
+        }
+        else {
+            $info['page'] = 1;
+        }
+
         if ($info['page'] <= 0 || $info['page'] >= 200) {
             $info['page'] = 1;
         }

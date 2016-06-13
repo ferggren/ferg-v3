@@ -1284,6 +1284,7 @@ var StorageFiles = function(container, storage, options) {
     this.rpp = 0;
     this.files = [];
     this.files_nodes = [];
+    this.paginator = false;
 
     this.__init();
 };
@@ -1300,6 +1301,11 @@ StorageFiles.prototype = {
 
         this.__clearFilesNodes();
 
+        if (this.paginator) {
+            this.paginator.destroy();
+        }
+
+        this.paginator = false;
         this.container = null;
         this.storage = null;
         this.files = null;
@@ -1463,9 +1469,7 @@ StorageFiles.prototype = {
             this.__addFileSeparator();
         }
 
-        if (this.pages > 1) {
-            this.__addPaginator();
-        }
+        this.__addPaginator();
     },
 
     __addFile: function(file, show_preview) {
@@ -1554,7 +1558,24 @@ StorageFiles.prototype = {
     },
 
     __addPaginator: function() {
-        console.log(this.page, this.pages);
+        if (this.paginator) {
+            this.paginator.destroy();
+        }
+
+        var that = this;
+
+        this.paginator = new Paginator({
+            page: this.page,
+            pages: this.pages,
+            onselect: function(page) {
+                that.page = page;
+                that.__loadFiles();
+                that = null;
+            },
+        });
+
+        this.container.appendChild(document.createElement('br'));
+        this.container.appendChild(this.paginator.getNode());
     },
 
     __checkUpload: function(file) {

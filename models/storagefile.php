@@ -272,7 +272,7 @@ class StorageFile {
             $port = (int)$data[1];
         }
 
-        if ($port != 80) {
+        if (!in_array($port, array(80, 443))) {
             $link .= ':' . $port;
         }
 
