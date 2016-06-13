@@ -1498,7 +1498,7 @@ StorageFiles.prototype = {
 
         var date = document.createElement('div');
         date.className = 'storage__file-date';
-        date.innerHTML = file.uploaded;
+        date.innerHTML = App.niceTimeFormat(file.uploaded);
 
         wrapper.appendChild(date);
 

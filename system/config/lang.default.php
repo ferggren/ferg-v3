@@ -28,6 +28,7 @@ $config = array(
             'site',
             'ajax',
             'storage',
+            'time',
         ),
     ),
 );
