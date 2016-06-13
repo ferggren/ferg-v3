@@ -108,21 +108,12 @@ class AjaxStorage_Controller extends AjaxController {
         $where[] = 'file_deleted = "0"';
         $where = implode(' AND ', $where);
 
-        // Count, pages & page
-        $count = Database::query(
-            'SELECT
-                COUNT(*) as count
-            FROM
-                storage_files
-            WHERE
-                ' . $where
-        );
+        $count = StorageFiles::whereRaw($where);
 
-        if (!isset($count[0]['count']) || !$count[0]['count']) {
+        if (!($count = $count->count())) {
             return $this->jsonSuccess($ret);
         }
 
-        $count = (int)$count[0]['count'];
         $rpp = $ret['rpp'];
         $pages = (int)($count / $rpp);
         if (($pages * $rpp) < $count) ++$pages;
@@ -131,20 +122,19 @@ class AjaxStorage_Controller extends AjaxController {
             $search['page'] = $pages;
         }
 
-        // Files
-        $files = Database::query(
-            'SELECT
-                *
-            FROM
-                storage_files
-            WHERE
-                ' . $where . '
-            ORDER BY
-                ' . ($search['orderby'] == 'popular' ? 'file_downloads' : 'file_id') . '
-                DESC 
-            LIMIT
-                ' . (($search['page'] - 1) * $rpp) . ', ' . $rpp
+        $files = StorageFiles::whereRaw($where);
+
+        $files->orderBy(
+            $search['orderby'] == 'popular' ? 'file_downloads' : 'file_id',
+            'desc'
         );
+
+        $files->limit(
+            $rpp,
+            (($search['page'] - 1) * $rpp)
+        );
+
+        $files = $files->get();
 
         if (!count($files)) {
             return $this->jsonSuccess($ret);
@@ -155,20 +145,11 @@ class AjaxStorage_Controller extends AjaxController {
         $ret['total'] = $count;
 
         foreach ($files as $file) {
-            $file = new StorageFile($file);
-
-            if (!$file->exists()) {
-                // wtf?
+            if ($file->file_deleted) {
                 continue;
             }
 
-            if ($file->isDeleted()) {
-                continue;
-            }
-
-            $info = $file->getInfo();
-
-            $ret['files'][] = $file->getInfo();
+            $ret['files'][] = $file->exportInfo();
         }
 
         return $this->jsonSuccess($ret);
@@ -271,7 +252,8 @@ class AjaxStorage_Controller extends AjaxController {
         }
 
         // create entry
-        $file = new Database('storage_files');
+        $file = new StorageFiles;
+
         $file->user_id = $file_info['user_id'];
         $file->group_id = $file_info['group_id'];
         $file->file_hash = $file_info['hash'];
@@ -289,18 +271,7 @@ class AjaxStorage_Controller extends AjaxController {
 
         $file->save();
 
-        $file = new StorageFile($file);
-
-        if (!$file->exists()) {
-            return $this->jsonError(
-                Lang::get('storage.error_file_upload_error')
-            );
-        }
-
-        $info = $file->getInfo();
-
-        // return file info
-        return $this->jsonSuccess($info);
+        return $this->jsonSuccess($file->exportInfo());
     }
 
     public function actionGetFileStats() {
@@ -535,7 +506,7 @@ class AjaxStorage_Controller extends AjaxController {
             return Lang::get('storage.error_file_is_too_big');
         }
         // file media
-        $info['media'] = Storage::getFileMedia($info['name']);
+        $info['media'] = StorageFiles::getFileMedia($info['name']);
 
         // access level
         $info['access'] = 'public';
@@ -559,7 +530,10 @@ class AjaxStorage_Controller extends AjaxController {
         }
 
         // check if preview available
-        $info['preview'] = Storage::checkPreviewFeature($info);
+        $info['preview'] = StoragePreview::checkPreviewFeature(
+            $info['name'],
+            $info['tmp_path']
+        );
 
         return $info;
     }

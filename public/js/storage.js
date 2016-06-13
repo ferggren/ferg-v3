@@ -1608,16 +1608,19 @@ StorageFiles.prototype = {
 
     __last_group: false,
     __last_media: false,
+    __last_order: false,
     __checkDisplay: function() {
         var group = this.storage.display.getGroup();
         var media = this.storage.display.getMedia().join(',');
+        var order = this.storage.display.getOrderBy();
 
-        if (this.__last_group != group || this.__last_media != media) {
+        if (this.__last_group != group || this.__last_media != media || this.__last_order != order) {
             this.page = 1;
         }
 
         this.__last_group = group;
         this.__last_media = media;
+        this.__last_order = order;
 
         this.__loadFiles();
     },
