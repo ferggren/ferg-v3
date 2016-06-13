@@ -132,6 +132,12 @@ class StorageFiles extends Database {
         $this->file_downloads = ++$this->file_downloads;
         $this->save();
 
+        $res = new Database('storage_history');
+        $res->file_id = $this->file_id;
+        $res->user_ip = $ip;
+        $res->access_time = time();
+        $res->save();
+
         return true;
     }
 

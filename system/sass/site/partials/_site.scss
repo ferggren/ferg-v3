@@ -3,7 +3,9 @@ $footer_size: 40px;
 $window_padding: 10px;
 $site_content_offset_top: 20px;
 
-$header_height: 150px;
+$header_height_phone: 200px;
+$header_height_tablet: 250px;
+$header_height_wide: 300px;
 
 $topbar_menu_color: #FFF;
 $topbar_menu_color_hover: #222;
@@ -119,20 +121,21 @@ body, input, textarea {
 	.site-header__photo {
 		background-size: cover;
 		background-repeat: no-repeat;
+		background-position: 40% 40%;
 		opacity: .95;
 		min-width: $screen_phone;
-		height: $header_height;
+		background-image: url('/images/site/header.jpg');
 
 		@include respond_to(screen_phone) {
-			background-image: url('/images/site/header_phone.jpg');
+			height: $header_height_phone;
 		}
 
 		@include respond_to(screen_tablet) {
-			background-image: url('/images/site/header_tablet.jpg');
+			height: $header_height_tablet;
 		}
 
 		@include respond_to(screen_wide) {
-			background-image: url('/images/site/header_wide.jpg');
+			height: $header_height_wide;
 		}
 	}
 
@@ -142,13 +145,18 @@ body, input, textarea {
 		max-width: $screen_wide;
 		text-align: right;
 		height: 46px + $window_padding;
-		padding-top: $header_height - 46px - $window_padding;
 
 		@include respond_to(screen_phone) {
 			text-align: center;
+			padding-top: $header_height_phone - 46px - $window_padding;
+		}
+
+		@include respond_to(screen_tablet) {
+			padding-top: $header_height_tablet - 46px - $window_padding;
 		}
 
 		@include respond_to(screen_wide) {
+			padding-top: $header_height_wide - 46px - $window_padding;
 			width: $screen_wide;
 			margin: auto;
 		}

@@ -1533,9 +1533,9 @@ StorageFiles.prototype = {
 
             info.appendChild(downloads);
 
-            downloads.setAttribute('file_id', file.id);
-            downloads.__parent = this;
-            downloads.onclick = this.__downloadsNodeOnClick;
+            // downloads.setAttribute('file_id', file.id);
+            // downloads.__parent = this;
+            // downloads.onclick = this.__downloadsNodeOnClick;
         }
 
         this.container.appendChild(wrapper);

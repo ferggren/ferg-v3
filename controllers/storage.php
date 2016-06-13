@@ -112,6 +112,7 @@ class Storage_Controller extends BaseController {
         }
 
         $preview = StoragePreview::makePreview($file, $options);
+        $file->updateDownloads();
 
         if (!$preview) {
             return self::__errorRedirect();
