@@ -52,7 +52,7 @@ class Storage_Controller extends BaseController {
         $content_type = 'application/' . ($ext ? $ext : 'plain');
 
         if ($file->file_media == 'image' && in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp'))) {
-            $content_type = 'image/' . $ext;
+            $content_type = 'image/jpeg';
         }
 
         if ($file->file_media == 'source') {
@@ -61,11 +61,15 @@ class Storage_Controller extends BaseController {
 
         self::__enableHTTPCaching();
 
-        // file redirect
-        header('Content-type: ' . $content_type);
         header('Content-Length: ' . filesize(ROOT_PATH . $file->file_path));
+        header('Content-Type: ' . $content_type);
         header('Content-Disposition: filename="' . $filename . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Accept-Ranges: bytes');
+
         header('X-Accel-Redirect: ' . $file->file_path);
+
+        exit;
     }
 
     /**
@@ -125,6 +129,8 @@ class Storage_Controller extends BaseController {
         header('Content-Length: ' . filesize(ROOT_PATH . $preview));
         header('Content-Disposition: filename="preview.jpg"');
         header('X-Accel-Redirect: ' . $preview);
+
+        exit;
     }
 
     /**
@@ -183,7 +189,7 @@ class Storage_Controller extends BaseController {
         header('ETag: ""');
         header('Last-Modified: '.gmdate('D, d M Y H:i:s', time()) . ' GMT');
         header('Expires: '.gmdate('D, d M Y H:i:s', time() + (60 * 60 * 24 * 7)) . ' GMT');
-        header('Cache-Control: max-age=259200');
+        header('Cache-Control: max-age=259200, public');
     }
 
     /**

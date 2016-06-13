@@ -19,11 +19,16 @@
 		container: "__storage",
 
 		onselect: function(file) {
-			console.log('inline select', file);
+			var win = window.open(
+				file.link_download,
+				'_blank'
+			);
+			
+  			win.focus();
 		},
 
 		onupload: function(file) {
-			console.log('inline upload', file);
+
 		},
 	});
 
