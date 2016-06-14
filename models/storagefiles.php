@@ -168,12 +168,6 @@ class StorageFiles extends Database {
             return 'other';
         }
 
-        if (!preg_match('#\.([0-9a-z_-]{1,6})$#', $file_name, $data)) {
-            return 'other';
-        }
-
-        $ext = strtolower($data[1]);
-
         $media_groups = array(
             'image' => array(
                 'gif', 'png', 'jpg', 'jpeg', 'psd', 'bmp', 'tiff',

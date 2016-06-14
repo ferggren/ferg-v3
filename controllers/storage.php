@@ -22,7 +22,7 @@ class Storage_Controller extends BaseController {
             return self::__errorRedirect();
         }
 
-        if (!$file->userHasAccess()) {
+        if (!User::hasAccess('admin') && !$file->userHasAccess()) {
             self::__bruteforceIncrease();
             return self::__errorRedirect();
         }
