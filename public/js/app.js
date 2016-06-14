@@ -32,6 +32,22 @@ var App = {
         });
     },
 
+    showUserSettings: function() {
+        Rocky.ajax({
+            url: '/ajax/logout/',
+
+            success: function(response) {
+                window.location.reload();
+            },
+
+            error: function(error) {
+                Popup.createWindow({
+                    content: error,
+                })
+            },
+        });
+    },
+
     /**
      *  Escapes html stuff from string
      *

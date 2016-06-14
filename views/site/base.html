@@ -31,6 +31,9 @@
 		<div class="site-topbar__wrapper">
 			<div class="site-topbar">
 				<ul class="site-topbar__navigation">
+					@eval
+						$user_is_auth = User::isAuthenticated() && User::get_user_name();
+					@endeval
 					<li @if ($current_menu == "landing") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/">@lang("site.menu_landing")</a>
 					</li><li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
@@ -41,9 +44,11 @@
 						<a href="/@lang/portfolio/">@lang("site.menu_portfolio")</a>
 					</li><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
-					</li><li class="site-topbar__navigation--right">
+					</li>@if(!$user_is_auth)<li class="site-topbar__navigation--right">
 						<a onclick="App.showLoginWindow();">@lang("site.menu_signin")</a>
-					</li>
+					</li>@else<li class="site-topbar__navigation--right">
+						<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
+					</li>@endif
 				</ul>
 
 				<div class="floating-clear"></div>
