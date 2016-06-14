@@ -36,19 +36,35 @@
 					@endeval
 					<li @if ($current_menu == "landing") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/">@lang("site.menu_landing")</a>
-					</li><li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
+					</li><!--
+
+					--><li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/gallery/">@lang("site.menu_gallery")</a>
-					</li><li @if ($current_menu == "blog") class="site-topbar__navigation--current" @endif>
-						<a href="/@lang/blog/">@lang("site.menu_blog")</a>
-					</li><li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
+					</li><!--
+
+					--><li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/portfolio/">@lang("site.menu_portfolio")</a>
-					</li><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
+					</li><!--
+
+					--><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
-					</li>@if(!$user_is_auth)<li class="site-topbar__navigation--right">
+					</li><!--
+					@if(!$user_is_auth)
+					--><li class="site-topbar__navigation--right">
 						<a onclick="App.showLoginWindow();">@lang("site.menu_signin")</a>
-					</li>@else<li class="site-topbar__navigation--right">
+					</li>
+					@else
+					--><li class="site-topbar__navigation--right">
 						<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
-					</li>@endif
+					</li><!--
+						@if(User::hasAccess('admin'))
+						--><li class="site-topbar__navigation--right">
+							<a href="/@lang/admin/">Admin</a>
+						</li>
+						<!--
+						@endif
+						-->
+					@endif
 				</ul>
 
 				<div class="floating-clear"></div>
@@ -83,10 +99,6 @@
 		</div>
 
 		<div class="site-content">
-			<div class="site-content__photo">
-
-			</div>
-
 			<div class="site-content__container">
 			@yield('site_content')
 			</div>

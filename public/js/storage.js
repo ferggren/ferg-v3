@@ -987,7 +987,7 @@ StorageDisplayOptions.prototype = {
             },
 
             data: {
-                admin_mode: this.options.admin_mode
+                admin_mode: (this.options.admin_mode ? 1 : 0),
             },
 
             async: true,
@@ -1023,7 +1023,7 @@ StorageDisplayOptions.prototype = {
             },
 
             data: {
-                admin_mode: this.options.admin_mode
+                admin_mode: (this.options.admin_mode ? 1 : 0),
             },
 
             async: true,
@@ -1210,7 +1210,7 @@ StorageDisplayOptions.prototype = {
 
         if (info.option_type == 'media') {
             var img = document.createElement('img');
-            img.src = '/images/site/storage/media_' + info.option_value + '.png';
+            img.src = '/images/storage/media_' + info.option_value + '.png';
 
             button.appendChild(img);
         }
@@ -1414,7 +1414,7 @@ StorageFiles.prototype = {
             },
 
             data: {
-                admin_mode: this.options.admin_mode,
+                admin_mode: (this.options.admin_mode ? 1 : 0),
                 media: this.storage.display.getMedia().join(','),
                 group: this.storage.display.getGroup(),
                 orderby: this.storage.display.getOrderBy(),
@@ -1489,7 +1489,7 @@ StorageFiles.prototype = {
 
         var ico = document.createElement('img');
         ico.className = 'storage__file-ico';
-        ico.src = '/images/site/storage/media_' + file.media + '.png';
+        ico.src = '/images/storage/media_' + file.media + '.png';
         ico.setAttribute('file_id', file.id);
         ico.__parent = this;
         ico.onclick = this.__fileNodeOnClick;
@@ -1703,6 +1703,6 @@ StorageFiles.prototype = {
     },
 
     __showDownloads: function(file_id) {
-        console.log(file_id);
+        // coming soon
     },
 }

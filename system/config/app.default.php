@@ -8,7 +8,7 @@ $config = array(
     'default_controller' => 'index',
 
     // Controller that will be loaded if user needs authentication
-    'auth_controller' => 'auth',
+    'auth_controller' => 'index',
 
     // If true, controllers tree will be cached in ./tmp/
     // Cache doesn't rebuild automaticly (use "./cli.php utils/cache rebuild" to update cache)

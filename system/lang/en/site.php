@@ -2,7 +2,7 @@
 $strings = array(
     'title' => 'ferg.in',
 
-    'title_landing' => 'Programmer, engineer and enthusiast photographer from Syberia',
+    'title_landing' => 'Programmer, engineer and enthusiast photographer from snowly Siberia',
     'title_gallery' => 'Gallery',
     'title_blog' => 'Blog',
     'title_portfolio' => 'Portfolio',

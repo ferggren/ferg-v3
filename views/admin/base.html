@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<link rel="alternate" hreflang="x-default" href="//ferg.in/admin/" /> 
+		<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/admin/" />
+		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/admin/" />
+
+		<title>@section('site_title')Admin // @lang("site.title")@show</title>
+
+		<link href="/v_@build_hash/css/admin.css" rel="stylesheet" />
+
+		<script src="/v_@build_hash/js/rocky.js"></script>
+		<script src="/v_@build_hash/js/popup.js"></script>
+		<script src="/v_@build_hash/js/lang.js"></script>
+		<script src="/v_@build_hash/js/app.js"></script>
+		<script src="/v_@build_hash/js/storage.js"></script>
+		<script src="/v_@build_hash/js/paginator.js"></script>
+		<script src="/v_@build_hash/js/lang/site_@lang.js"></script>
+
+		<script>Lang.setLang('{{Lang::getLang()}}');</script>
+
+		@if(Config::get('app.debug'))<script>Rocky.enableDebug();</script>@endif
+	</head>
+
+	<body>
+		<div class="site__wrapper">
+		<div class="site-topbar__wrapper">
+			<div class="site-topbar">
+				<ul class="site-topbar__navigation">
+					<li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/admin/storage">@lang("site.menu_storage")</a>
+					</li><!--
+
+					--><li class="site-topbar__navigation--right">
+						<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
+					</li><!--
+
+					--><li class="site-topbar__navigation--right">
+						<a href="/@lang/">@lang("site.menu_landing")</a>
+					</li>
+				</ul>
+
+				<div class="floating-clear"></div>
+			</div>
+		</div>
+
+		<div class="site-header">
+			
+		</div>
+
+		<div class="site-content">
+			<div class="site-content__photo">
+
+			</div>
+
+			<div class="site-content__container">
+			@yield('site_content')
+			</div>
+		</div>
+
+		<div class="site-footer__wrapper">
+			<div class="site-footer">
+				<div class="site-footer__lang">
+					@eval
+					$lang = Lang::getLang() == 'ru' ? 'en' : 'ru';
+					$url = '/' . $lang . '/';
+
+					if (isset($_SERVER['REQUEST_URI'])) {
+						$url = preg_replace(
+							'#^/(?:ru/|en/)?(.*+)$#',
+							'/' . $lang . '/$1',
+							$_SERVER['REQUEST_URI']
+						);
+					}
+					@endeval
+					<a href="{{$url}}">
+						<img src="/images/site/{{$lang}}.png" />
+						@lang("site.swap_lang")
+					</a>
+				</div>
+
+				<div class="site-footer__copy">
+					ferg.in &copy; 2013 – 2016
+				</div>
+
+				<div class="floating-clear"></div>
+			</div>
+		</div>
+		</div>
+	</body>
+</html>
