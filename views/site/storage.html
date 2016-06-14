@@ -9,11 +9,6 @@
 	<div class="nice-form__loader"></div>
 </div>
 
-<br /><br />
-
-<button id="__storage_photo">Select photo</button>
-<button id="__storage_all">Select file</button>
-
 <script>
 	var storage = new Storage({
 		container: "__storage",
@@ -25,78 +20,17 @@
 				'_blank'
 			);
 			
-  			win.focus();
+			win.focus();
 		},
 
-		onupload: function(file) {
+		upload: {
+			group: 'storage',
+		},
 
+		display: {
+			group: 'storage',
+			show_groups: true,
 		},
 	});
-
-	document.getElementById('__storage_photo').onclick = function() {
-		var container = document.createElement('div');
-		var storage = new Storage({
-			container: container,
-			admin_mode: false,
-
-			onselect: function(file) {
-				console.log('popup click', file);
-			},
-
-			onupload: function(file) {
-				console.log('popup upload', file);
-			},
-
-			upload: {
-				media: ['image', 'video'],
-				access: "private",
-				group: "storage",
-			},
-
-			display: {
-				media: ['image'],
-				group: 'storage',
-				show_groups: true,
-			},
-		});
-
-		var popup = Popup.createWindow({
-			content: container,
-			onclose: function() {
-				storage.destroy();
-			}
-		});
-	}
-
-	document.getElementById('__storage_all').onclick = function() {
-		var container = document.createElement('div');
-		var storage = new Storage({
-			container: container,
-			admin_mode: false,
-
-			onselect: function(file) {
-				console.log('popup click', file);
-			},
-
-			onupload: function(file) {
-				console.log('popup upload', file);
-			},
-
-			upload: {
-				group: "test",
-			},
-
-			display: {
-				show_groups: true,
-			},
-		});
-
-		var popup = Popup.createWindow({
-			content: container,
-			onclose: function() {
-				storage.destroy();
-			}
-		});
-	}
 </script>
 @stop
