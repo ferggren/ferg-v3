@@ -310,6 +310,15 @@ body, input, textarea {
 			left: 0px;
 		}
 
+	.site-footer__counters {
+		position: absolute;
+		left: 0px;
+		bottom: 0px;
+		width: 1px;
+		height: 1px;
+		margin-left: -9999px;
+	}
+
 .floating-clear {
 	clear: both;
 }

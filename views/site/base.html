@@ -129,6 +129,14 @@
 					ferg.in &copy; 2013 – 2016
 				</div>
 
+				@if(count(Config::get('app.footer_counters')))
+				<div class="site-footer__counters">
+					@foreach(Config::get('app.footer_counters') as $counter)
+						{!!$counter!!}
+					@endforeach
+				</div>
+				@endif
+
 				<div class="floating-clear"></div>
 			</div>
 		</div>

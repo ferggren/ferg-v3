@@ -63,5 +63,10 @@ $config = array(
 
     // dump html performance debug
     'dump_perf_debug' => true,
+
+    // Analytics code
+    'footer_counters' => array(
+        
+    ),
 );
 ?>
