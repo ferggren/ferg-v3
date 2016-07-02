@@ -11,15 +11,19 @@
 
 		<title>@section('site_title')@lang("site.title")@show</title>
 
-		<link href="/v_@build_hash/css/site.css" rel="stylesheet" />
+		<link href="/v_@file_hash('/public/css/site.css')/css/site.css" rel="stylesheet" />
 
-		<script src="/v_@build_hash/js/rocky.js"></script>
-		<script src="/v_@build_hash/js/popup.js"></script>
-		<script src="/v_@build_hash/js/lang.js"></script>
-		<script src="/v_@build_hash/js/app.js"></script>
-		<script src="/v_@build_hash/js/storage.js"></script>
-		<script src="/v_@build_hash/js/paginator.js"></script>
-		<script src="/v_@build_hash/js/lang/site_@lang.js"></script>
+		<script src="/v_@file_hash('/public/js/rocky.js')/js/rocky.js"></script>
+		<script src="/v_@file_hash('/public/js/popup.js')/js/popup.js"></script>
+		<script src="/v_@file_hash('/public/js/lang.js')/js/lang.js"></script>
+		<script src="/v_@file_hash('/public/js/app.js')/js/app.js"></script>
+		<script src="/v_@file_hash('/public/js/storage.js')/js/storage.js"></script>
+		<script src="/v_@file_hash('/public/js/paginator.js')/js/paginator.js"></script>
+		@if (Lang::getLang() == 'ru')
+		<script src="/v_@file_hash('/public/js/lang/site_ru.js')/js/lang/site_ru.js"></script>
+		@else
+		<script src="/v_@file_hash('/public/js/lang/site_en.js')/js/lang/site_en.js"></script>
+		@endif
 
 		<script>Lang.setLang('{{Lang::getLang()}}');</script>
 
@@ -29,48 +33,51 @@
 	<body>
 		<div class="site__wrapper">
 		<div class="site-topbar__wrapper">
+			@nospaces
 			<div class="site-topbar">
 				<ul class="site-topbar__navigation">
 					@eval
 						$user_is_auth = User::isAuthenticated() && User::get_user_name();
 					@endeval
+
 					<li @if ($current_menu == "landing") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/">@lang("site.menu_landing")</a>
-					</li><!--
-
-					--><li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
-						<a href="/@lang/gallery/">@lang("site.menu_gallery")</a>
-					</li><!--
-
-					--><li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
-						<a href="/@lang/portfolio/">@lang("site.menu_portfolio")</a>
-					</li><!--
-
-					--><li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
-						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
-					</li><!--
-					@if(!$user_is_auth)
-					--><li class="site-topbar__navigation--right">
-						<a onclick="App.showLoginWindow();">@lang("site.menu_signin")</a>
 					</li>
-					@else
-					--><li class="site-topbar__navigation--right">
-						<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
-					</li><!--
-						@if(User::hasAccess('admin'))
-						--><li class="site-topbar__navigation--right">
-							<a href="/@lang/admin/">Admin</a>
+
+					<li @if ($current_menu == "gallery") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/gallery/">@lang("site.menu_gallery")</a>
+					</li>
+
+					<li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/portfolio/">@lang("site.menu_portfolio")</a>
+					</li>
+
+					<li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/storage/">@lang("site.menu_storage")</a>
+					</li>
+
+					@if(!$user_is_auth)
+						<li class="site-topbar__navigation--right">
+							<a onclick="App.showLoginWindow();">@lang("site.menu_signin")</a>
 						</li>
-						<!--
-						@endif
-						-->
+					@else
+						<li class="site-topbar__navigation--right">
+							<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
+						</li>
+					@endif
+
+					@if(User::hasAccess('admin'))
+					<li class="site-topbar__navigation--right">
+						<a href="/@lang/admin/">Admin</a>
+					</li>
 					@endif
 				</ul>
 
 				<div class="floating-clear"></div>
 			</div>
+			@endnospaces
 		</div>
-
+		
 		<div class="site-header">
 			@if ($current_menu == "landing")
 			<div class="site-header__photo">

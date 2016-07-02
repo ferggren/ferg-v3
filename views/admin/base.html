@@ -11,15 +11,19 @@
 
 		<title>@section('site_title')Admin // @lang("site.title")@show</title>
 
-		<link href="/v_@build_hash/css/admin.css" rel="stylesheet" />
+		<link href="/v_@file_hash('/public/css/admin.css')/css/admin.css" rel="stylesheet" />
 
-		<script src="/v_@build_hash/js/rocky.js"></script>
-		<script src="/v_@build_hash/js/popup.js"></script>
-		<script src="/v_@build_hash/js/lang.js"></script>
-		<script src="/v_@build_hash/js/app.js"></script>
-		<script src="/v_@build_hash/js/storage.js"></script>
-		<script src="/v_@build_hash/js/paginator.js"></script>
-		<script src="/v_@build_hash/js/lang/site_@lang.js"></script>
+		<script src="/v_@file_hash('/public/js/rocky.js')/js/rocky.js"></script>
+		<script src="/v_@file_hash('/public/js/popup.js')/js/popup.js"></script>
+		<script src="/v_@file_hash('/public/js/app.js')/js/app.js"></script>
+		<script src="/v_@file_hash('/public/js/lang.js')/js/lang.js"></script>
+		<script src="/v_@file_hash('/public/js/storage.js')/js/storage.js"></script>
+		<script src="/v_@file_hash('/public/js/paginator.js')/js/paginator.js"></script>
+		@if (Lang::getLang() == 'ru')
+		<script src="/v_@file_hash('/public/js/lang/admin_ru.js')/js/lang/admin_ru.js"></script>
+		@else
+		<script src="/v_@file_hash('/public/js/lang/admin_en.js')/js/lang/admin_en.js"></script>
+		@endif
 
 		<script>Lang.setLang('{{Lang::getLang()}}');</script>
 
@@ -29,23 +33,37 @@
 	<body>
 		<div class="site__wrapper">
 		<div class="site-topbar__wrapper">
+			@nospaces
 			<div class="site-topbar">
 				<ul class="site-topbar__navigation">
 					<li @if ($current_menu == "storage") class="site-topbar__navigation--current" @endif>
 						<a href="/@lang/admin/storage">@lang("site.menu_storage")</a>
-					</li><!--
+					</li>
 
-					--><li class="site-topbar__navigation--right">
+					<li @if ($current_menu == "events") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/admin/pages/events/">@lang("site.menu_events")</a>
+					</li>
+
+					<li @if ($current_menu == "notes") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/admin/pages/notes/">@lang("site.menu_notes")</a>
+					</li>
+
+					<li @if ($current_menu == "portfolio") class="site-topbar__navigation--current" @endif>
+						<a href="/@lang/admin/pages/portfolio/">@lang("site.menu_portfolio")</a>
+					</li>
+
+					<li class="site-topbar__navigation--right">
 						<a onclick="App.showUserSettings();">{{User::get_user_name()}}</a>
-					</li><!--
+					</li>
 
-					--><li class="site-topbar__navigation--right">
+					<li class="site-topbar__navigation--right">
 						<a href="/@lang/">@lang("site.menu_landing")</a>
 					</li>
 				</ul>
 
 				<div class="floating-clear"></div>
 			</div>
+			@endnospaces
 		</div>
 
 		<div class="site-header">

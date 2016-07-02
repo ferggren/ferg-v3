@@ -30,6 +30,14 @@ $config = array(
             'storage',
             'time',
         ),
+
+        'admin' => array(
+            'site',
+            'ajax',
+            'storage',
+            'time',
+            'media_pages',
+        ),
     ),
 );
 ?>

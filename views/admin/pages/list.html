@@ -1,0 +1,37 @@
+@extends('admin.base')
+
+@section('site_title')
+{{Lang::get('site.menu_' . $current_menu)}} // @parent
+@stop
+
+@section('site_content')
+<div class="media-pages__wrapper">
+	<div class="nice-form__button media-pages__create-project" id="__create_project">
+		@lang('media_pages.create_page')
+	</div>
+	@if($group_tags)
+	<div class="media-pages__tags-wrapper">
+	TAGS
+	</div>
+	<div class="media-pages__list-wrapper">
+	@endif
+
+	<pre>@eval print_r($pages_list); @endeval
+	</pre>
+
+	<br /><br />
+
+	@include("plugins.paginator", array('page' => $paginator_page, 'pages' => $paginator_pages, 'link' => $paginator_link))
+
+	@if($group_tags)</div>@endif
+
+	<br class="floating-clear" />
+</div>
+
+<script src="/v_@file_hash('/public/js/admin/media_pages.js')/js/admin/media_pages.js"></script>
+<script>
+document.getElementById('__create_project').onclick = function() {
+	MediaPages.create('{{$pages_group}}');
+};
+</script>
+@stop

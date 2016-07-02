@@ -10,7 +10,8 @@ $strings = array(
 
     'menu_landing' => 'Home',
     'menu_gallery' => 'Gallery',
-    'menu_blog' => 'Blog',
+    'menu_notes' => 'Notes',
+    'menu_events' => 'Events',
     'menu_portfolio' => 'Portfolio',
     'menu_storage' => 'Storage',
     'menu_signin' => 'Sign in',

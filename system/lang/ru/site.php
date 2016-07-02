@@ -10,7 +10,8 @@ $strings = array(
 
     'menu_landing' => 'Главная',
     'menu_gallery' => 'Галерея',
-    'menu_blog' => 'Бложе',
+    'menu_notes' => 'Заметки',
+    'menu_events' => 'События',
     'menu_portfolio' => 'Портфолио',
     'menu_storage' => 'Storage',
     'menu_signin' => 'Вход',

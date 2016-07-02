@@ -1,0 +1,21 @@
+@extends('admin.base')
+
+@section('site_title')
+{{Lang::get('site.menu_' . $current_menu)}} // @parent
+@stop
+
+@section('site_content')
+<div class="media_page" id="__media_page">
+	<div class="nice-form__loader"></div>
+</div>
+
+<script src="/v_@file_hash('/public/js/admin/media_page.js')/js/admin/media_page.js"></script>
+<script>
+Rocky.onload(function(){
+	var page = new MediaPage({
+		page_id: '{{$page_id}}',
+		container: '__media_page',
+	});
+});
+</script>
+@stop

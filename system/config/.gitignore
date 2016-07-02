@@ -3,4 +3,5 @@ database.php
 auth.php
 lang.php
 storage.php
+pages.php
 !.gitignore
