@@ -13,11 +13,11 @@ var MediaPage = function(options) {
 };
 
 MediaPage.prototype = {
-	__init: function(options) {
-		console.log(options);
-	},
+    __init: function(options) {
+        
+    },
 
-	destroy: function() {
+    destroy: function() {
 
-	},
+    },
 }

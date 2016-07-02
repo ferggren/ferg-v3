@@ -9,49 +9,49 @@
  *  MediaPages common utils
  */
 var MediaPages = {
-	/**
-	 *	Creates new media page and redirects user to page editor
-	 *
-	 *	@param {string} pages_group Page group
-	 */
-	create: function(page_group) {
-		var loader = document.createElement('div');
-		loader.className = 'nice-form__loader';
+    /**
+     *  Creates new media page and redirects user to page editor
+     *
+     *  @param {string} pages_group Page group
+     */
+    create: function(page_group) {
+        var loader = document.createElement('div');
+        loader.className = 'nice-form__loader';
 
-		var popup = Popup.createWindow({
-			content: loader,
-		});
+        var popup = Popup.createWindow({
+            content: loader,
+        });
 
-		Rocky.ajax({
-			url: '/ajax/admin/mediaPages/create/',
+        Rocky.ajax({
+            url: '/ajax/admin/mediaPages/create/',
 
-			success: function(page_id) {
-				var link = '/';
-				link += Lang.getLang();
-				link += '/admin/pages/';
-				link += page_group;
-				link += '/';
-				link += page_id;
-				link += '/';
+            success: function(page_id) {
+                var link = '/';
+                link += Lang.getLang();
+                link += '/admin/pages/';
+                link += page_group;
+                link += '/';
+                link += page_id;
+                link += '/';
 
-				window.location = link;
-			},
+                window.location = link;
+            },
 
-			error: function(error) {
-				Popup.closePopup(popup);
+            error: function(error) {
+                Popup.closePopup(popup);
 
-				var block = document.createElement('div');
-				block.className = 'nice-form__error';
-				block.innerHTML = error;
+                var block = document.createElement('div');
+                block.className = 'nice-form__error';
+                block.innerHTML = error;
 
-				Popup.createWindow({
-					content: block,
-				});
-			},
+                Popup.createWindow({
+                    content: block,
+                });
+            },
 
-			data: {
-				page_group: page_group,
-			}
-		});
-	},
+            data: {
+                page_group: page_group,
+            }
+        });
+    },
 }
