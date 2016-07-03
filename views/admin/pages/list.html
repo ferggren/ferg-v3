@@ -16,8 +16,51 @@
 	<div class="media-pages__list-wrapper">
 	@endif
 
-	<pre>@eval print_r($pages_list); @endeval
-	</pre>
+	@forelse ($pages_list as $page)
+		<a class="media-pages__page" href="/@lang/admin/pages/{{$page['group']}}/{{$page['id']}}/">
+			<div class="media-pages__page-title">
+				@if(isset($page['title']))
+				{{$page['title']}}
+				@else
+				–
+				@endif
+			</div>
+
+			<div class="media-pages__page-desc">
+				@if(isset($page['desc']))
+				{{$page['desc']}}
+				@else
+				–
+				@endif
+			</div>
+
+			@if($page['date'])
+			<div class="media-pages__date">
+				{{$page['date']}}
+			</div>
+			@endif
+
+			@if(count($page['versions']))
+			<div class="media-pages__versions">
+				@foreach($page['versions'] as $version)
+					<span>{{$version}}</span>
+				@endforeach
+			</div>
+			@endif
+
+			@if(!$page['visible'])
+			<div class="media-pages__page-hidden">
+				<img src="/images/admin/page_hidden.png" />
+			</div>
+			@endif
+		</a>
+
+		<div class="media-pages__separator"></div>
+	@empty
+		<div class="nice-form__error">
+		@lang('media_pages.pages_not_found')
+		</div>
+	@endforelse
 
 	<br /><br />
 
