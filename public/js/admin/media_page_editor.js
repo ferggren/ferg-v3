@@ -261,6 +261,9 @@ MediaPageEditor_preview = function(editor, container) {
 };
 
 MediaPageEditor_preview.prototype = {
+    /**
+     *  Destroy preview
+     */
     destroy: function() {
         this.container.innerHTML = '';
         this.container = null;
@@ -277,6 +280,9 @@ MediaPageEditor_preview.prototype = {
         }
     },
 
+    /**
+     *  Init preview
+     */
     __init: function(editor, container) {
         this.container = container;
         this.editor = editor;
@@ -368,6 +374,8 @@ MediaPageEditor_preview.prototype = {
 
     /**
      *  Update preview
+     *
+     *  @param {object} file Preview file
      */
     __updatePreview: function(file) {
         if (!this.editor) {
@@ -422,6 +430,9 @@ MediaPageEditor_preview.prototype = {
         });
     },
 
+    /**
+     *  Show preview & clear button
+     */
     __showPreview: function() {
         if (!this.editor) {
             return;
@@ -439,6 +450,9 @@ MediaPageEditor_preview.prototype = {
         }
     },
 
+    /**
+     *  Clear page preview
+     */
     __clearPreview: function(e) {
         if (e.stopPropagation) e.stopPropagation();
         if (e.preventDefault) e.preventDefault();
