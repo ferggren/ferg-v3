@@ -223,7 +223,7 @@ class AjaxAdminMediaPages_Controller extends AjaxController {
             'width' => 900,
             'height' => 150,
             'crop' => true,
-            'valign' => 'top',
+            'valign' => 'middle',
             'align' => 'center',
         ));
 

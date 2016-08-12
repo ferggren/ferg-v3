@@ -41,7 +41,7 @@ class AdminPages_Controller extends BaseController {
                 'width' => 900,
                 'height' => 150,
                 'crop' => true,
-                'valign' => 'top',
+                'valign' => 'middle',
                 'align' => 'center',
             )
         );
