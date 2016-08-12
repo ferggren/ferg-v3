@@ -5,17 +5,23 @@
 @stop
 
 @section('site_content')
-<div class="media_page" id="__media_page">
+<div class="media-page-editor" id="__media_page">
 	<div class="nice-form__loader"></div>
 </div>
 
-<script src="/v_@file_hash('/public/js/admin/media_page.js')/js/admin/media_page.js"></script>
+<div class="nice-form__button" id="__destroy">DESTROY</div>
+
+<script src="/v_@file_hash('/public/js/admin/media_page_editor.js')/js/admin/media_page_editor.js"></script>
 <script>
 Rocky.onload(function(){
-	var page = new MediaPage({
-		page_id: '{{$page_id}}',
+	var page = new MediaPageEditor({
+		page_id: {{$page_id}},
 		container: '__media_page',
 	});
+
+	document.getElementById('__destroy').onclick = function() {
+		page.destroy();
+	};
 });
 </script>
 @stop

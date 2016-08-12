@@ -64,7 +64,14 @@
 
 	<br /><br />
 
-	@include("plugins.paginator", array('page' => $paginator_page, 'pages' => $paginator_pages, 'link' => $paginator_link))
+	@include(
+		"plugins.paginator",
+		array(
+			'page'  => $paginator_page,
+			'pages' => $paginator_pages,
+			'link'  => $paginator_link,
+		)
+	)
 
 	@if($group_tags)</div>@endif
 

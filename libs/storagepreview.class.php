@@ -34,7 +34,7 @@ class StoragePreview {
      *  @param {array} preview_options List of preview options
      *  @return {string} Signed preview link
      */
-    public static function makePreviewLink($file, $preview_options) {
+    public static function makePreviewLink($file, $preview_options = array()) {
         $options = self::__validatePreviewOptions($preview_options);
 
         $link = array(

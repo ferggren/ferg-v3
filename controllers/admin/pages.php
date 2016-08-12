@@ -88,7 +88,7 @@ class AdminPages_Controller extends BaseController {
 
         $view->assign('current_menu', $page->page_group);
         $view->assign('page_group', $page->page_group);
-        $view->assign('page_id', $page->page_id);
+        $view->assign('page_id', (int)$page->page_id);
 
         $view->printView();
     }

@@ -49,6 +49,7 @@ $pages_tags_margin: 30px;
 		line-height: 30px;
 		font-size: 18px;
 		padding: 0px 5px;
+		white-space: nowrap;
 		@include background_rgba(100, 100, 100, .6);
 	}
 
@@ -57,6 +58,7 @@ $pages_tags_margin: 30px;
 		line-height: 20px;
 		font-size: 14px;
 		padding: 0px 5px;
+		white-space: nowrap;
 		@include background_rgba(100, 100, 100, .6);
 	}
 
