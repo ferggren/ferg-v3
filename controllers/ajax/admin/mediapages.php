@@ -222,6 +222,9 @@ class AjaxAdminMediaPages_Controller extends AjaxController {
         $preview = $file->getPreviewLink(array(
             'width' => 900,
             'height' => 150,
+            'crop' => true,
+            'valign' => 'top',
+            'align' => 'center',
         ));
 
         if (!$preview) {

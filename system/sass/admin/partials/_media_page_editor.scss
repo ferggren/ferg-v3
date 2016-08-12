@@ -5,14 +5,29 @@
 	background: #f5f5f5;
 	line-height: 150px;
 	text-align: center;
-	font-size: 20px;
-	color: #666;
-	cursor: pointer;
 	white-space: nowrap;
 	margin-bottom: 20px;
 	background-size: cover;
 	background-repeat: no-repeat;
 }
+
+	.media-page-editor__preview-update {
+		display: inline-block;
+		line-height: 40px;
+		height: 40px;
+		font-size: 20px;
+		cursor: pointer;
+		@include background_rgba(100, 100, 100, .8);
+		color: #FFF;
+		cursor: pointer;
+		padding: 0px 15px;
+		border-radius: 3px;
+		opacity: .8;
+	}
+
+		.media-page-editor__preview-update:hover {
+			opacity: 1;			
+		}
 
 	.media-page-editor__preview-clear {
 		position: absolute;
@@ -24,13 +39,11 @@
 		padding: 5px 15px;
 		font-size: 12px;
 		cursor: pointer;
-		color: #999;
-		@include background_rgba(200, 200, 200, .6);
+		color: #DDD;
+		@include background_rgba(100, 100, 100, .8);
 		opacity: .8;
 	}
 
 	.media-page-editor__preview-clear:hover {
-		color: #666;
-		@include background_rgba(200, 200, 200, .8);
 		opacity: 1;
 	}

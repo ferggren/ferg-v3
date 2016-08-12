@@ -269,14 +269,21 @@ MediaPageEditor_preview.prototype = {
         this.container = null;
         this.editor = null;
 
-        if (this.preview) {
-            this.preview.__parent = null;
-            this.preview = null;
-        }
+        var elements = [
+            "preview",
+            "clear",
+            "update",
+        ];
 
-        if (this.clear) {
-            this.clear.__parent = null;
-            this.clear = null;
+        for (var element in elements) {
+            element = elements[element];
+
+            if (!this[element]) {
+                continue;
+            }
+
+            this[element].__parent = null;
+            this[element] = null;
         }
     },
 
@@ -300,9 +307,7 @@ MediaPageEditor_preview.prototype = {
 
         var preview = document.createElement('div');
         preview.className = 'media-page-editor__preview';
-        preview.innerHTML = Lang.get('media_pages.preview_update');
         preview.__parent = this;
-        preview.onclick = this.__selectPreview;
 
         var clear = document.createElement('div');
         clear.className = 'media-page-editor__preview-clear';
@@ -310,10 +315,19 @@ MediaPageEditor_preview.prototype = {
         clear.__parent = this;
         clear.onclick = this.__clearPreview;
 
+        var update = document.createElement('div');
+        update.className = 'media-page-editor__preview-update';
+        update.innerHTML = Lang.get('media_pages.preview_update');
+        update.__parent = this;
+        update.onclick = this.__selectPreview;
+
         this.preview = preview;
         this.clear = clear;
+        this.update = update;
 
+        preview.appendChild(update);
         preview.appendChild(clear);
+        
         this.container.appendChild(preview);
 
         this.__showPreview();
