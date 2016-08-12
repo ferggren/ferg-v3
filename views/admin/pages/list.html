@@ -17,7 +17,7 @@
 	@endif
 
 	@forelse ($pages_list as $page)
-		<a class="media-pages__page" href="/@lang/admin/pages/{{$page['group']}}/{{$page['id']}}/">
+		<a class="media-pages__page" href="/@lang/admin/pages/{{$page['group']}}/{{$page['id']}}/"@if($page['preview']) style="background-image: url('{{$page['preview']}}')" @endif>
 			<div class="media-pages__page-title">
 				@if(isset($page['title']))
 				{{$page['title']}}

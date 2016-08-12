@@ -29,13 +29,22 @@ class AdminPages_Controller extends BaseController {
         if (!is_numeric($page)) $page = 1;
         $page = (int)$page;
 
-        $list = MediaPages::search(array(
-            'visible' => 'all',
-            'group' => $pages_group,
-            'page' => $page,
-            'tag' => $tag,
-            'lang' => 'all',
-        ));
+        $list = MediaPages::search(
+            array(
+                'visible' => 'all',
+                'group' => $pages_group,
+                'page' => $page,
+                'tag' => $tag,
+                'lang' => 'all',
+            ),
+            array(
+                'width' => 900,
+                'height' => 150,
+                'crop' => true,
+                'valign' => 'top',
+                'align' => 'center',
+            )
+        );
 
         if (!$list) {
             header('Location: /'.Lang::getLang().'/admin/');

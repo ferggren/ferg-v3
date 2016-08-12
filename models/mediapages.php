@@ -13,9 +13,10 @@ class MediaPages extends Database {
      *                         lang - page lang (default = all)
      *                         page - number of page
      *                         visible - page visible status (default = visible)
+     *  @param {array} preview_options Page preview options
      *  @return {array} Pages
      */
-    public static function search($options) {
+    public static function search($options, $preview_options = false) {
         if (!($options = self::__validateSearchOptions($options))) {
             return array();
         }
@@ -43,12 +44,21 @@ class MediaPages extends Database {
         $ret = array();
 
         foreach ($res as $row) {
+            $preview = false;
+
+            if ($row->page_preview && is_array($preview_options)) {
+                $preview = self::__getPagePreview(
+                    $row->page_preview,
+                    $preview_options
+                );
+            }
+
             $info = array(
                 'id' => (int)$row->page_id,
                 'group' => $row->page_group,
                 'date' => $row->page_date,
                 'url' => $row->page_url,
-                'preview' => $row->page_preview,
+                'preview' => $preview,
                 'versions' => array(),
                 'visible' => !!$row->page_visible,
             );
@@ -111,5 +121,33 @@ class MediaPages extends Database {
         }
 
         return $options;
+    }
+
+    /**
+     *  Return page previw link
+     *
+     *  @param {string} preview_hash Preview hash
+     *  @param {array} preview_options Preview options
+     *  @return {string} Preview link
+     */
+    protected static function __getPagePreview($preview_hash, $preview_options) {
+        $preview = StorageFiles::where('file_hash', '=', $preview_hash);
+        $preview = $preview->get();
+
+        if (count($preview) != 1) {
+            return false;
+        }
+
+        $preview = $preview[0];
+
+        if ($preview->file_deleted) {
+            return false;
+        }
+
+        if (!($preview = $preview->getPreviewLink($preview_options))) {
+            return false;
+        }
+
+        return $preview;
     }
 }
