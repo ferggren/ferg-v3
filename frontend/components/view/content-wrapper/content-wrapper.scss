@@ -1,0 +1,25 @@
+@import 'styles/mixins/respond_to';
+
+$footer_size: 40px;
+$window_padding: 10px;
+
+.site-content {
+	min-width: $screen_phone;
+	padding-bottom: $footer_size + 10px;
+	padding-top: 10px;
+
+	@include respond_to(screen_phone) {
+		padding-bottom: ($footer_size * 2) + 10px;
+	}
+}
+
+.site-content__container {
+	min-width: $screen_phone - $window_padding * 2;
+	max-width: $screen_wide - $window_padding * 2;
+	padding: 0px $window_padding;
+
+	@include respond_to(screen_wide) {
+		margin: auto;
+		width: $screen_wide - $window_padding;
+	}
+}

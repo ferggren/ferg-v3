@@ -1,0 +1,17 @@
+$screen_phone: 320px;
+$screen_tablet: 480px;
+$screen_wide: 980px;
+
+@mixin respond_to($media) {
+	@if $media == screen_phone {
+		@media only screen and (max-width: $screen_tablet - 1px) { @content; }
+	}
+
+	@else if $media == screen_tablet {
+		@media only screen and (min-width: $screen_tablet) and (max-width: $screen_wide - 1px) { @content; }
+	}
+
+	@else if $media == screen_wide {
+		@media only screen and (min-width: $screen_wide) { @content; }
+	}
+}

@@ -1,0 +1,4 @@
+@mixin background_rgba($r, $g, $b, $a) {
+	background: rgb($r, $g, $b);
+	background: rgba($r, $g, $b, $a);
+}

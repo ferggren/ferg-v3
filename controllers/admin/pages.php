@@ -12,6 +12,10 @@ class AdminPages_Controller extends BaseController {
      *  @param {string} tag If set, only tagged pages will be shown
      */
     public function actionIndex($pages_group, $page_id, $page, $tag) {
+        $view = new Template('admin.admin');
+        $view->printView();
+        return;
+        
         if ($page_id) {
             return $this->actionPage($page_id);
         }
@@ -78,6 +82,9 @@ class AdminPages_Controller extends BaseController {
      *  @param {number} page_id Page id
      */
     public function actionPage($page_id) {
+        $view = new Template('admin.admin');
+        $view->printView();
+        return;
         if (!preg_match('#^\d++$#', $page_id)) {
             header('Location: /'.Lang::getLang().'/admin/');
             exit;
