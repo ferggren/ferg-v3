@@ -1,6 +1,10 @@
 var React = require('react');
 
 var Uploader = React.createClass({
+  shouldComponentUpdate() {
+    return false;
+  },
+
   toggleInput(e) {
     this.refs.upload_input.click();
   },
@@ -17,7 +21,7 @@ var Uploader = React.createClass({
   onDrop(e) {
     e.preventDefault();
 
-    this.refs.upload_handler.className = 'storage__upload';
+    this.refs.upload_box.className = 'storage__upload';
 
     if (typeof this.props.onUpload != 'function') {
       return false;
@@ -42,12 +46,12 @@ var Uploader = React.createClass({
 
   onDragLeave(e) {
     e.preventDefault();
-    this.refs.upload_handler.className = 'storage__upload';
+    this.refs.upload_box.className = 'storage__upload';
   },
 
   onDragEnter(e) {
     e.preventDefault();
-    this.refs.upload_handler.className = 'storage__upload storage__upload--hover';
+    this.refs.upload_box.className = 'storage__upload storage__upload--hover';
   },
 
   render() {
@@ -55,7 +59,7 @@ var Uploader = React.createClass({
       <div className="storage__uploader">
 
         <div
-          ref="upload_handler"
+          ref="upload_box"
           onDrop={this.onDrop}
           onDragOver={this.onDragOver}
           onDragLeave={this.onDragLeave}

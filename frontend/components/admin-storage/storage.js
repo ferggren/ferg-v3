@@ -15,7 +15,7 @@ var AdminStorage = React.createClass({
 					onFileSelect={this.onFileSelect}
 					group="all"
 					adminMode={true}
-					media="all"
+					mediaTypes="all"
 				/>
 			</ContentWrapper>
 		);

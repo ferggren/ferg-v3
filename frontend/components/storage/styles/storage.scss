@@ -4,6 +4,18 @@
 $storage_filters_width: 200px;
 $storage_filters_margin: 20px;
 
+@mixin insert_media($url) {
+	position: absolute;
+	background-image: url($url);
+	background-size: 20px 20px;
+	content: "";
+	width: 20px;
+	height: 20px;
+	top: 2px;
+	left: 4px;
+	opacity: .8;
+}
+
 .storage__wrapper {
 
 }
@@ -134,14 +146,37 @@ $storage_filters_margin: 20px;
 		.storage__option {
 			padding: 0px 10px 0px 30px;
 		}
+		
+		.storage__option--media-all:before {
+			@include insert_media('../media/media_all.png');
+		}
 
-		.storage__option img {
-			position: absolute;
-			width: 20px;
-			height: 20px;
-			top: 2px;
-			left: 4px;
-			opacity: .8;
+		.storage__option--media-image:before {
+			@include insert_media('../media/media_image.png');
+		}
+
+		.storage__option--media-video:before {
+			@include insert_media('../media/media_video.png');
+		}
+
+		.storage__option--media-audio:before {
+			@include insert_media('../media/media_audio.png');
+		}
+
+		.storage__option--media-document:before {
+			@include insert_media('../media/media_document.png');
+		}
+
+		.storage__option--media-source:before {
+			@include insert_media('../media/media_source.png');
+		}
+
+		.storage__option--media-archive:before {
+			@include insert_media('../media/media_archive.png');
+		}
+
+		.storage__option--media-other:before {
+			@include insert_media('../media/media_other.png');
 		}
 	}
 
