@@ -1,5 +1,4 @@
 var React   = require('react');
-var Groups  = require('./storage-options-groups.js');
 var Media   = require('./storage-options-media.js');
 var OrderBy = require('./storage-options-orderby.js');
 
@@ -20,13 +19,7 @@ var Options = React.createClass({
             media={this.props.media}
             mediaTypes={this.props.mediaTypes}
           />
-
-          <div className="storage__options-spacing" />
-
-          <Groups
-            onOptionChange={this.props.onOptionChange}
-            group={this.props.group}
-          />
+          
         </div>
       </div>
     );

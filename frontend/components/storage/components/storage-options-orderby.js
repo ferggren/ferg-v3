@@ -1,4 +1,5 @@
 var React = require('react');
+var Lang  = require('libs/lang');
 
 var OrderBy = React.createClass({
   shouldComponentUpdate(nextProps) {
@@ -23,7 +24,7 @@ var OrderBy = React.createClass({
           key={orderby}
           className={className}
           onClick={() => {this.props.onOptionChange("orderby", orderby)}}
-        >{orderby}</a>
+        >{Lang.get('storage.orderby_' + orderby)}</a>
       );
     }, this);
 

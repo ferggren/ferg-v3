@@ -66,7 +66,7 @@
       return Lang.lang;
     }
 
-    Lang.__init();
+    Lang._init();
     return Lang.lang;
   },
 
@@ -136,16 +136,16 @@
     }
 
     for (var key in replacements) {
-      var regexp = new RegExp(Lang.__escapeRegexp('%'+key+'%'), 'g');
+      var regexp = new RegExp(Lang._escapeRegexp('%'+key+'%'), 'g');
       string = string.replace(regexp, replacements[key]);
     }
 
     if (string.indexOf('rupluralize') >= 0) {
-      string = Lang.__processRupluralize(string);
+      string = Lang._processRupluralize(string);
     }
 
     if (string.indexOf('pluralize') >= 0) {
-      string = Lang.__processPluralize(string);
+      string = Lang._processPluralize(string);
     }
 
     return string;
@@ -157,14 +157,14 @@
    *  @param {string} Raw string 
    *  @return {string} Processed string
    */
-  __processRupluralize(string) {
+  _processRupluralize(string) {
     var regexp = /rupluralize\((\d+(?:\.\d+)?)\s+['\"]([^'\"]+)['\"]\s+['\"]([^'\"]+)['\"]\s+['\"]([^'\"]+)['\"]\)/g;
     var match;
     
     while((match = regexp.exec(string)) !== null) {
       string = string.replace(
-        new RegExp(Lang.__escapeRegexp(match[0]), 'g'),
-        Lang.__rupluralize(match[1], match[2], match[3], match[4])
+        new RegExp(Lang._escapeRegexp(match[0]), 'g'),
+        Lang._rupluralize(match[1], match[2], match[3], match[4])
       );
 
       regexp.lastIndex = 0;
@@ -183,7 +183,7 @@
    *  @param {string} third  Word form for second form (пять тестов)
    *  @return {string} Correct word form for number
    */
-  __rupluralize: function(amount, first, second, third) {
+  _rupluralize: function(amount, first, second, third) {
     amount %= 100;
 
     if (amount >= 10 && amount <= 20) {
@@ -210,14 +210,14 @@
    *  @param {string} Raw string 
    *  @return {string} Processed string
    */
-  __processPluralize(string) {
+  _processPluralize(string) {
     var regexp = /pluralize\((\d+(?:\.\d+)?)\s+['\"]([^'\"]+)['\"]\s+['\"]([^'\"]+)['\"]\)/g;
     var match;
     
     while((match = regexp.exec(string)) !== null) {
       string = string.replace(
-        new RegExp(Lang.__escapeRegexp(match[0]), 'g'),
-        Lang.__pluralize(match[1], match[2], match[3])
+        new RegExp(Lang._escapeRegexp(match[0]), 'g'),
+        Lang._pluralize(match[1], match[2], match[3])
       );
 
       regexp.lastIndex = 0;
@@ -234,7 +234,7 @@
    *  @param {string} many Word form for plural amount
    *  @return {string} Correct word form for number
    */
-  __pluralize: function(amount, one, many) {
+  _pluralize: function(amount, one, many) {
     return amount == 1 ? one : many;
   },
 
@@ -244,14 +244,14 @@
    *  @param {string} string Escaping string
    *  @return {string} Regexp-ready string
    */
-  __escapeRegexp: function(string) {
+  _escapeRegexp: function(string) {
     return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
   },
 
   /**
    *  Initialize current lang
    */
-  __init() {
+  _init() {
     if (typeof window != 'undefined' &&
         typeof window.__CURRENT_LANG != 'undefined' &&
         Lang.setLang(window.__CURRENT_LANG)

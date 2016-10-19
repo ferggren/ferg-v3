@@ -148,35 +148,35 @@ $storage_filters_margin: 20px;
 		}
 		
 		.storage__option--media-all:before {
-			@include insert_media('../media/media_all.png');
+			@include insert_media('./media/media_all.png');
 		}
 
 		.storage__option--media-image:before {
-			@include insert_media('../media/media_image.png');
+			@include insert_media('./media/media_image.png');
 		}
 
 		.storage__option--media-video:before {
-			@include insert_media('../media/media_video.png');
+			@include insert_media('./media/media_video.png');
 		}
 
 		.storage__option--media-audio:before {
-			@include insert_media('../media/media_audio.png');
+			@include insert_media('./media/media_audio.png');
 		}
 
 		.storage__option--media-document:before {
-			@include insert_media('../media/media_document.png');
+			@include insert_media('./media/media_document.png');
 		}
 
 		.storage__option--media-source:before {
-			@include insert_media('../media/media_source.png');
+			@include insert_media('./media/media_source.png');
 		}
 
 		.storage__option--media-archive:before {
-			@include insert_media('../media/media_archive.png');
+			@include insert_media('./media/media_archive.png');
 		}
 
 		.storage__option--media-other:before {
-			@include insert_media('../media/media_other.png');
+			@include insert_media('./media/media_other.png');
 		}
 	}
 

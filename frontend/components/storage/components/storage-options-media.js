@@ -1,4 +1,5 @@
 var React = require('react');
+var Lang  = require('libs/lang');
 
 var Media = React.createClass({
   shouldComponentUpdate(nextProps) {
@@ -18,7 +19,7 @@ var Media = React.createClass({
           key={media}
           className={className}
           onClick={() => {this.props.onOptionChange("media", media)}}
-        >{media}</a>
+        >{Lang.get('storage.media_' + media)}</a>
       );
     }, this);
 

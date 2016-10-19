@@ -1,24 +1,30 @@
-var React = require('react');
+var React     = require('react');
+var Uploader  = require('./components/storage-uploader.js');
+var Uploads   = require('./components/storage-uploads.js');
+var FilesList = require('./components/storage-files-list.js');
+var Options   = require('./components/storage-options.js');
+var Request   = require('libs/request');
+var Lang      = require('libs/lang');
 
-var Uploader   = require('./storage-uploader.js');
-var Uploads    = require('./storage-uploads.js');
-var FilesList  = require('./storage-files-list.js');
-var Options    = require('./storage-options.js');
-
-require('./styles/storage.scss');
+require('./storage.scss');
 require('styles/partials/floating_clear');
+
+Lang.exportStrings(
+  'storage',
+  require('./storage.' + Lang.getLang() + '.js')
+);
 
 var Storage = React.createClass({
   getInitialState() {
-    var media_types = this.__validateMedia(this.props.mediaTypes);
+    var media_types = this._validateMedia(this.props.mediaTypes);
     var media = media_types.length == 1 ? media_types[0] : 'all';
 
     return {
       files: [],
+      files_error: false,
       uploads: [],
       loading: false,
       page: 1,
-      group: false,
       media_types,
       media,
       orderby: 'latest',
@@ -38,12 +44,39 @@ var Storage = React.createClass({
   },
 
   loadFiles() {
-    console.log('load files', this.state.media, this.state.orderby, this.state.group);
-    this.setState({loading: true});
+    console.log('load files', this.state.media, this.state.orderby, this.state.admin_mode);
+    this.setState({loading: true, files_error: false});
+
+    Request.fetch(
+      '/ajax/storage/getFiles', {
+        success: files => {
+          this.setState({loading: false});
+          console.log('onsuccess', files);
+        },
+
+        error: error => {
+          this.setState({loading: false});
+          console.log('onerror', error);
+        },
+
+        progress: progress => {
+          console.log('onprogress', progress);
+        },
+
+        timeout: 3,
+
+        data: {
+          media: this.state.media,
+          orderby: this.state.orderby,
+          group: this.props.group,
+          admin_mode: this.props.admin_mode,
+        }
+      }
+    );
   },
 
   setOption(option, value) {
-    if (this.loading) {
+    if (this.state.loading) {
       return;
     }
 
@@ -61,7 +94,7 @@ var Storage = React.createClass({
     this.setState(state, this.loadFiles);
   },
 
-  __validateMedia(media) {
+  _validateMedia(media) {
     var types = [
       'image',
       'video',

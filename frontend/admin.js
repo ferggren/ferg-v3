@@ -17,6 +17,7 @@ var PageEditor  = require('components/admin-page-editor');
 var PagesList   = require('components/admin-pages-list');
 var Menu        = require('components/admin-navigation');
 var Footer      = require('components/view/footer');
+var Progress    = require('components/request-progress');
 
 require('styles/admin.scss');
 
@@ -25,6 +26,7 @@ var App = React.createClass({
     return (
       <div>
         <Menu />
+        <Progress />
 
         {React.cloneElement(this.props.children, this.props)}
 

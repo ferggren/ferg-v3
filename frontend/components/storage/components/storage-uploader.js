@@ -1,4 +1,5 @@
 var React = require('react');
+var Lang  = require('libs/lang');
 
 var Uploader = React.createClass({
   shouldComponentUpdate() {
@@ -67,7 +68,7 @@ var Uploader = React.createClass({
           className="storage__upload"
           onClick={this.toggleInput}
         >
-          Translate me
+          {Lang.get('storage.file_upload')}
         </div>
 
         <form ref="upload_form" encType="multipart/form-data">
