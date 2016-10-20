@@ -8,9 +8,6 @@ var FilesList = React.createClass({
     if (this.props.loading) {
       loader = <div>LOADING</div>;
     }
-    else {
-      
-    }
 
     return (
       <div className="storage__files-wrapper">

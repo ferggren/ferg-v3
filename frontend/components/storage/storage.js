@@ -49,21 +49,15 @@ var Storage = React.createClass({
 
     Request.fetch(
       '/ajax/storage/getFiles', {
-        success: files => {
+        success: response => {
           this.setState({loading: false});
-          console.log('onsuccess', files);
+          console.log('onsuccess', response);
         },
 
         error: error => {
           this.setState({loading: false});
           console.log('onerror', error);
         },
-
-        progress: progress => {
-          console.log('onprogress', progress);
-        },
-
-        timeout: 3,
 
         data: {
           media: this.state.media,
@@ -137,17 +131,17 @@ var Storage = React.createClass({
           uploads={this.state.uploads}
         />
 
-        <FilesList
-          loading={this.state.loading}
-          files={this.state.files}
-          onFileSelect={this.onFileSelect}
-        />
-
         <Options
           onOptionChange={this.setOption}
           orderby={this.state.orderby}
           media={this.state.media}
           mediaTypes={this.state.media_types}
+        />
+
+        <FilesList
+          loading={this.state.loading}
+          files={this.state.files}
+          onFileSelect={this.onFileSelect}
         />
 
         <div className="floating-clear" />

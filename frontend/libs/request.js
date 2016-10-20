@@ -322,6 +322,7 @@ var Request = {
     // send data
     request.xhr.open('POST', request.options.url);
     request.xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    request.xhr.setRequestHeader('X-Csrf-Token', request.csrf_token);
 
     if (request.isFormData) {
       request.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -346,8 +347,14 @@ var Request = {
     var request = Request._requests[id];
     var data = request.options.data;
     var lang = Lang.getLang();
-    var csrf_token = false;
+    var csrf_token = Cookies.getCookie('__csrf_token');
 
+    if (!csrf_token) {
+      csrf_token = Request._makeCSRFToken();
+      Cookies.setCookie('__csrf_token', csrf_token, 86400 * 365);
+    }
+
+    request.csrf_token = csrf_token;
     request.isFormData = false;
 
     if (typeof data == 'object') {
@@ -579,9 +586,9 @@ var Request = {
       Request._request_loading = false;
     }
 
-    if (typeof Request._requests[id].success == 'function') {
+    if (typeof Request._requests[id].options.success == 'function') {
       try {
-        Request._requests[id].success(
+        Request._requests[id].options.success(
             Request._requests[id].response.response
         );
       }
@@ -634,6 +641,34 @@ var Request = {
     
     delete Request._requests[id];
   },
+
+  /**
+   *  Generates CSRF TOKEN
+   *
+   *  @return {string} CSRF Token
+   */
+  _makeCSRFToken() {
+    var set   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    var token = [];
+
+    if (window.Uint8Array && (window.crypto || window.msCrypto)) {
+      var crypto = window.crypto || window.msCrypto;
+      var random = new Uint8Array(32);
+
+      crypto.getRandomValues(random);
+
+      random.forEach(num => {
+        token.push(set.charAt(num % set.length));
+      });
+    }
+    else {
+      for (var i = 0; i < 32; ++i) {
+        token.push(set.charAt(Math.floor(Math.random() * set.length)));
+      }
+    }
+
+    return token.join('');
+  }
 };
 
 module.exports = Request;
