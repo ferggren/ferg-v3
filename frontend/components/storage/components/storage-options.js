@@ -18,6 +18,7 @@ var Options = React.createClass({
             onOptionChange={this.props.onOptionChange}
             media={this.props.media}
             mediaTypes={this.props.mediaTypes}
+            mediaStats={this.props.mediaStats}
           />
           
         </div>

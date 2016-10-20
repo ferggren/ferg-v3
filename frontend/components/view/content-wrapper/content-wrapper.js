@@ -6,7 +6,7 @@ module.exports = React.createClass({
     return (
       <div className="site-content">
         <div className="site-content__container">
-          {React.cloneElement(this.props.children, this.props)}
+          {this.props.children}
         </div>
       </div>
     );

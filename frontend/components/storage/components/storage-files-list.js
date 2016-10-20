@@ -44,8 +44,9 @@ var FilesList = React.createClass({
   },
 
   render() {
-    var loader = null;
-    var files = null;
+    var loader    = null;
+    var files     = null;
+    var paginator = null;
 
     if (this.props.files.length) {
       files = this.props.files.map(file => {

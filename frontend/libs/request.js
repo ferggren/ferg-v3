@@ -12,9 +12,6 @@ var Request = {
   /** Requests queue */
   _requests: [],
 
-  /** Request loading flag */
-  _request_loading: false,
-
   /** Interval for XMLHTTP readyState watcher */
   _watch_inverval: false,
 
@@ -161,7 +158,7 @@ var Request = {
     }
 
     if (typeof options.async == 'undefined') {
-      options.async = false;
+      options.async = true;
     }
 
     if (typeof options.timeout == 'undefined') {
@@ -204,8 +201,7 @@ var Request = {
       }
 
       if (request.xhr.status != 200) {
-        Request._error(request.id);
-        return;
+        return Request._error(request.id);
       }
 
       request.response = null;
@@ -216,18 +212,15 @@ var Request = {
         );
       }
       catch(e) {
-        Request._error(request.id);
-        return;
+        return Request._error(request.id);
       }
 
       if (typeof request.response != 'object') {
-        Request._error(request.id);
-        return;
+        return Request._error(request.id);
       }
 
       if (typeof request.response.status == 'undefined') {
-        Request._error(request.id);
-        return;
+        return Request._error(request.id);
       }
 
       if (request.response.status != 'success') {
@@ -269,16 +262,32 @@ var Request = {
    */
   _getNextRequestId() {
     var keys = Object.keys(Request._requests);
+    var loading = false;
+
+    for (var id in keys) {
+      id = keys[id];
+
+      if (Request._requests[id].status != 'loading') {
+        continue;
+      }
+
+      if (Request._requests[id].options.async) {
+        continue;
+      }
+
+      loading = true;
+      break;
+    }
 
     for (var id in keys) {
       id = keys[id];
 
       if (Request._requests[id].status != 'pending') {
-          continue;
+        continue;
       }
 
-      if (Request._request_loading && !Request._requests[id].options.async) {
-          continue;
+      if (loading && !Request._requests[id].options.async) {
+        continue;
       }
 
       return id;
@@ -307,16 +316,11 @@ var Request = {
     request.status = 'loading';
 
     if (!Request._makeRequestData(id)) {
-      Request._error(id);
+      return Request._error(id);
     }
 
     if (!Request._makeRequestXHR(id)) {
-      Request._error(id);
-    }
-
-    // ajax loading flag
-    if (!request.async) {
-      Request._request_loading = true;
+      return Request._error(id);
     }
 
     // send data
@@ -324,7 +328,7 @@ var Request = {
     request.xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     request.xhr.setRequestHeader('X-Csrf-Token', request.csrf_token);
 
-    if (request.isFormData) {
+    if (!request.isFormData) {
       request.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     }
 
@@ -359,7 +363,6 @@ var Request = {
 
     if (typeof data == 'object') {
       if (typeof data.append == 'function') {
-        data.append('__csrf_token', csrf_token);
         data.append('USER_LANG', lang);
         request.isFormData = true;
       }
@@ -378,11 +381,7 @@ var Request = {
     }
 
     if (typeof data == 'string') {
-      data += '&__csrf_token=' + csrf_token;
-
-      if (lang) {
-        data += '&USER_LANG=' + lang;
-      }
+      data += '&USER_LANG=' + lang;
     }
 
     request.data = data;
@@ -524,18 +523,16 @@ var Request = {
       return;
     }
 
-    if (!Request._requests[id].xhr) {
-      return;
+    if (Request._requests[id].xhr) {
+      Request._requests[id].xhr.abort();
     }
-
-    Request._requests[id].xhr.abort();
-    Request._requests[id]._abort_timer = false;
 
     if (fire_callback) {
       Request._error(id);
     }
     else {
       Request._deleteRequest(id);
+      setTimeout(Request._process, 10);
     }
   },
 
@@ -552,10 +549,6 @@ var Request = {
 
     if (typeof error == 'undefined') {
       error = 'request_runtime_error';
-    }
-
-    if (!Request._requests[id].options.async) {
-      Request._request_loading = false;
     }
 
     if (typeof Request._requests[id].options.error == 'function') {
@@ -580,10 +573,6 @@ var Request = {
   _success(id) {
     if (typeof Request._requests[id] != 'object') {
       return;
-    }
-
-    if (!Request._requests[id].async) {
-      Request._request_loading = false;
     }
 
     if (typeof Request._requests[id].options.success == 'function') {

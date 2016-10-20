@@ -5,6 +5,7 @@ var FilesList = require('./components/storage-files-list.js');
 var Options   = require('./components/storage-options.js');
 var Request   = require('libs/request');
 var Lang      = require('libs/lang');
+var Paginator = require('components/paginator');
 
 require('./storage.scss');
 require('styles/partials/floating_clear');
@@ -15,29 +16,60 @@ Lang.exportStrings(
 );
 
 var Storage = React.createClass({
+  stats_request: false,
+  files_request: false,
+
   getInitialState() {
     var media_types = this._validateMedia(this.props.mediaTypes);
     var media = media_types.length == 1 ? media_types[0] : 'all';
 
     return {
-      files: [],
-      files_error: false,
-      uploads: [],
-      loading: false,
-      page: 1,
-      pages: 1,
+      files:       [],
+      uploads:     [],
+      loading:     false,
+      page:        1,
+      pages:       1,
       media_stats: {},
+      orderby:     'latest',
       media_types,
       media,
-      orderby: 'latest',
     };
   },
 
   componentDidMount() {
     this.loadFiles();
+    this.loadStats();
+  },
+
+  componentWillUnmount() {
+    if (this.stats_request !== false) {
+      Request.abort(this.stats_request);
+      this.stats_request = false;
+    }
+
+    if (this.files_request !== false) {
+      Request.abort(this.files_request);
+      this.files_request = false;
+    }
+  },
+
+  onPageSelect(page) {
+    if (this.state.loading) {
+      if (this.files_request === false) {
+        return;
+      }
+
+      Request.abort(this.files_request);
+      this.files_request = false;
+    }
+
+    this.setState({page: page, loading: false}, this.loadFiles);
   },
 
   onFileSelect(file) {
+    var stats = JSON.parse(JSON.stringify(this.state.media_stats));
+    stats[file.media]++;
+    this.setState({media_stats: stats});
     console.log('file_select', file);
   },
 
@@ -45,13 +77,38 @@ var Storage = React.createClass({
     console.log('file_upload', form_data);
   },
 
-  loadFiles() {
-    console.log('load files', this.state.media, this.state.orderby, this.state.admin_mode);
-    this.setState({loading: true, files_error: false});
+  loadStats() {
+    this.stats_request = Request.fetch(
+      '/ajax/storage/getMediaStats', {
+        success: response => {
+          this.stats_request = false;
 
-    Request.fetch(
+          this.setState({
+            media_stats: response,
+          });
+        },
+
+        error: error => {
+          this.stats_request = false;
+        },
+
+        data: {
+          media:      this.state.media,
+          group:      this.props.group ? this.props.group : '',
+          admin_mode: this.props.adminMode ? 'enabled' : 'disabled',
+        }
+      }
+    );
+  },
+
+  loadFiles() {
+    this.setState({loading: true});
+
+    this.files_request = Request.fetch(
       '/ajax/storage/getFiles', {
         success: response => {
+          this.files_request = false;
+
           this.setState({
             loading: false,
             files:   response.files,
@@ -61,25 +118,22 @@ var Storage = React.createClass({
         },
 
         error: error => {
-          this.setState({loading: false});
-          console.log('onerror', error);
+          this.files_request = false;
+          this.setState({loading: false, files: []});
         },
 
         data: {
-          media: this.state.media,
-          orderby: this.state.orderby,
-          group: this.props.group,
-          admin_mode: this.props.admin_mode,
+          page:       this.state.page,
+          media:      this.state.media,
+          orderby:    this.state.orderby,
+          group:      this.props.group ? this.props.group : '',
+          admin_mode: this.props.adminMode ? 'enabled' : 'disabled',
         }
       }
     );
   },
 
   setOption(option, value) {
-    if (this.state.loading) {
-      return;
-    }
-
     if (typeof this.state[option] == 'undefined') {
       return;
     }
@@ -88,7 +142,19 @@ var Storage = React.createClass({
       return;
     }
 
-    var state = {};
+    if (this.state.loading) {
+      if (this.files_request === false) {
+        return;
+      }
+
+      Request.abort(this.files_request);
+      this.files_request = false;
+    }
+
+    var state = {
+      loading: false
+    };
+    
     state[option] = value;
 
     this.setState(state, this.loadFiles);
@@ -150,6 +216,15 @@ var Storage = React.createClass({
           files={this.state.files}
           onFileSelect={this.onFileSelect}
           media={this.state.media}
+        />
+
+        <br />
+
+        <Paginator
+          page={this.state.page}
+          pages={this.state.pages}
+          onSelect={this.onPageSelect}
+          url="/some/url/%page%"
         />
 
         <div className="floating-clear" />
