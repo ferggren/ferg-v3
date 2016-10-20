@@ -19,7 +19,7 @@ var RequestProgress = React.createClass({
   componentDidMount() {
     this._inverval = setInterval(
       this._watchProgress,
-      300
+      100
     );
   },
 
@@ -31,15 +31,39 @@ var RequestProgress = React.createClass({
   },
 
   _watchProgress() {
-    var progress = Request.getTotalProgress();
+    var progress = this._calcProgress(Request.getTotalProgress());
 
-    var total = parseInt(Math.random() * 99 + 1);
-
-    if (total == this.state.progress) {
+    if (progress == this.state.progress) {
       return;
     }
 
-    this.setState({progress: total});
+    this.setState({progress: progress});
+  },
+
+  _calcProgress(stats) {
+    var progress = 0;
+
+    if (!stats.requests_total) {
+      return progress;
+    }
+
+    var loaded_progress = 0;
+    if (stats.loaded_total) {
+      loaded_progress = (stats.loaded * 100) / stats.loaded_total;
+    }
+
+    var uploaded_progress = 0;
+    if (stats.uploaded_total) {
+      uploaded_progress = (stats.uploaded * 100) / stats.uploaded_total;
+    }
+
+    progress = loaded_progress * 0.5 + uploaded_progress * 0.5;
+    progress /= stats.requests_total;
+    progress *= stats.requests_loading;
+    progress = 25 + progress * 0.7;
+    progress = parseInt(progress);
+
+    return progress;
   },
 
   render() {
@@ -48,13 +72,13 @@ var RequestProgress = React.createClass({
     }
 
     var style = {
-      width: this.state.progress + 'px',
+      width: this.state.progress + '%',
     }
 
     return (
       <div className="request-progress__wrapper">
         <div className="request-progress" style={style}>
-          {this.state.progress}
+          
         </div>
       </div>
     );

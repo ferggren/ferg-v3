@@ -21,6 +21,12 @@ $link_padding: 10px;
 		top: 0px;
 		left: 0px;
 	}
+
+	@include respond_to(screen_tablet) {
+		position: fixed;
+		top: 0px;
+		left: 0px;
+	}
 }
 
 .site-menu__fixed-placeholder {
@@ -30,6 +36,11 @@ $link_padding: 10px;
 		display: block;
 		height: $menu_height;
 	};
+
+	@include respond_to(screen_tablet) {
+		display: block;
+		height: $menu_height;
+	}
 }
 
 .site-menu {

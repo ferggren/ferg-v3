@@ -1,2 +1,32 @@
 @import 'styles/mixins/background_rgba';
 @import 'styles/mixins/respond_to';
+
+$progress_height: 2px;
+$bg_color: (162, 1, 1, .8);
+
+.request-progress__wrapper {
+	min-width: $screen_phone;
+	width: 100%;
+	height: $progress_height;
+	overflow: hidden;
+	z-index: 10;
+	position: absolute;
+
+	@include respond_to(screen_wide) {
+		position: fixed;
+		top: 30px;
+		left: 0px;
+	}
+
+	@include respond_to(screen_tablet) {
+		position: fixed;
+		top: 30px;
+		left: 0px;
+	}
+}
+
+.request-progress {
+	@include background_rgba(nth($bg_color, 1), nth($bg_color, 2), nth($bg_color, 3), nth($bg_color, 4));
+	height: $progress_height;
+	overflow: hidden;
+}
