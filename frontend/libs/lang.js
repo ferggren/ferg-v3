@@ -53,7 +53,7 @@
       return string;
     }
 
-    return Lang.processString(string, variables);
+    return Lang._processString(string, variables);
   },
 
   /**
@@ -130,7 +130,7 @@
    *  @param {object} replacements List of replacements (name: value)
    *  @return {string} Processed string
    */
-  processStrings(string, replacements) {
+  _processString(string, replacements) {
     if (typeof replacements != 'object') {
       replacements = {};
     }

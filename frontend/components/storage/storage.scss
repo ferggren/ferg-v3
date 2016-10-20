@@ -16,6 +16,14 @@ $storage_filters_margin: 20px;
 	opacity: .8;
 }
 
+@mixin insert_ico($url) {
+	background-image: url($url);
+	background-size: 26px 26px;
+	content: "";
+	width: 26px;
+	height: 26px;
+}
+
 .storage__wrapper {
 
 }
@@ -241,6 +249,34 @@ $storage_filters_margin: 20px;
 
 		.storage__file-wrapper--preview .storage__file-ico {
 			display: none;
+		}
+
+		.storage__file-ico--image {
+			@include insert_ico('./media/media_image.png');
+		}
+
+		.storage__file-ico--video {
+			@include insert_ico('./media/media_video.png');
+		}
+
+		.storage__file-ico--audio {
+			@include insert_ico('./media/media_audio.png');
+		}
+
+		.storage__file-ico--document {
+			@include insert_ico('./media/media_document.png');
+		}
+
+		.storage__file-ico--source {
+			@include insert_ico('./media/media_source.png');
+		}
+
+		.storage__file-ico--archive {
+			@include insert_ico('./media/media_archive.png');
+		}
+
+		.storage__file-ico--other {
+			@include insert_ico('./media/media_other.png');
 		}
 
 	.storage__file-title {
