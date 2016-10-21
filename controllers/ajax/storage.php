@@ -277,7 +277,9 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     // get group id
-    $file_info['group_id'] = self::_getGroupId($file_info);
+    if (!($file_info['group_id'] = self::_getGroupId($file_info))) {
+      return $this->jsonError('error_file_upload_error');
+    }
 
     // get file hash
     if (!($file_info['hash'] = self::_makeFileHash($file_info))) {

@@ -16,16 +16,6 @@ var AdminStorage = React.createClass({
           adminMode="enabled"
           mediaTypes="all"
         />
-        <br />
-        <br />
-        <br />
-        <br />
-        <Storage 
-          onFileUpload={this.onFileSelect}
-          onFileSelect={this.onFileSelect}
-          group="storage"
-          mediaTypes="all"
-        />
       </ContentWrapper>
     );
   },

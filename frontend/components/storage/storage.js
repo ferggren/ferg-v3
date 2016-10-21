@@ -72,6 +72,15 @@ var Storage = React.createClass({
       this._files_request = false;
     }
 
+    this.state.uploads.forEach(upload => {
+      if (upload.request_id === false) {
+        return;
+      }
+
+      Request.abort(upload.request_id);
+      upload.request_id = false;
+    });
+
     this._clearFilesRequests();
   },
 
@@ -109,17 +118,145 @@ var Storage = React.createClass({
    *  File selected in FilesList
    */
   _onFileSelect(file) {
-    var stats = JSON.parse(JSON.stringify(this.state.media_stats));
-    stats[file.media]++;
-    this.setState({media_stats: stats});
-    console.log('file_select', file);
+    this._changeStats(file.media, 1);
+
+    if (typeof this.props.onFileSelect == 'function') {
+      this.props.onFileSelect(file);
+    }
   },
 
   /**
    *  File uploaded in Uploader
    */
+  _upload_id: 1,
   _onUpload(form_data) {
-    console.log('file_upload', form_data);
+    var upload = {
+      upload_id:  (++this._upload_id),
+      progress:   0,
+      request_id: false,
+      file_name:  false,
+      status:     'scheduled',
+      error:      false,
+    };
+
+    if (form_data.get) {
+      var file = form_data.get('upload');
+
+      if (file && file.name) {
+        upload.file_name = file.name;
+      }
+    }
+
+    form_data.append(
+      'file_access',
+      this.props.upload_access == 'private' ? 'private' : 'public'
+    );
+
+    form_data.append(
+      'file_group',
+      this.props.group ? this.props.group : ''
+    );
+
+    form_data.append(
+      'file_media',
+      this.state.media_types.join(',')
+    );
+
+    upload.request_id = Request.fetch(
+      '/ajax/storage/upload', {
+        success: file => {
+          upload.progress = 100;
+          upload.request_id = false;
+          upload.status = 'success';
+
+          this.setState({uploads: this.state.uploads});
+
+          this._onFileUploaded(file, upload);
+        },
+
+        error: error => {
+          upload.progress = 100;
+          upload.request_id = false;
+          upload.status = 'error';
+          upload.error = Lang.get('storage.' + error);
+
+          this.setState({uploads: this.state.uploads});
+        },
+
+        progress: progress => {
+          upload.status = 'uploading';
+
+          if (!progress.uploaded_total) {
+            return;
+          }
+
+          progress = (progress.uploaded * 100) / progress.uploaded_total;
+          progress = Math.floor(progress);
+
+          if (upload.progress == progress) {
+            return;
+          }
+
+          upload.progress = progress;
+          this.setState({uploads: this.state.uploads});
+        },
+
+        data: form_data,
+
+        async: false,
+      }
+    );
+
+    var uploads = this.state.uploads;
+    uploads.push(upload);
+
+    this.setState({uploads});
+  },
+
+  /**
+   *  Successful file upload
+   */
+  _onFileUploaded(file, upload) {
+    var media = this.state.media;
+    var page  = this.state.page;
+
+    this._changeStats(file.media, 1);
+
+    if (page == 1 && (media == 'all' || media == file.media)) {
+      if (this._files_request !== false) {
+        Request.abort(this._files_request);
+        this._files_request = false;
+      }
+
+      this._loadFiles();
+      this._onUploadClick(upload);
+    }
+
+    if (typeof this.props.onFileUpload == 'function') {
+      this.props.onFileUpload(file);
+    }
+  },
+
+  /**
+   *  Upload clicked on in Uploader
+   */
+  _onUploadClick(upload) {
+    if (upload.request_id !== false) {
+      Request.abort(upload.request_id);
+      upload.request_id = false;
+    }
+
+    var uploads = [];
+
+    for (var i in this.state.uploads) {
+      if (this.state.uploads[i].upload_id == upload.upload_id) {
+        continue;
+      }
+
+      uploads.push(this.state.uploads[i]);
+    }
+
+    this.setState({uploads});
   },
 
   /**
@@ -131,11 +268,15 @@ var Storage = React.createClass({
         return;
       }
 
+      file.loading = true;
       file._request_id = Request.fetch(
         '/ajax/storage/deleteFile', {
           success: () => {
+            file.loading = false;
             file.file_deleted = true;
             file._request_id = false;
+
+            this._changeStats(file.media, -1);
 
             this.setState({
               files: this.state.files,
@@ -143,6 +284,7 @@ var Storage = React.createClass({
           },
 
           error: error => {
+            file.loading = false;
             file._request_id = false;
 
             this.setState({
@@ -169,11 +311,14 @@ var Storage = React.createClass({
         return;
       }
 
+      file.loading = true;
       file._request_id = Request.fetch(
         '/ajax/storage/restoreFile', {
           success: () => {
+            file.loading = false;
             file.file_deleted = false;
             file._request_id = false;
+            this._changeStats(file.media, 1);
 
             this.setState({
               files: this.state.files,
@@ -181,6 +326,7 @@ var Storage = React.createClass({
           },
 
           error: error => {
+            file.loading = false;
             file._request_id = false;
             
             this.setState({
@@ -331,9 +477,45 @@ var Storage = React.createClass({
     );
   },
 
+  /**
+   *  Increase/Decrease values in media stats
+   */
+  _changeStats(stat, amount) {
+    var stats = JSON.parse(JSON.stringify(this.state.media_stats));
+
+    if (typeof stats[stat] == 'undefined') {
+      stats[stat] = 0;
+    }
+
+    stats[stat] += amount;
+
+    if (stats[stat] < 0) {
+      stats[stat] = 0;
+    }
+
+    this.setState({media_stats: stats});
+  },
+
   render() {
     var paginator = null;
     var loader    = null;
+    var uploader  = null;
+    var uploads   = null;
+
+    if (this.props.group) {
+      uploader = (
+        <Uploader
+          onUpload={this._onUpload}
+        />
+      );
+
+      uploads = (
+        <Uploads
+          uploads={this.state.uploads}
+          onUploadClick={this._onUploadClick}
+        />
+      );
+    }
 
     if (this.state.loading) {
       loader = (
@@ -357,13 +539,9 @@ var Storage = React.createClass({
 
     return (
       <div className="storage__wrapper">
-        <Uploader
-          onUpload={this._onUpload}
-        />
+        {uploader}
 
-        <Uploads
-          uploads={this.state.uploads}
-        />
+        {uploads}
 
         <Options
           onOptionChange={this._setOption}

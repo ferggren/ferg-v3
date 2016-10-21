@@ -10,6 +10,23 @@ var Lang     = require('libs/lang');
 var NiceTime = require('libs/nice-time');
 
 var StorageFile = React.createClass({
+  /** for shouldComponentUpdate use **/
+  _loading:      false,
+  _file_deleted: false,
+
+  /** update only when file is changed **/
+  shouldComponentUpdate(nextProps) {
+    if (this._loading !== nextProps.file.loading) {
+      return true;
+    }
+
+    if (this._file_deleted !== nextProps.file.file_deleted) {
+      return true;
+    }
+
+    return false;
+  },
+
   /**
    *  Convert downloads number to nice form
    */ 
@@ -58,6 +75,9 @@ var StorageFile = React.createClass({
   },
 
   render() {
+    this._loading = this.props.file.loading;
+    this._file_deleted = this.props.file.file_deleted;
+
     var ico       = null;
     var loader    = null;
     var remove    = null;
@@ -76,7 +96,7 @@ var StorageFile = React.createClass({
       className += " storage__file-wrapper--deleted";
     }
 
-    if (typeof file._request_id != 'undefined' && file._request_id !== false) {
+    if (file.loading) {
       var loader = <div className="storage__file-loader loader-tiny"></div>;
     }
     else {

@@ -3,6 +3,9 @@
 
 $storage_filters_width: 200px;
 $storage_filters_margin: 20px;
+$storage_upload_height: 24px;
+$upload_bg: (185, 208, 163);
+$upload_bg_error: (177, 7, 7);
 
 @mixin insert_media($url) {
 	position: absolute;
@@ -45,39 +48,57 @@ $storage_filters_margin: 20px;
 			background: #EEE !important;
 		}
 
-	.storage__uploads {
+.storage__uploads {
+	margin-bottom: 20px;
+}
 
+	.storage__uploads-file {
+		height: $storage_upload_height;
+		margin-bottom: 10px;
+		position: relative;
+		background: #f5f5f5;
+		font-size: 12px;
+		cursor: pointer;
 	}
 
-		.storage__uploads-file {
-			height: 20px;
-			margin-bottom: 15px;
-			position: relative;
-			text-align: center;
-			background: #f5f5f5;
-			cursor: pointer;
+	.storage__uploads-progress {
+		position: absolute;
+		height: $storage_upload_height;
+		top: 0px;
+		left: 0px;
+		@include background_rgba(nth($upload_bg, 1), nth($upload_bg, 2), nth($upload_bg, 3), 0.6);
+	}
+
+		.storage__uploads-file:hover .storage__uploads-progress {
+			@include background_rgba(nth($upload_bg, 1), nth($upload_bg, 2), nth($upload_bg, 3), 0.9);
 		}
 
-		.storage__uploads-progress {
-			position: absolute;
-			height: 20px;
-			top: 0px;
-			left: 0px;
-			background: #B9D0A3;
+		.storage__uploads-progress--error {
+			@include background_rgba(nth($upload_bg_error, 1), nth($upload_bg_error, 2), nth($upload_bg_error, 3), 0.2);
 		}
 
-			.storage__uploads-progress--error {
-				background: #FFF4F4;
-			}
-
-		.storage__uploads-title {
-			position: absolute;
-			height: 20px;
-			width: 100%;
-			text-align: center;
-			line-height: 20px;
-			font-size: 12px;
+		.storage__uploads-file:hover .storage__uploads-progress--error {
+			@include background_rgba(nth($upload_bg_error, 1), nth($upload_bg_error, 2), nth($upload_bg_error, 3), 0.3);			
 		}
+
+	.storage__uploads-title {
+		top: 0px;
+		left: 0px;
+		margin-right: 150px;
+		padding-left: 10px;
+		position: relative;
+		line-height: $storage_upload_height;
+		font-weight: bold;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	.storage__uploads-status {
+		top: 0px;
+		right: 10px;
+		position: absolute;
+		line-height: $storage_upload_height;
+	}
 
 .storage__options-wrapper {
 	@include respond_to(screen_wide) {
