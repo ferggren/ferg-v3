@@ -1,6 +1,7 @@
 module.exports = {
   'orderby_latest':  'Latest',
   'orderby_popular': 'Popular',
+  'orderby_biggest': 'By size',
 
   'media_all':      'All',
   'media_image':    'Image',
@@ -19,7 +20,9 @@ module.exports = {
   'file_not_downloaded': '',
   'file_downloads':      '%downloads% pluralize(%downloads% "download" "downloads")',
 
-  'file_upload': 'Click or drop file to upload',
+  'file_upload':  'Click or drop file to upload',
+  'file_delete':  'delete',
+  'file_restore': 'restore',
 
   'upload_file_placeholder': 'File',
   'upload_file_scheduled':   'Uploading... ',

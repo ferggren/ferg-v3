@@ -10,6 +10,7 @@ var OrderBy = React.createClass({
     var buttons = [
       'latest',
       'popular',
+      'biggest',
     ];
 
     buttons = buttons.map((orderby) => {

@@ -8,28 +8,8 @@ class AjaxStorage_Controller extends AjaxController {
   }
 
   /**
-   *  Return user groups
-   *
-   *  @return {object} Groups
-   */
-  public function actionGetGroups() {
-    if (!is_array($groups = $this->__loadUserGroups())) {
-      return $this->jsonError('internal_server_error');
-    }
-
-    $ret = array();
-
-    foreach ($groups as $group) {
-      $ret[] = $group['name'];
-    }
-
-    return $this->jsonSuccess($ret);
-  }
-
-  /**
    *  Return statistic
    *  Media - number of user files of each media type
-   *  Groups - number of user files of each group
    *
    *  If admin_mode is enabled (and user is admin),
    *  Function returns statistics about all files
@@ -38,29 +18,38 @@ class AjaxStorage_Controller extends AjaxController {
    *  @param {string} media List of comma-separated media types
    *  @return {object} Media and group statistic
    */
-  public function actionGetStats($admin_mode = false, $media = '') {
-    $admin_mode = !!$admin_mode;
+  public function actionGetMediaStats($admin_mode = false, $media = '', $group = '') {
+    if (!User::isAuthenticated()) {
+      return $this->jsonSuccess(array());
+    }
+
+    $admin_mode = $admin_mode == 'enabled';
     if ($admin_mode && !User::hasAccess('admin')) {
       $admin_mode = false;
     }
 
-    $media = self::__validateMedia($media);
+    $group_id = false;
+    if (!$admin_mode && $group) {
+      $group_id = -1;
 
-    if ($admin_mode) {
-      $groups = array();
-      $media = self::__loadMediaStats($media, true);
-    }
-    else {
-      $groups = self::__loadGroupsStats();
-      $media = self::__loadMediaStats($media);
+      foreach (self::_loadUserGroups() as $user_group) {
+        if ($user_group['name'] != $group) {
+          continue;
+        }
+
+        $group_id = (int)$user_group['id'];
+        break;
+      }
     }
 
-    return $this->jsonSuccess(
-      array(
-        'media' => $media,
-        'groups' => $groups,
-      )
-    );
+    if ($group_id == -1) {
+      return $this->jsonSuccess(array());
+    }
+
+    $media = self::_validateMedia($media);
+    $media = self::_loadMediaStats($media, $admin_mode, $group_id);
+
+    return $this->jsonSuccess($media);
   }
 
   /**
@@ -75,7 +64,7 @@ class AjaxStorage_Controller extends AjaxController {
       'rpp' => Config::get('storage.results_per_page'),
     );
 
-    $search = self::__validateSearch();
+    $search = self::_validateSearch();
 
     if (!User::isAuthenticated()) {
       return $this->jsonSuccess($ret);
@@ -83,6 +72,11 @@ class AjaxStorage_Controller extends AjaxController {
 
     // Nothing to return
     if (!count($search['media'])) {
+      return $this->jsonSuccess($ret);
+    }
+
+    // if group was not created yet
+    if ($search['group_id'] == -1) {
       return $this->jsonSuccess($ret);
     }
 
@@ -124,10 +118,18 @@ class AjaxStorage_Controller extends AjaxController {
 
     $files = StorageFiles::whereRaw($where);
 
-    $files->orderBy(
-      $search['orderby'] == 'popular' ? 'file_downloads' : 'file_id',
-      'desc'
-    );
+    if ($search['orderby'] == 'popular') {
+      $files->orderBy('file_downloads', 'desc');
+    }
+    else if ($search['orderby'] == 'biggest') {
+      $files->orderBy('file_size', 'desc');
+    }
+    else if ($search['orderby'] == 'smallest') {
+      $files->orderBy('file_size', 'asc');
+    }
+    else {
+      $files->orderBy('file_id', 'desc');
+    }
 
     $files->limit(
       $rpp,
@@ -164,15 +166,11 @@ class AjaxStorage_Controller extends AjaxController {
   public function actionUpload() {
     // If file even uploaded?
     if (!isset($_FILES) || !is_array($_FILES)) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_not_uploaded')
-      );
+      return $this->jsonError('error_file_not_uploaded');
     }
 
     if (!isset($_FILES['upload']) || !is_array($_FILES['upload'])) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_not_uploaded')
-      );
+      return $this->jsonError('error_file_not_uploaded');
     }
 
     $upload = $_FILES['upload'];
@@ -181,28 +179,20 @@ class AjaxStorage_Controller extends AjaxController {
     if (isset($upload['error']) && $upload['error']) {
       // No arrays are allowed here
       if (is_array($upload['error'])) {
-        return $this->jsonError(
-          Lang::get('storage.error_file_upload_error')
-        );
+        return $this->jsonError('error_file_upload_error');
       }
 
       $error = $upload['error'];
 
       if ($error == UPLOAD_ERR_NO_FILE) {
-        return $this->jsonError(
-          Lang::get('storage.error_file_not_uploaded')
-        );
+        return $this->jsonError('error_file_not_uploaded');
       }
 
       if ($error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE) {
-        return $this->jsonError(
-          Lang::get('storage.error_file_is_too_big')
-        );
+        return $this->jsonError('error_file_is_too_big');
       }
 
-      return $this->jsonError(
-        Lang::get('storage.error_file_not_uploaded')
-      );
+      return $this->jsonError('error_file_not_uploaded');
     }
 
     // check fields
@@ -211,44 +201,34 @@ class AjaxStorage_Controller extends AjaxController {
         continue;
       }
 
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+      return $this->jsonError('error_file_upload_error');
     }
 
     // get file info
-    if (!is_array($file_info = self::__processUploadedFile($upload))) {
+    if (!is_array($file_info = self::_processUploadedFile($upload))) {
       if ($file_info) {
         return $this->jsonError($file_info);
       }
 
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+      return $this->jsonError('error_file_upload_error');
     }
 
     // get user id
-    if (!($file_info['user_id'] = self::__getUserId())) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+    if (!($file_info['user_id'] = self::_getUserId())) {
+      return $this->jsonError('error_file_upload_error');
     }
 
     // get group id
-    $file_info['group_id'] = self::__getGroupId($file_info);
+    $file_info['group_id'] = self::_getGroupId($file_info);
 
     // get file hash
-    if (!($file_info['hash'] = self::__makeFileHash($file_info))) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+    if (!($file_info['hash'] = self::_makeFileHash($file_info))) {
+      return $this->jsonError('error_file_upload_error');
     }
 
     // move file
-    if (!($file_info['path'] = self::__moveUploadedFile($file_info))) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+    if (!($file_info['path'] = self::_moveUploadedFile($file_info))) {
+      return $this->jsonError('storage.error_file_upload_error');
     }
 
     // create entry
@@ -274,17 +254,13 @@ class AjaxStorage_Controller extends AjaxController {
     return $this->jsonSuccess($file->exportInfo());
   }
 
-  public function actionGetFileStats() {
-    return $this->jsonSuccess(array());
-  }
-
   /**
    * Validate user media
    *
    *  @param {string} user_media List of comma-separated media types
    *  @return {array} List of validated media types
    */
-  protected static function __validateMedia($user_media) {
+  protected static function _validateMedia($user_media) {
     $valid_media = array(
       'image',
       'video',
@@ -303,10 +279,8 @@ class AjaxStorage_Controller extends AjaxController {
       $user_media = '';
     }
 
-    $user_media = explode(',', $user_media);
-
     $_user_media_valid = array();
-    foreach ($user_media as $media) {
+    foreach (explode(',', $user_media) as $media) {
       if (!in_array($media, $valid_media)) {
         continue;
       }
@@ -328,7 +302,7 @@ class AjaxStorage_Controller extends AjaxController {
    *
    *  @return {array} List of user groups
   */
-  protected static function __loadUserGroups() {
+  protected static function _loadUserGroups() {
     if (!User::isAuthenticated()) {
       return array();
     }
@@ -353,69 +327,13 @@ class AjaxStorage_Controller extends AjaxController {
   }
 
   /**
-   *  Return user groups statistics
-   *
-   * 
-   */
-  protected static function __loadGroupsStats() {
-    if (!User::isAuthenticated()) {
-      return array();
-    }
-
-    if (!is_array($groups = self::__loadUserGroups())) {
-      return array();
-    }
-
-    if (!count($groups)) {
-      return array();
-    }
-
-    $map = array(
-      '0' => 'groupless',
-    );
-
-    foreach ($groups as $group) {
-      $map[$group['id']] = $group['name'];
-    }
-
-    $res = Database::query(
-      'SELECT
-        COUNT(*) as count,
-        group_id
-      FROM
-        storage_files
-      WHERE
-        user_id = "'.Database::escape(User::get_user_id()).'"
-        AND file_deleted = "0"
-      GROUP BY
-        group_id'
-    );
-
-    if (!$res || !is_array($res)) {
-      return array();
-    }
-
-    $stats = array();
-
-    foreach ($res as $stat) {
-      if (!isset($map[$stat['group_id']])) {
-        continue;
-      }
-
-      $stats[$map[$stat['group_id']]] = (int)$stat['count'];
-    }
-
-    return $stats;
-  }
-
-  /**
    *  Return user/global media types statistics
    *
    *  @param {array} user_media List of media types
    *  @param {boolean} global Return all statistics
    *  @return {array} List of media types with statistics
    */
-  protected static function __loadMediaStats($user_media, $global = false) {
+  protected static function _loadMediaStats($user_media, $global = false, $group_id = false) {
     $stats = array();
 
     if (!count($user_media) || !User::isAuthenticated()) {
@@ -430,6 +348,10 @@ class AjaxStorage_Controller extends AjaxController {
 
     if (!$global) {
       $where[] = 'user_id = "'.Database::escape(User::get_user_id()).'"';
+    }
+
+    if ($group_id !== false) {
+      $where[] = 'group_id = "'.Database::escape($group_id).'"';      
     }
 
     $where_media = array();
@@ -471,7 +393,7 @@ class AjaxStorage_Controller extends AjaxController {
    *  @param {array} upload File info from $_FILES
    *  @return {array} File processed info
    */
-  protected static function __processUploadedFile($upload) {
+  protected static function _processUploadedFile($upload) {
     $info = array();
 
     // file name
@@ -482,28 +404,27 @@ class AjaxStorage_Controller extends AjaxController {
     );
 
     if (strlen($upload['name']) > 70) {
-      return Lang::get('storage.error_filename_too_big');
+      return 'error_filename_too_big';
     }
 
     $info['name'] = $upload['name'];
 
     // check tmp path
     if (!file_exists($upload['tmp_name'])) {
-      return $this->jsonError(
-        Lang::get('storage.error_file_upload_error')
-      );
+      return 'error_file_upload_error';
     }
+
     $info['tmp_path'] = $upload['tmp_name'];
 
     // check file size
     $info['size'] = filesize($upload['tmp_name']);
 
     if ($info['size'] <= 0) {
-      return Lang::get('storage.error_file_is_empty');
+      return 'error_file_is_empty';
     }
 
     if ($info['size'] > Config::get('storage.max_filesize')) {
-      return Lang::get('storage.error_file_is_too_big');
+      return 'error_file_is_too_big';
     }
     // file media
     $info['media'] = StorageFiles::getFileMedia($info['name']);
@@ -518,15 +439,15 @@ class AjaxStorage_Controller extends AjaxController {
     // check if file meets required media type
     // media type is specified in storage widget
     if (!isset($_POST['file_media'])) {
-      return Lang::get('storage.error_incorrect_media_type');
+      return 'error_incorrect_media_type';
     }
 
-    if (!($media = self::__validateMedia($_POST['file_media']))) {
-      return Lang::get('storage.error_incorrect_media_type');
+    if (!($media = self::_validateMedia($_POST['file_media']))) {
+      return 'error_incorrect_media_type';
     }
 
     if (!in_array($info['media'], $media)) {
-      return Lang::get('storage.error_incorrect_media_type');
+      return 'error_incorrect_media_type';
     }
 
     // check if preview available
@@ -544,7 +465,7 @@ class AjaxStorage_Controller extends AjaxController {
    *
    *  @return {strgin} File owner id
    */
-  protected static function __getUserId() {
+  protected static function _getUserId() {
     if (User::isAuthenticated()) {
       return User::get_user_id();
     }
@@ -563,7 +484,7 @@ class AjaxStorage_Controller extends AjaxController {
    *  @param {array} file_info uploaded file info
    *  @return {strgin} Group id
    */
-  protected static function __getGroupId($file_info) {
+  protected static function _getGroupId($file_info) {
     if (!$file_info['user_id']) {
       return false;
     }
@@ -605,7 +526,7 @@ class AjaxStorage_Controller extends AjaxController {
    *  @param {array} file_info uploaded file info
    *  @return {strgin} File hash
    */
-  protected static function __makeFileHash($file_info) {
+  protected static function _makeFileHash($file_info) {
     while (true) {
       if (!($hash = makeRandomString(8))) {
         return false;
@@ -627,7 +548,7 @@ class AjaxStorage_Controller extends AjaxController {
    *  @param {array} file_info uploaded file info
    *  @return {strgin} Generated file path
    */
-  protected static function __moveUploadedFile($file_info) {
+  protected static function _moveUploadedFile($file_info) {
     $path  = '/uploads/';
 
     for ($i = 0; $i <= 1; ++$i) {
@@ -663,7 +584,7 @@ class AjaxStorage_Controller extends AjaxController {
    *
    *  @return {array} Search params
    */
-  protected static function __validateSearch() {
+  protected static function _validateSearch() {
     // validate data
     $fields = array(
       'media',
@@ -697,15 +618,26 @@ class AjaxStorage_Controller extends AjaxController {
     $info['admin_mode'] = false;
     if (isset($_POST['admin_mode']) &&
       $_POST['admin_mode'] &&
+      $_POST['admin_mode'] == 'enabled' &&
       User::hasAccess('admin')
       ) {
       $info['admin_mode'] = true;
     }
 
     // group id
-    $info['group_id'] = $info['group'] == 'groupless' ? 0 : false;
-    if ($info['group']) {
-      foreach (self::__loadUserGroups() as $group) {
+    $info['group_id'] = false;
+
+    if ($info['admin_mode']) {
+      if ($info['group'] == '__groupless') {
+        $info['group_id'] = 0;
+      }
+
+      $info['group'] = '';
+    }
+    else if($info['group']) {
+      $info['group_id'] = -1;
+
+      foreach (self::_loadUserGroups() as $group) {
         if ($group['name'] != $info['group']) {
           continue;
         }
@@ -716,10 +648,19 @@ class AjaxStorage_Controller extends AjaxController {
     }
 
     // orderby
-    $info['orderby'] = $info['orderby'] == 'newest' ? 'newest' : 'popular';
+    $orderby = array(
+      'latest',
+      'popular',
+      'biggest',
+      'smallest',
+    );
+
+    if (!in_array($info['orderby'], $orderby)) {
+      $info['orderby'] = 'latest';
+    }
 
     // media
-    $info['media'] = self::__validateMedia($info['media']);
+    $info['media'] = self::_validateMedia($info['media']);
 
     // page
     if (preg_match('#^[0-9]{1,5}$#', $info['page'])) {

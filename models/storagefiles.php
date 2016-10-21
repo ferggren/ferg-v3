@@ -33,8 +33,8 @@ class StorageFiles extends Database {
             $info['link_preview'] = $this->getPreviewLink(
                 array(
                     'crop' => true,
-                    'width' => 600,
-                    'height' => 200,
+                    'width' => 100,
+                    'height' => 100,
                     'align' => 'center',
                     'valign' => 'middle',
                 )

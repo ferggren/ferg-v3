@@ -1,6 +1,7 @@
 module.exports = {
   'orderby_latest':  'Последние',
   'orderby_popular': 'Популярные',
+  'orderby_biggest': 'По размеру',
 
   'media_all':      'Все',
   'media_image':    'Изображения',
@@ -19,7 +20,9 @@ module.exports = {
   'file_not_downloaded': '',
   'file_downloads':      '%downloads% rupluralize(%downloads% "загрузка" "загрузки" "загрузок")',
 
-  'file_upload': 'Кликните или перенесите файлы для загрузки',
+  'file_upload':  'Кликните или перенесите файлы для загрузки',
+  'file_delete':  'удалить',
+  'file_restore': 'восстановить',
 
   'upload_file_placeholder': 'Файл',
   'upload_file_scheduled':   'Загрузка... ',

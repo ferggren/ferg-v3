@@ -1,3 +1,10 @@
+/**
+ * @file Paginator
+ * @name Paginator
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React = require('react');
 
 require('./paginator.scss');
@@ -64,13 +71,11 @@ var Paginator = React.createClass({
 
     // if needed - separator
     if ((this.size_static + 1) < dynamic_left) {
-      list = list.concat([
-        this._makeButton({
-          title: '...',
-          active: false,
-          page: 'buttons_left',
-        })
-      ]);
+      list.push(this._makeButton({
+        title: '...',
+        active: false,
+        page: 'buttons_left',
+      }));
     }
 
     // dynamic middle pages
@@ -81,13 +86,11 @@ var Paginator = React.createClass({
 
     // if needed - separator
     if ((this.pages - this.size_static) > dynamic_right) {
-      list = list.concat([
-        this._makeButton({
-          title: '...',
-          active: false,
-          page: 'buttons_right',
-        })
-      ]);
+      list.push(this._makeButton({
+        title: '...',
+        active: false,
+        page: 'buttons_right',
+      }));
     }
 
     // right static pages
