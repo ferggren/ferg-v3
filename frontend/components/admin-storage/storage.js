@@ -4,7 +4,12 @@ var ContentWrapper = require('components/view/content-wrapper');
 
 var AdminStorage = React.createClass({
   onFileSelect(file) {
-    console.log(file);
+    var win = window.open(
+      file.link_download,
+      '_blank'
+    );
+    
+    win.focus();
   },
 
   render() {
