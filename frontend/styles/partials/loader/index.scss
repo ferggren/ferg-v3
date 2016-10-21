@@ -1,0 +1,15 @@
+.loader {
+	height: 24px;
+	background-size: 220px 19px;
+	background-image: url('./loader.gif');
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}
+
+.loader-tiny {
+	min-height: 11px;
+	min-width: 16px;
+	background-image: url('./loader-tiny.gif');
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}

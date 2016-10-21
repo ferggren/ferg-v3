@@ -1,30 +1,40 @@
+/**
+ * @file Storage options media
+ * @name Media
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React = require('react');
 var Lang  = require('libs/lang');
 
 var Media = React.createClass({
   shouldComponentUpdate(nextProps) {
+    // check for selected media
     if (nextProps.media !== this.props.media) {
       return true;
     }
 
-    var len = Object.keys(this.props.mediaStats).length;
-    var len_next = Object.keys(nextProps.mediaStats).length
+    // && media stats
+    var len = Object.keys(this.props.media_stats).length;
+    var len_next = Object.keys(nextProps.media_stats).length
 
     if (len != len_next) {
       return true;
     }
 
-    for (var media in nextProps.mediaStats) {
-      if (nextProps.mediaStats[media] != this.props.mediaStats[media]) {
+    for (var media in nextProps.media_stats) {
+      if (nextProps.media_stats[media] != this.props.media_stats[media]) {
         return true;
       }
     }
 
+    // nothing changed
     return false;
   },
 
   render() {
-    var stats = this.props.mediaStats;
+    var stats = this.props.media_stats;
     var total = 0;
 
     for (var key in stats) {
@@ -34,10 +44,10 @@ var Media = React.createClass({
 
     stats.all = total;
 
-    var media = this.props.mediaTypes.map((media) => {
+    var media = this.props.media_types.map((media) => {
       var className = "storage__option storage__option--media-" + media;
-
       var amount = null;
+
       if (stats[media] && stats[media] > 0) {
         amount = <span>{stats[media]}</span>;
       }

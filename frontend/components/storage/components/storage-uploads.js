@@ -1,3 +1,10 @@
+/**
+ * @file Storage uploads list
+ * @name Uploads
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React = require('react');
 
 var Uploads = React.createClass({

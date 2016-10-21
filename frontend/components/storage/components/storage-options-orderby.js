@@ -1,8 +1,16 @@
+/**
+ * @file Storage options orderBy
+ * @name OrderBy
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React = require('react');
 var Lang  = require('libs/lang');
 
 var OrderBy = React.createClass({
   shouldComponentUpdate(nextProps) {
+    //only if orderby is changed
     return nextProps.orderby !== this.props.orderby;
   },
 

@@ -1,3 +1,10 @@
+/**
+ * @file Storage component
+ * @name Storage
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React     = require('react');
 var Uploader  = require('./components/storage-uploader.js');
 var Uploads   = require('./components/storage-uploads.js');
@@ -17,7 +24,13 @@ Lang.exportStrings(
 );
 
 var Storage = React.createClass({
+  /** stats request id **/
   _stats_request: false,
+
+  /** file delete & restore request **/
+  _file_request: false,
+
+  /** load files request id **/
   _files_request: false,
 
   getInitialState() {
@@ -37,11 +50,17 @@ var Storage = React.createClass({
     };
   },
 
+  /**
+   *  Load files & stats 
+   */
   componentDidMount() {
     this._loadFiles();
     this._loadStats();
   },
 
+  /**
+   *  Abort any connections
+   */
   componentWillUnmount() {
     if (this._stats_request !== false) {
       Request.abort(this._stats_request);
@@ -52,8 +71,27 @@ var Storage = React.createClass({
       Request.abort(this._files_request);
       this._files_request = false;
     }
+
+    this._clearFilesRequests();
   },
 
+  /**
+   * Clear all requests for deleting & restoring files
+   */
+  _clearFilesRequests() {
+    this.state.files.map(file => {
+      if (typeof file._request_id == 'undefined') return;
+      if (file._request_id === false) return;
+
+
+      Request.abort(file._request_id);
+      file._request_id = false;
+    });
+  },
+
+  /**
+   *  Page selected in paginator
+   */
   _onPageSelect(page) {
     if (this.state.loading) {
       if (this._files_request === false) {
@@ -67,6 +105,9 @@ var Storage = React.createClass({
     this.setState({page: page, loading: false}, this._loadFiles);
   },
 
+  /**
+   *  File selected in FilesList
+   */
   _onFileSelect(file) {
     var stats = JSON.parse(JSON.stringify(this.state.media_stats));
     stats[file.media]++;
@@ -74,10 +115,92 @@ var Storage = React.createClass({
     console.log('file_select', file);
   },
 
+  /**
+   *  File uploaded in Uploader
+   */
   _onUpload(form_data) {
     console.log('file_upload', form_data);
   },
 
+  /**
+   *  File deleted in FilesList
+   */
+  _onFileDelete(deleted_file) {
+    this.state.files.forEach(file => {
+      if (file.id != deleted_file.id) {
+        return;
+      }
+
+      file._request_id = Request.fetch(
+        '/ajax/storage/deleteFile', {
+          success: () => {
+            file.file_deleted = true;
+            file._request_id = false;
+
+            this.setState({
+              files: this.state.files,
+            });
+          },
+
+          error: error => {
+            file._request_id = false;
+
+            this.setState({
+              files: this.state.files,
+            });
+          },
+
+          data: {
+            file_id: file.id,
+          }
+        }
+      );
+    });
+
+    this.setState({files: this.state.files});
+  },
+
+  /**
+   *  File restored in FilesList
+   */
+  _onFileRestore(restored_file) {
+    this.state.files.forEach(file => {
+      if (file.id != restored_file.id) {
+        return;
+      }
+
+      file._request_id = Request.fetch(
+        '/ajax/storage/restoreFile', {
+          success: () => {
+            file.file_deleted = false;
+            file._request_id = false;
+
+            this.setState({
+              files: this.state.files,
+            });
+          },
+
+          error: error => {
+            file._request_id = false;
+            
+            this.setState({
+              files: this.state.files,
+            });
+          },
+
+          data: {
+            file_id: file.id,
+          }
+        }
+      );
+    });
+
+    this.setState({files: this.state.files});
+  },
+
+  /**
+   *  Option changed in StorageOptions
+   */
   _setOption(option, value) {
     if (typeof this.state[option] == 'undefined') {
       return;
@@ -107,6 +230,12 @@ var Storage = React.createClass({
     this.setState(state, this._loadFiles);
   },
 
+  /**
+   *  Validate media types
+   *
+   *  @param {string} media Comma separated media types string
+   *  @return {object} Validated media
+   */
   _validateMedia(media) {
     var types = [
       'image',
@@ -139,19 +268,22 @@ var Storage = React.createClass({
     return user_types;
   },
 
+  /**
+   *  Load media stats
+   */
   _loadStats() {
-    this.stats_request = Request.fetch(
+    this._stats_request = Request.fetch(
       '/ajax/storage/getMediaStats', {
-        success: response => {
-          this.stats_request = false;
+        success: stats => {
+          this._stats_request = false;
 
           this.setState({
-            media_stats: response,
+            media_stats: stats,
           });
         },
 
         error: error => {
-          this.stats_request = false;
+          this._stats_request = false;
         },
 
         data: {
@@ -163,13 +295,17 @@ var Storage = React.createClass({
     );
   },
 
+  /**
+   *  Load files list
+   */
   _loadFiles() {
     this.setState({loading: true});
+    this._clearFilesRequests();
 
-    this.files_request = Request.fetch(
+    this._files_request = Request.fetch(
       '/ajax/storage/getFiles', {
         success: response => {
-          this.files_request = false;
+          this._files_request = false;
 
           this.setState({
             loading: false,
@@ -180,7 +316,7 @@ var Storage = React.createClass({
         },
 
         error: error => {
-          this.files_request = false;
+          this._files_request = false;
           this.setState({loading: false, files: []});
         },
 
@@ -233,14 +369,16 @@ var Storage = React.createClass({
           onOptionChange={this._setOption}
           orderby={this.state.orderby}
           media={this.state.media}
-          mediaTypes={this.state.media_types}
-          mediaStats={this.state.media_stats}
+          media_types={this.state.media_types}
+          media_stats={this.state.media_stats}
         />
 
         <FilesList
           loading={this.state.loading}
           files={this.state.files}
           onFileSelect={this._onFileSelect}
+          onFileDelete={this._onFileDelete}
+          onFileRestore={this._onFileRestore}
           media={this.state.media}
         />
 

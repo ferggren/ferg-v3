@@ -7,6 +7,64 @@ class AjaxStorage_Controller extends AjaxController {
     return $this->jsonError('access_denied');
   }
 
+  public function actionDeleteFile($file_id = false) {
+    if (!User::isAuthenticated()) {
+      return $this->jsonError('access_denied');
+    }
+
+    if (!is_string($file_id) || !preg_match('#^\d{1,10}$#', $file_id)) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if (!$file = StorageFiles::find($file_id)) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if ($file->file_deleted) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if ($file->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('ivalid_file_id');
+      }
+    }
+
+    $file->file_deleted = 1;
+    $file->save();
+
+    return $this->jsonSuccess();
+  }
+
+  public function actionRestoreFile($file_id = false) {
+    if (!User::isAuthenticated()) {
+      return $this->jsonError('access_denied');
+    }
+
+    if (!is_string($file_id) || !preg_match('#^\d{1,10}$#', $file_id)) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if (!$file = StorageFiles::find($file_id)) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if (!$file->file_deleted) {
+      return $this->jsonError('ivalid_file_id');
+    }
+
+    if ($file->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('ivalid_file_id');
+      }
+    }
+
+    $file->file_deleted = 0;
+    $file->save();
+    
+    return $this->jsonSuccess();
+  }
+
   /**
    *  Return statistic
    *  Media - number of user files of each media type

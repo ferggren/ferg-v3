@@ -1,16 +1,30 @@
+/**
+ * @file Storage uploader
+ * @name Uploader
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React = require('react');
 var Lang  = require('libs/lang');
 
 var Uploader = React.createClass({
   shouldComponentUpdate() {
+    // nevah
     return false;
   },
 
-  toggleInput(e) {
+  /**
+   *  Open upload dialog
+   */
+  _toggleInput(e) {
     this.refs.upload_input.click();
   },
 
-  inputOnChange(e) {
+  /**
+   *  Upload file selected in _toggleInput
+   */
+  _inputOnChange(e) {
     if (typeof this.props.onUpload != 'function') {
       return false;
     }
@@ -19,7 +33,10 @@ var Uploader = React.createClass({
     this.props.onUpload(form_data);
   },
 
-  onDrop(e) {
+  /**
+   *  Upload file(s)
+   */
+  _onDrop(e) {
     e.preventDefault();
 
     this.refs.upload_box.className = 'storage__upload';
@@ -41,16 +58,25 @@ var Uploader = React.createClass({
     }
   },
 
-  onDragOver(e) {
+  /**
+   *  Just ignore it
+   */
+  _onDragOver(e) {
     e.preventDefault();
   },
 
-  onDragLeave(e) {
+  /**
+   *  Remove hover from uploader
+   */
+  _onDragLeave(e) {
     e.preventDefault();
     this.refs.upload_box.className = 'storage__upload';
   },
 
-  onDragEnter(e) {
+  /**
+   *  Apply hover to uploader
+   */
+  _onDragEnter(e) {
     e.preventDefault();
     this.refs.upload_box.className = 'storage__upload storage__upload--hover';
   },
@@ -61,12 +87,12 @@ var Uploader = React.createClass({
 
         <div
           ref="upload_box"
-          onDrop={this.onDrop}
-          onDragOver={this.onDragOver}
-          onDragLeave={this.onDragLeave}
-          onDragEnter={this.onDragEnter}
+          onDrop={this._onDrop}
+          onDragOver={this._onDragOver}
+          onDragLeave={this._onDragLeave}
+          onDragEnter={this._onDragEnter}
           className="storage__upload"
-          onClick={this.toggleInput}
+          onClick={this._toggleInput}
         >
           {Lang.get('storage.file_upload')}
         </div>
@@ -77,7 +103,7 @@ var Uploader = React.createClass({
             type="file"
             multiple="false"
             name="upload"
-            onChange={this.inputOnChange}
+            onChange={this._inputOnChange}
           />
         </form>
       </div>

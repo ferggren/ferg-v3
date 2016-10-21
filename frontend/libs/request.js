@@ -10,7 +10,7 @@ var Cookies = require('libs/cookies');
 
 var Request = {
   /** Requests queue */
-  _requests: [],
+  _requests: {},
 
   /** Interval for XMLHTTP readyState watcher */
   _watch_inverval: false,
@@ -112,11 +112,13 @@ var Request = {
 
     progress.requests = 0;
 
-    Request._requests.forEach(request => {
+    for (var request_id in Request._requests) {
+      var request = Request._requests[request_id];
+
       progress.requests_total++;
 
       if (request.status != 'loading') {
-        return;
+        continue;
       }
 
       progress.requests_loading++;
@@ -125,7 +127,7 @@ var Request = {
       progress.loaded_total += request.progress.loaded_total;
       progress.uploaded += request.progress.uploaded;
       progress.uploaded_total += request.progress.uploaded_total;
-    });
+    };
 
     return progress;
   },
@@ -174,7 +176,7 @@ var Request = {
    *  @return {number} Uniq id
    */
   _makeNewRequestId() {
-    for (var i = 0; ; ++i) {
+    for (var i = 1; ; ++i) {
       if (typeof (Request._requests[i]) == 'object') {
         continue;
       }
@@ -189,19 +191,21 @@ var Request = {
   _watchStateChange() {
     var counter = 0;
 
-    Request._requests.forEach(request => {
+    for (var request_id in Request._requests) {
+      var request = Request._requests[request_id];
       ++counter;
 
       if (request.status != 'loading') {
-        return;
+        continue;
       }
 
       if (request.xhr.readyState != 4) {
-        return;
+        continue;
       }
 
       if (request.xhr.status != 200) {
-        return Request._error(request.id);
+        Request._error(request.id)
+        continue;
       }
 
       request.response = null;
@@ -212,15 +216,18 @@ var Request = {
         );
       }
       catch(e) {
-        return Request._error(request.id);
+        Request._error(request.id)
+        continue;
       }
 
       if (typeof request.response != 'object') {
-        return Request._error(request.id);
+        Request._error(request.id)
+        continue;
       }
 
       if (typeof request.response.status == 'undefined') {
-        return Request._error(request.id);
+        Request._error(request.id)
+        continue;
       }
 
       if (request.response.status != 'success') {
@@ -231,11 +238,11 @@ var Request = {
           Request._error(request.id);
         }
 
-        return;
+        continue;
       }
 
       Request._success(request.id);
-    });
+    };
 
     if (!counter && Request._watch_inverval) {
       clearInterval(Request._watch_inverval);;

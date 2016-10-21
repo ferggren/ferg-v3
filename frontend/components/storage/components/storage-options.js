@@ -1,3 +1,10 @@
+/**
+ * @file Storage options
+ * @name Options
+ * @author ferg <me@ferg.in>
+ * @copyright 2016 ferg
+ */
+
 var React   = require('react');
 var Media   = require('./storage-options-media.js');
 var OrderBy = require('./storage-options-orderby.js');
@@ -17,8 +24,8 @@ var Options = React.createClass({
           <Media
             onOptionChange={this.props.onOptionChange}
             media={this.props.media}
-            mediaTypes={this.props.mediaTypes}
-            mediaStats={this.props.mediaStats}
+            media_types={this.props.media_types}
+            media_stats={this.props.media_stats}
           />
           
         </div>
