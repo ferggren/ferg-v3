@@ -1,0 +1,51 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$options_width: 200px;
+$options_margin: 20px;
+
+.photolibrary__options-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		min-width: $options_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		min-width: $options_width;
+	}
+}
+
+	.photolibrary__options {
+
+	}
+
+	.photolibrary__options-spacing {
+		line-height: 1px;
+		background: #CCC;
+		height: 1px;
+		margin: 9px 0px;
+	}
+
+.photolibrary__photos-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $options_width + $options_margin;
+		min-width: $screen_tablet - $options_width - $options_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $options_width + $options_margin;
+		min-width: $screen_tablet - $options_width - $options_margin - 60px;
+	}
+}
+
+	.photolibrary__photos {
+
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}

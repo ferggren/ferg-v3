@@ -163,7 +163,7 @@ var Storage = React.createClass({
     );
 
     upload.request_id = Request.fetch(
-      '/ajax/storage/upload', {
+      '/api/storage/upload', {
         success: file => {
           upload.progress = 100;
           upload.request_id = false;
@@ -270,7 +270,7 @@ var Storage = React.createClass({
 
       file.loading = true;
       file._request_id = Request.fetch(
-        '/ajax/storage/deleteFile', {
+        '/api/storage/deleteFile', {
           success: () => {
             file.loading = false;
             file.file_deleted = true;
@@ -313,7 +313,7 @@ var Storage = React.createClass({
 
       file.loading = true;
       file._request_id = Request.fetch(
-        '/ajax/storage/restoreFile', {
+        '/api/storage/restoreFile', {
           success: () => {
             file.loading = false;
             file.file_deleted = false;
@@ -418,8 +418,12 @@ var Storage = React.createClass({
    *  Load media stats
    */
   _loadStats() {
+    if (this.props.mode == "uploader") {
+      return;
+    }
+    
     this._stats_request = Request.fetch(
-      '/ajax/storage/getMediaStats', {
+      '/api/storage/getMediaStats', {
         success: stats => {
           this._stats_request = false;
 
@@ -445,11 +449,15 @@ var Storage = React.createClass({
    *  Load files list
    */
   _loadFiles() {
+    if (this.props.mode == "uploader") {
+      return;
+    }
+
     this.setState({loading: true});
     this._clearFilesRequests();
 
     this._files_request = Request.fetch(
-      '/ajax/storage/getFiles', {
+      '/api/storage/getFiles', {
         success: response => {
           this._files_request = false;
 
@@ -501,6 +509,8 @@ var Storage = React.createClass({
     var loader    = null;
     var uploader  = null;
     var uploads   = null;
+    var options   = null;
+    var files     = null;
 
     if (this.props.group) {
       uploader = (
@@ -517,32 +527,8 @@ var Storage = React.createClass({
       );
     }
 
-    if (this.state.loading) {
-      loader = (
-        <div className="storage__loader">
-          <div className="loader" />
-        </div>
-      );
-    }
-
-    if (!this.state.loading) {
-      paginator = (
-        <div className="storage__paginator">
-          <Paginator
-            page={this.state.page}
-            pages={this.state.pages}
-            onSelect={this._onPageSelect}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="storage__wrapper">
-        {uploader}
-
-        {uploads}
-
+    if (this.props.mode != "uploader") {
+      options = (
         <Options
           onOptionChange={this._setOption}
           orderby={this.state.orderby}
@@ -550,7 +536,9 @@ var Storage = React.createClass({
           media_types={this.state.media_types}
           media_stats={this.state.media_stats}
         />
+      );
 
+      files = (
         <FilesList
           loading={this.state.loading}
           files={this.state.files}
@@ -559,10 +547,37 @@ var Storage = React.createClass({
           onFileRestore={this._onFileRestore}
           media={this.state.media}
         />
+      );
 
+      if (this.state.loading) {
+        loader = (
+          <div className="storage__loader">
+            <div className="loader" />
+          </div>
+        );
+      }
+
+      if (!this.state.loading) {
+        paginator = (
+          <div className="storage__paginator">
+            <Paginator
+              page={this.state.page}
+              pages={this.state.pages}
+              onSelect={this._onPageSelect}
+            />
+          </div>
+        );
+      }
+    }
+
+    return (
+      <div className="storage__wrapper">
+        {uploader}
+        {uploads}
+        {options}
+        {files}
         {loader}
         {paginator}
-
         <div className="floating-clear" />
       </div>
     );

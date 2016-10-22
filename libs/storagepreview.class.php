@@ -34,12 +34,12 @@ class StoragePreview {
      *  @param {array} preview_options List of preview options
      *  @return {string} Signed preview link
      */
-    public static function makePreviewLink($file, $preview_options = array()) {
+    public static function makePreviewLink($file_hash, $preview_options = array()) {
         $options = self::__validatePreviewOptions($preview_options);
 
         $link = array(
             'img',
-            $file->file_hash
+            $file_hash
         );
 
         foreach ($options as $option => $value) {
@@ -64,7 +64,7 @@ class StoragePreview {
             }
         }
 
-        $link[] = self::__makeSign($file, $options);
+        $link[] = self::__makeSign($file_hash, $options);
 
         $link = '/' . implode('/', $link) . '/';
 
@@ -126,7 +126,7 @@ class StoragePreview {
      *  @return {boolean} Preview check status
      */
     public static function checkPreviewSign($file, $preview_options, $preview_sign) {
-        return self::__makeSign($file, $preview_options) == $preview_sign;
+        return self::__makeSign($file->file_hash, $preview_options) == $preview_sign;
     }
 
     /**
@@ -286,10 +286,9 @@ class StoragePreview {
      *  @param {array} options Preview options
      *  @return {string} Preview sign
      */
-    protected static function __makeSign($file, $options) {
+    protected static function __makeSign($file_hash, $options) {
         $sign = array(Config::get('storage.salt'));
-        $sign[] = $file->file_hash;
-        $sign[] = $file->file_id;
+        $sign[] = $file_hash;
 
         ksort($options);
 
@@ -297,8 +296,7 @@ class StoragePreview {
             $sign[] = $key . ':' . $value;
         }
 
-        $sign[] = $file->file_hash;
-        $sign[] = $file->file_id;
+        $sign[] = $file_hash;
         $sign[] = Config::get('storage.salt');
 
         $sign = substr(md5(implode(';', $sign)), 0, 6);

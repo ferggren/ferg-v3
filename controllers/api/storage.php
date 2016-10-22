@@ -1,5 +1,5 @@
 <?php
-class AjaxStorage_Controller extends AjaxController {
+class ApiStorage_Controller extends AjaxController {
   /**
    *  Return access error
    */

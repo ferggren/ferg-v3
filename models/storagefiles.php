@@ -76,7 +76,7 @@ class StorageFiles extends Database {
             return false;
         }
 
-        if (!($link = StoragePreview::makePreviewLink($this, $options))) {
+        if (!($link = StoragePreview::makePreviewLink($this->file_hash, $options))) {
             return false;
         }
 
