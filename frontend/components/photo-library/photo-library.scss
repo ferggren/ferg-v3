@@ -6,6 +6,7 @@ $options_margin: 20px;
 $select_bg: (200, 200, 200);
 $select_bg_hover: (191, 191, 191);
 $buttons_bg: (90, 90, 90);
+$collection_title_bg: (90, 90, 90, 0.2);
 
 .photolibrary__options-wrapper {
 	@include respond_to(screen_wide) {
@@ -44,8 +45,16 @@ $buttons_bg: (90, 90, 90);
 
 .photolibrary__photo-wrapper {
 	float: left;
-	min-width: 150px;
 	width: 25%;
+
+	@include respond_to(screen_tablet) {
+		min-width: 150px;
+		width: 25%;
+	}
+
+	@include respond_to(screen_phone) {
+		width: 50%;
+	}
 }
 
 	.photolibrary__photo {
@@ -155,7 +164,36 @@ $buttons_bg: (90, 90, 90);
 		border-radius: 3px;
 		color: #FFF;
 	}
-	
+
 		.photolibrary__selector-attach:hover {
 			background: #41556f;
+		}
+
+.photolibrary__collection-wrapper {
+	float: left;
+	width: 50%;
+}
+
+	.photolibrary__collection {
+		margin: 5px;
+		height: 150px;
+		background-size: cover;
+		background-repeat: no-repeat;
+		cursor: pointer;
+		position: relative;
+		background: #ecf1f5;
+	}
+
+	.photolibrary__collection-title-wrapper {
+		text-align: center;
+		line-height: 150px;
+	}
+
+		.photolibrary__collection-title {
+			line-height: 24px;
+			display: inline-block;
+			border-radius: 3px;
+			padding: 0px 10px;
+			margin: 0px 5px;
+			@include background_rgba(nth($collection_title_bg, 1), nth($collection_title_bg, 2), nth($collection_title_bg, 3), nth($collection_title_bg, 4));
 		}

@@ -12,7 +12,7 @@ var Storage      = require('components/storage/');
 var Paginator    = require('components/paginator');
 var TagsCloud    = require('components/tags-cloud');
 var Photo        = require('./components/photo.js');
-var Collection   = require('./components/collection.js');
+var Cover        = require('./components/cover.js');
 var Collections  = require('./components/collections.js');
 var ButtonAttach = require('./components/button-attach.js');
 
@@ -38,6 +38,7 @@ var PhotoLibrary = React.createClass({
       page:        1,
       pages:       1,
       selected:    {},
+      tags:        {},
     };
   },
 
@@ -46,6 +47,8 @@ var PhotoLibrary = React.createClass({
    */
   componentDidMount() {
     this._loadPhotos();
+    this._loadTags();
+    this._loadCollections();
   },
 
   /**
@@ -58,6 +61,7 @@ var PhotoLibrary = React.createClass({
       }
 
       Request.abort(this._requests[request]);
+      this._requests[request] = null;
     }
 
     this._requests = {};
@@ -66,7 +70,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  File uploaded in storage
    */
-  _onPhotoUpload(photo) {
+  _createNewPhoto(photo) {
     var request_id = Request.fetch(
       '/api/photolibrary/addPhoto', {
       success: photo => {
@@ -106,6 +110,55 @@ var PhotoLibrary = React.createClass({
     photos.unshift(photo);
 
     this.setState(photos);
+  },
+
+  /**
+   *  Load tags
+   */
+  _loadTags() {
+    console.log('load tags');
+  },
+
+  /**
+   *  Load collections
+   */
+  _loadCollections() {
+    if (this._requests.load_collections) {
+      Request.abort(this._requests.load_collections);
+      delete this._requests.load_collections;
+    }
+
+    this._requests.load_collections = Request.fetch(
+      '/api/photolibrary/getCollections/', {
+      success: collections => {
+
+        this.setState({collections});
+
+        this._requests.load_collections = null;
+        delete this._requests.load_collections;
+      },
+
+      error: error => {
+        this._requests.load_collections = null;
+        delete this._requests.load_collections;
+      }
+    });
+  },
+
+  _setCollection(collection_id) {
+    console.log('set ', collection_id);
+  },
+
+  _addCollection(collection_name) {
+    console.log('add ', collection_name);
+  },
+
+  _deleteCollection(deleted_collection) {
+    console.log('delete ', deleted_collection);
+  },
+
+  _restoreCollection(restored_collection) {
+    console.log('restore ', restored_collection);
   },
 
   /**
@@ -150,7 +203,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  Select new page
    */
-  _onPageSelect(page) {
+  _selectPage(page) {
     if (this.state.loading) {
       if (!this._requests.load_photos) {
         return;
@@ -166,7 +219,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  Select photo
    */
-  _onPhotoSelect(photo) {
+  _setPhotoSelected(photo) {
     var selected = this.state.selected;
     selected[photo.id] = true;
 
@@ -176,7 +229,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  Unselect photo
    */
-  _onPhotoUnselect(photo) {
+  _setPhotoUnselected(photo) {
     var selected = this.state.selected;
 
     if (typeof selected[photo.id] == 'undefined') {
@@ -192,7 +245,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  Delete photo
    */
-  _onPhotoDelete(deleted_photo) {
+  _deletePhoto(deleted_photo) {
     var request  = 'photo_' + deleted_photo.id;
     var selected = this.state.selected;
 
@@ -245,7 +298,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  Restore photo
    */
-  _onPhotoRestore(restored_photo) {
+  _restorePhoto(restored_photo) {
     var request = 'photo_' + restored_photo.id;
 
     this.state.photos.forEach(photo => {
@@ -292,7 +345,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  On photo click -> return clicked photo
    */
-  _onPhotoClick(photo) {
+  _attachPhoto(photo) {
     if (photo.deleted) {
       return;
     }
@@ -307,7 +360,7 @@ var PhotoLibrary = React.createClass({
   /**
    *  On photos selected -> return all photos
    */
-  _onPhotosAttached() {
+  _attachSelectedPhotos() {
     var photos = Object.keys(this.state.selected);
 
     if (!photos.length) {
@@ -324,15 +377,22 @@ var PhotoLibrary = React.createClass({
   /**
    *  Clear all photos
    */
-  _clearSelection() {
+  _clearSelectedPhotos() {
     this.setState({selected: {}});
   },
 
   /**
-   *  On photo edit
+   *  Show photo editor
    */
-  _onPhotoEdit(photo) {
+  _editPhoto(photo) {
     console.log(photo);
+  },
+
+  /**
+   *  Update photo info
+   */
+  _updatePhoto(info) {
+
   },
 
   render() {
@@ -340,17 +400,24 @@ var PhotoLibrary = React.createClass({
     var loader      = null;
     var paginator   = null;
     var collections = null;
-    var collection  = null;
+    var cover       = null;
 
     if (!this.state.collection) {
       collections = (
         <Collections
+          collections={this.state.collections}
+          onCollectionSelect={this._setCollection}
+          onCollectionCreate={this._addCollection}
+          onCollectionDelete={this._deleteCollection}
+          onCollectionRestore={this._restoreCollection}
         />
       );
     }
     else {
-      collection = (
+      cover = (
         <Collection
+          onCollectionSelect={this._setCollection}
+          onCollectionDelete={this._deleteCollection}
         />
       );
     }
@@ -363,12 +430,12 @@ var PhotoLibrary = React.createClass({
           key={photo.id}
           photo={photo}
           selected={selected}
-          onPhotoDelete={this._onPhotoDelete}
-          onPhotoRestore={this._onPhotoRestore}
-          onPhotoSelect={this._onPhotoSelect}
-          onPhotoUnselect={this._onPhotoUnselect}
-          onPhotoEdit={this._onPhotoEdit}
-          onPhotoClick={this._onPhotoClick}
+          onPhotoDelete={this._deletePhoto}
+          onPhotoRestore={this._restorePhoto}
+          onPhotoSelect={this._setPhotoSelected}
+          onPhotoUnselect={this._setPhotoUnselected}
+          onPhotoEdit={this._editPhoto}
+          onPhotoClick={this._attachPhoto}
         />
       );
     });
@@ -387,7 +454,7 @@ var PhotoLibrary = React.createClass({
         <Paginator
           page={this.state.page}
           pages={this.state.pages}
-          onSelect={this._onPageSelect}
+          onSelect={this._selectPage}
         />
       );
     }
@@ -395,11 +462,11 @@ var PhotoLibrary = React.createClass({
     return (
       <div>
         <Storage 
-          onFileUpload={this._onPhotoUpload}
+          onFileUpload={this._createNewPhoto}
           mediaTypes="image"
           group="photolibrary"
           mode="uploader"
-          file_access="private"
+          upload_access="private"
         />
 
         <div className="photolibrary__options-wrapper">
@@ -434,15 +501,15 @@ var PhotoLibrary = React.createClass({
         <div className="photolibrary__photos-wrapper">
           <div className="photolibrary__photos">
             {collections}
-            {collection}
+            {cover}
             {photos}
             <div className="floating-clear" />
             <br />
             {loader}
             {paginator}
             <ButtonAttach
-              onAbort={this._clearSelection}
-              onAttach={this._onPhotosAttached}
+              onAbort={this._clearSelectedPhotos}
+              onAttach={this._attachSelectedPhotos}
               selected={this.state.selected}
             />
           </div>

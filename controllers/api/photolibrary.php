@@ -231,7 +231,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
         'width'  => 200,
         'height' => 150,
         'align'  => 'center',
-        'valign' => 'middle',
+        'valign' => 'top',
     ));
 
     return $this->jsonSuccess(array(
