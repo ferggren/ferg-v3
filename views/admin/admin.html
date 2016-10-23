@@ -13,17 +13,24 @@
 
 		<script>window.__CURRENT_LANG = '{{Lang::getLang()}}';</script>
 
-		<!--
-		<script src="/v_@file_hash('/public/js/lang/admin_en.js')/js/lang/admin_en.js"></script>
-		-->
+		@if (Config::get('app.env') == 'dev')
+			<link href="/assets/admin/admin.css?v=@build_hash" rel="stylesheet" />
 
-		<link href="/assets/admin/admin.css" />
-		<script src="/assets/admin/admin-common.js"></script>
-		<script src="/assets/admin/admin.js"></script>
+			<script src="/assets/admin/admin-common.js?v=@build_hash" defer></script>
+
+			<script src="/assets/admin/admin.js?v=@build_hash" defer></script>
+		@else
+			<link href="/assets/v_@file_hash('/public/assets/admin/admin.css')/admin/admin.css" rel="stylesheet" />
+
+			<script src="/assets/v_@file_hash('/public/assets/admin/admin-common.js')/admin/admin-common.js" defer></script>
+
+			<script src="/assets/v_@file_hash('/public/assets/admin/admin.js')/admin/admin.js" defer></script>
+		@endif
 	</head>
 
 	<body>
 		<div class="site-wrapper" id="react-root">
+			<div style="text-align: center; margin-top: 30px;">Loading...</div>
 		</div>
 	</body>
 </html>

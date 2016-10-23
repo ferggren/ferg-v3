@@ -78,7 +78,7 @@ $upload_bg_error: (177, 7, 7);
 		}
 
 		.storage__uploads-file:hover .storage__uploads-progress--error {
-			@include background_rgba(nth($upload_bg_error, 1), nth($upload_bg_error, 2), nth($upload_bg_error, 3), 0.3);			
+			@include background_rgba(nth($upload_bg_error, 1), nth($upload_bg_error, 2), nth($upload_bg_error, 3), 0.3);
 		}
 
 	.storage__uploads-title {

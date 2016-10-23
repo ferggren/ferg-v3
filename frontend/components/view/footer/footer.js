@@ -13,7 +13,7 @@ require('styles/partials/floating_clear');
 
 Lang.exportStrings(
   'footer',
-  require('./footer.' + Lang.getLang() + '.js')
+  require('./footer.lang-' + Lang.getLang() + '.js')
 );
 
 var Footer = React.createClass({

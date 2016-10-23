@@ -20,7 +20,7 @@ require('styles/partials/loader');
 
 Lang.exportStrings(
   'storage',
-  require('./storage.' + Lang.getLang() + '.js')
+  require('./storage.lang-' + Lang.getLang() + '.js')
 );
 
 var Storage = React.createClass({

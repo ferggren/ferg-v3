@@ -11,7 +11,7 @@ var Lang        = require('libs/lang');
 
 Lang.exportStrings(
   'nav',
-  require('./navigation.' + Lang.getLang() + '.js')
+  require('./navigation.lang-' + Lang.getLang() + '.js')
 );
 
 var navagation_links = [

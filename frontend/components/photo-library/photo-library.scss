@@ -3,6 +3,9 @@
 
 $options_width: 200px;
 $options_margin: 20px;
+$select_bg: (200, 200, 200);
+$select_bg_hover: (191, 191, 191);
+$buttons_bg: (90, 90, 90);
 
 .photolibrary__options-wrapper {
 	@include respond_to(screen_wide) {
@@ -15,17 +18,6 @@ $options_margin: 20px;
 		min-width: $options_width;
 	}
 }
-
-	.photolibrary__options {
-
-	}
-
-	.photolibrary__options-spacing {
-		line-height: 1px;
-		background: #CCC;
-		height: 1px;
-		margin: 9px 0px;
-	}
 
 .photolibrary__photos-wrapper {
 	@include respond_to(screen_wide) {
@@ -49,3 +41,121 @@ $options_margin: 20px;
 			min-width: 220px;
 		}
 	}
+
+.photolibrary__photo-wrapper {
+	float: left;
+	min-width: 150px;
+	width: 25%;
+}
+
+	.photolibrary__photo {
+		margin: 5px;
+		height: 90px;
+		background-size: cover;
+		background-repeat: no-repeat;
+		cursor: pointer;
+		position: relative;
+	}
+
+	.photolibrary__photo--deleted {
+		opacity: .6;
+	}
+
+	.photolibrary__photo-button {
+		border: 1px solid #CCC;
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		height: 5px;
+		width: 5px;
+		padding: 5px;
+		border-radius: 12px;
+		border-width: 2px;
+		border-style: solid;
+		opacity: .8;
+	}
+
+		.photolibrary__photo-button:hover {
+			opacity: 1;
+		}
+
+		.photolibrary__photo-button-select {
+			border-color: #EEE;
+			@include background_rgba(nth($select_bg, 1), nth($select_bg, 2), nth($select_bg, 3), 0.2);
+		}
+
+		.photolibrary__photo-button-unselect {
+			border-color: #EEE;
+			@include background_rgba(nth($select_bg_hover, 1), nth($select_bg_hover, 2), nth($select_bg_hover, 3), 0.9);
+		}
+
+	.photolibrary__photo-delete, .photolibrary__photo-restore, .photolibrary__photo-edit {
+		position: absolute;
+		opacity: .8;
+		font-size: 12px;
+		color: #FFF !important;
+		padding: 0px 5px;
+		line-height: 20px;
+		border-radius: 3px;
+		@include background_rgba(nth($buttons_bg, 1), nth($buttons_bg, 2), nth($buttons_bg, 3), 0.7);
+	}
+		.photolibrary__photo-delete, .photolibrary__photo-restore {
+			bottom: 5px;
+			right: 5px;
+		}
+
+		.photolibrary__photo-edit {
+			bottom: 5px;
+			left: 5px;
+		}
+
+		.photolibrary__photo-delete:hover, .photolibrary__photo-restore:hover, .photolibrary__photo-edit:hover {
+			opacity: 1;
+		}
+
+	.photolibrary__photo-loader {
+		position: absolute;
+		bottom: 10px;
+		right: 10px;
+	}
+
+.photolibrary__options {
+
+}
+
+.photolibrary__options-spacing {
+	line-height: 1px;
+	background: #CCC;
+	height: 1px;
+	margin: 9px 0px;
+}
+
+.photolibrary__selector {
+	margin-top: 10px;
+	line-height: 25px;
+	text-align: right;
+	font-size: 12px;
+}
+
+	.photolibrary__selector-abort {
+		display: inline-block;
+		margin-right: 20px;
+		cursor: pointer;
+	}
+
+		.photolibrary__selector-abort:hover {
+			text-decoration: underline;
+		}
+
+	.photolibrary__selector-attach {
+		display: inline-block;
+		padding: 0px 7px;
+		cursor: pointer;
+		background: #577294;
+		border-radius: 3px;
+		color: #FFF;
+	}
+	
+		.photolibrary__selector-attach:hover {
+			background: #41556f;
+		}

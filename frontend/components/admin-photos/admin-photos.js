@@ -6,7 +6,11 @@ var AdminPhotos = React.createClass({
   render() {
     return (
       <ContentWrapper>
-        <PhotoLibrary />
+        <PhotoLibrary
+        	onAttach={photos => {
+        		console.log(photos);
+        	}}
+        />
       </ContentWrapper>
     );
   }
