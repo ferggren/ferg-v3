@@ -40,6 +40,14 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     $photo->photo_deleted = 1;
     $photo->save();
 
+    if ($photo->photo_collection_id) {
+      if ($collection = $this->_updateCollection($photo->photo_collection_id)) {
+        return $this->jsonSuccess(array(
+          'collection' => $collection,
+        ));
+      }
+    }
+
     return $this->jsonSuccess();
   }
 
@@ -72,6 +80,14 @@ class ApiPhotoLibrary_Controller extends AjaxController {
 
     $photo->photo_deleted = 0;
     $photo->save();
+
+    if ($photo->photo_collection_id) {
+      if ($collection = $this->_updateCollection($photo->photo_collection_id)) {
+        return $this->jsonSuccess(array(
+          'collection' => $collection,
+        ));
+      }
+    }
 
     return $this->jsonSuccess();
   }
@@ -136,6 +152,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
         'title_en'      => $photo->photo_title_en,
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
+        'added'         => $photo->photo_added,
       );
     }
 
@@ -150,6 +167,32 @@ class ApiPhotoLibrary_Controller extends AjaxController {
   public function actionGetCollections() {
     $ret = array();
 
+    $collections = PhotoLibraryCollections::whereAnd('user_id', '=', User::get_user_id());
+    $collections->whereAnd('collection_deleted', '=', 0);
+
+    foreach ($collections->get() as $collection) {
+      $preview = false;
+
+      if ($collection->collection_cover_photo_hash) {
+        $preview = StoragePreview::makePreviewLink(
+          $collection->collection_cover_photo_hash, array(
+            'crop'   => true,
+            'width'  => 200,
+            'height' => 150,
+            'align'  => 'center',
+            'valign' => 'top',
+        ));
+      }
+
+      $ret[] = array(
+        'id'      => $collection->collection_id,
+        'name'    => $collection->collection_name,
+        'updated' => $collection->collection_updated,
+        'cover'   => $preview,
+        'photos'  => $collection->collection_photos,
+      );
+    }
+
     return $this->jsonSuccess($ret);
   }
 
@@ -159,8 +202,154 @@ class ApiPhotoLibrary_Controller extends AjaxController {
    *  @param {string} collection Collection name
    *  @return {object} Collection object
    */
-  public function actionCreateCollection() {
-    return $this->jsonError();
+  public function actionCreateCollection($name = '') {
+    if (!is_string($name)) {
+      return $this->jsonError('invalid_collection_name');
+    }
+
+    if (iconv_strlen($name) < 1 || iconv_strlen($name) > 20) {
+      return $this->jsonError('invalid_collection_name');
+    }
+
+    $exists = Database::from('photolibrary_collections');
+    $exists->where('user_id', '=', User::get_user_id());
+    $exists->whereAnd('collection_deleted', '=', 0);
+    $exists->whereAnd('collection_name', 'LIKE', $name);
+
+    if ($exists->count()) {
+      return $this->jsonError('collection_name_exists');
+    }
+
+    $collection = new PhotoLibraryCollections;
+    $collection->user_id = User::get_user_id();
+    $collection->collection_name = $name;
+    $collection->collection_updated = time();
+    $collection->collection_created = time();
+    $collection->collection_cover_photo_id = 0;
+    $collection->save();
+
+    return $this->jsonSuccess(array(
+      'id'      => $collection->collection_id,
+      'name'    => $collection->collection_name,
+      'updated' => $collection->collection_updated,
+      'cover'   => '',
+      'photos'  => 0,
+    ));
+  }
+
+  /**
+   *  Update collection title
+   *
+   *  @param {string} collection Collection name
+   *  @param {int} id Collection id
+   *  @return {object} Collection object
+   */
+  public function actionUpdateCollection($id = 0, $name = '') {
+    if (!is_string($name)) {
+      return $this->jsonError('invalid_collection_name');
+    }
+
+    if (iconv_strlen($name) < 1 || iconv_strlen($name) > 20) {
+      return $this->jsonError('invalid_collection_name');
+    }
+
+    if (!is_string($id) || !preg_match('#^\d{1,10}$#', $id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if (!$collection = PhotoLibraryCollections::find($id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if ($collection->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('invalid_collection_id');
+      }
+    }
+
+    if ($collection->collection_deleted) {
+      return $this->jsonError();
+    }
+
+    if ($collection->collection_name == $name) {
+      return $this->jsonSuccess();
+    }
+
+    $exists = Database::from('photolibrary_collections');
+    $exists->where('user_id', '=', User::get_user_id());
+    $exists->whereAnd('collection_deleted', '=', 0);
+    $exists->whereAnd('collection_name', 'LIKE', $name);
+
+    if ($exists->count()) {
+      return $this->jsonError('collection_name_exists');
+    }
+
+    $collection->collection_name = $name;
+    $collection->save();
+
+    return $this->jsonSuccess();
+  }
+
+  /**
+   *  Delete collection
+   *
+   *  @param {int} id Collection id
+   *  @return {boolean} Result
+   */
+  public function actionDeleteCollection($id = 0) {
+    if (!is_string($id) || !preg_match('#^\d{1,10}$#', $id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if (!$collection = PhotoLibraryCollections::find($id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if ($collection->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('invalid_collection_id');
+      }
+    }
+
+    if ($collection->collection_deleted) {
+      return $this->jsonSuccess();
+    }
+
+    $collection->collection_deleted = 1;
+    $collection->save();
+
+    return $this->jsonSuccess();
+  }
+
+  /**
+   *  Restore collection
+   *
+   *  @param {int} id Collection id
+   *  @return {boolean} Result
+   */
+  public function actionRestoreCollection($id = 0) {
+    if (!is_string($id) || !preg_match('#^\d{1,10}$#', $id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if (!$collection = PhotoLibraryCollections::find($id)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    if ($collection->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('invalid_collection_id');
+      }
+    }
+
+    if (!$collection->collection_deleted) {
+      return $this->jsonSuccess();
+    }
+
+    $collection->collection_deleted = 0;
+    $collection->save();
+
+    return $this->jsonSuccess();
   }
 
   /**
@@ -221,8 +410,9 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     $photo->file_id = $file_id;
     $photo->file_hash = $file->file_hash;
     $photo->user_id = User::get_user_id();
-    $photo->photo_collection_id = 0;
+    $photo->photo_collection_id = $collection;
     $photo->photo_size = "{$size[0]}x{$size[1]}";
+    $photo->photo_added = time();
     $photo->save();
 
     $preview = StoragePreview::makePreviewLink(
@@ -234,15 +424,27 @@ class ApiPhotoLibrary_Controller extends AjaxController {
         'valign' => 'top',
     ));
 
-    return $this->jsonSuccess(array(
-      'id'            => (int)$photo->file_id,
-      'gps'           => '',
-      'taken'         => '',
-      'title_ru'      => '',
-      'title_en'      => '',
-      'preview'       => $preview,
-      'collection_id' => (int)$photo->photo_collection_id,
-    ));
+    $ret = array(
+      'photo' => array(
+        'id'            => (int)$photo->file_id,
+        'gps'           => '',
+        'taken'         => '',
+        'title_ru'      => '',
+        'title_en'      => '',
+        'preview'       => $preview,
+        'collection_id' => (int)$photo->photo_collection_id,
+        'added'         => $photo->photo_added,
+      ),
+      'collection' => false,
+    );
+
+    if ($collection) {
+      if ($collection = $this->_updateCollection($collection)) {
+        $ret['collection'] = $collection;
+      }
+    }
+
+    return $this->jsonSuccess($ret);
   }
 
   protected function _actionDeleteFile($file) {
@@ -267,19 +469,63 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       return true;
     }
 
-    $collections = Database::from('hotolibrary_collections');
-    $collections->where('user_id', '=', User::get_user_id());
-    $collections->whereAnd('collection_deleted', '=', 0);
-
-    foreach ($collections->get() as $collection) {
-      if ($collection->collection_id != $collection_id) {
-        continue;
-      }
-
-      return true;
+    if (!($collection = PhotoLibraryCollections::find($collection_id))) {
+      return false;
     }
 
-    return false;
+    return !$collection->collection->collection_deleted;
+  }
+
+  /**
+   *  Update collections stats
+   *
+   *  @param {int} collection_id Collection id
+   *  @return {boolean} Is collection valid
+   */
+  protected function _updateCollection($collection_id) {
+    if (!($collection = PhotoLibraryCollections::find($collection_id))) {
+      return false;
+    }
+
+    $collection->collection_updated = $collection->collection_created;
+    $collection->collection_cover_photo_id = 0;
+    $collection->collection_cover_photo_hash = '';
+    $collection->collection_photos = 0;
+
+    $photo = PhotoLibrary::where('photo_collection_id', '=', $collection_id);
+    $photo->whereAnd('photo_deleted', '=', 0);
+
+    $collection->collection_photos = $photo->count();
+
+    $photo->limit(1);
+    $photo->orderBy('photo_added', 'desc');
+    $photo = $photo->get();
+
+    $preview = '';
+
+    if (count($photo)) {
+      $collection->collection_cover_photo_id = $photo[0]->file_id;
+      $collection->collection_cover_photo_hash = $photo[0]->file_hash;
+      $collection->collection_updated = $photo[0]->photo_added;
+
+      $preview = StoragePreview::makePreviewLink(
+        $photo[0]->file_hash, array(
+          'crop'   => true,
+          'width'  => 200,
+          'height' => 150,
+          'align'  => 'center',
+          'valign' => 'middle',
+      ));
+    }
+
+    $collection->save();
+
+    return array(
+      'id'      => $collection->collection_id,
+      'photos'  => $collection->collection_photos,
+      'cover'   => $preview,
+      'updated' => $collection->collection_updated,
+    );
   }
 }
 ?>

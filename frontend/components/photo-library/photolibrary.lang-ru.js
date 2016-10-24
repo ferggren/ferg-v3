@@ -1,7 +1,16 @@
 module.exports = {
+  photos_all:             'Все фотографии',
   photo_restore: 					'восстановить',
   photo_delete:  					'удалить',
   photo_edit:       			'инфо',
   selected_photos_attach: 'Прикрепить %selected% фото',
   selected_photos_abort:  'Отменить',
+  collection_restore:     'восстановить',
+  collection_delete:      'удалить',
+  collection_edit:        'изменить',
+  collection_abort:       'отмена',
+  collection_add:         'Добавить альбом',
+  collections_expand:     'Показать все альбомы',
+  collections_collapse:   'Скрыть альбомы',
+  collections_back:       '← Все фотографии',
 };

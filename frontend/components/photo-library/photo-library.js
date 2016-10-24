@@ -68,51 +68,6 @@ var PhotoLibrary = React.createClass({
   },
 
   /**
-   *  File uploaded in storage
-   */
-  _createNewPhoto(photo) {
-    var request_id = Request.fetch(
-      '/api/photolibrary/addPhoto', {
-      success: photo => {
-        this._addPhoto(photo);
-
-        this._requests[request_id] = null;
-        delete this._requests[request_id];
-      },
-
-      error: error => {
-        this._requests[request_id] = null;
-        delete this._requests[request_id];
-      },
-
-      data: {
-        file_id: photo.id,
-        collection:   this.state.collection ? this.state.collection : 0,
-      }
-    });
-
-    this._requests[request_id] = request_id;
-  },
-
-  /**
-   *  Add new photo
-   */
-  _addPhoto(photo) {
-    if (this.state.page != 1) {
-      return;
-    }
-
-    if (this.state.collection != photo.collection_id) {
-      return;
-    }
-
-    var photos = this.state.photos;
-    photos.unshift(photo);
-
-    this.setState(photos);
-  },
-
-  /**
    *  Load tags
    */
   _loadTags() {
@@ -132,6 +87,22 @@ var PhotoLibrary = React.createClass({
       '/api/photolibrary/getCollections/', {
       success: collections => {
 
+        collections.sort(function(a, b) {
+          return parseInt(b.updated) - parseInt(a.updated);
+        });
+
+        collections.push({
+          id:      -1,
+          name:    Lang.get('photolibrary.collection_add'),
+          updated: 0,
+        });
+
+        collections.push({
+          id:      0,
+          name:    Lang.get('photolibrary.photos_all'),
+          updated: 0,
+        });
+
         this.setState({collections});
 
         this._requests.load_collections = null;
@@ -145,20 +116,256 @@ var PhotoLibrary = React.createClass({
     });
   },
 
-  _setCollection(collection_id) {
-    console.log('set ', collection_id);
+  /**
+   *  Select collection
+   */
+  _selectCollection(collection) {
+    if (typeof collection != 'object') {
+      var found = false;
+
+      for (var i in this.state.collections) {
+        if (this.state.collections[i].id != collection) {
+          continue;
+        }
+
+        collection = this.state.collections[i];
+        found = true;
+        break;
+      }
+
+      if (!found) {
+        return;
+      }
+    }
+
+    if (collection.id == this.state.collection) {
+      return;
+    }
+
+    if (collection.id == -1) {
+      return this._editCollection(collection);
+    }
+
+    var id = !collection.deleted ? collection.id : 0;
+
+    this.setState({
+      collection: id,
+      page: 1,
+      pages: 1,
+    }, () => {
+      this._loadPhotos();
+      this._loadTags();
+    });
   },
 
-  _addCollection(collection_name) {
-    console.log('add ', collection_name);
+  /**
+   *  Toggle collection editing
+   */
+  _editCollection(collection) {
+    collection.editing = true;
+    collection.name_edit = collection.id == -1 ? "" : collection.name;
+    this.forceUpdate();
   },
 
-  _deleteCollection(deleted_collection) {
-    console.log('delete ', deleted_collection);
+  /**
+   *  Abort collection editing
+   */
+  _abortEditCollection(collection) {
+    collection.editing = false;
+    this.forceUpdate();
   },
 
-  _restoreCollection(restored_collection) {
-    console.log('restore ', restored_collection);
+  /**
+   *  Update collection title
+   */
+  _updateCollection(collection, collection_name) {
+    if (collection.id == -1) {
+      return this._createCollection(collection, collection_name);
+    }
+
+    collection.loading = true;
+
+    var request_id = Request.fetch(
+      '/api/photolibrary/updateCollection', {
+      success: () => {
+        collection.loading = false;
+        collection.editing = false;
+        collection.name = collection_name;
+
+        this.forceUpdate();
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      error: error => {
+        collection.loading = false;
+        this.forceUpdate();
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      data: {
+        name: collection_name,
+        id: collection.id,
+      }
+    });
+
+    this._requests[request_id] = request_id;
+    this.forceUpdate();
+  },
+
+  /**
+   *  Create new collection
+   */
+  _createCollection(collection, collection_name) {
+    collection.loading = true;
+
+    var request_id = Request.fetch(
+      '/api/photolibrary/createCollection', {
+      success: new_collection => {
+        collection.loading = false;
+        collection.editing = false;
+
+        var collections = this.state.collections;
+        collections.push(new_collection);
+
+        collections.sort(function(a, b) {
+          return parseInt(b.updated) - parseInt(a.updated);
+        });
+
+        this.setState({collections});
+        this._selectCollection(new_collection)
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      error: error => {
+        collection.loading = false;
+        this.forceUpdate();
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      data: {
+        name: collection_name,
+      }
+    });
+
+    this._requests[request_id] = request_id;
+    this.forceUpdate();
+  },
+
+  /**
+   *  Delete collection
+   */
+  _deleteCollection(collection) {
+    collection.loading = true;
+
+    var request_id = Request.fetch(
+      '/api/photolibrary/deleteCollection', {
+      success: () => {
+        collection.loading = false;
+        collection.deleted = true;
+        this.forceUpdate()
+
+        if (collection.id == this.state.collection) {
+          this._setCollection(collection);
+        }
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      error: error => {
+        collection.loading = false;
+        this.forceUpdate();
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      data: {
+        id: collection.id,
+      }
+    });
+
+    this._requests[request_id] = request_id;
+    this.forceUpdate();
+  },
+
+  /**
+   *  Restore collection
+   */
+  _restoreCollection(collection) {
+    collection.loading = true;
+
+    var request_id = Request.fetch(
+      '/api/photolibrary/restoreCollection', {
+      success: () => {
+        collection.loading = false;
+        collection.deleted = false;
+
+        this.forceUpdate()
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      error: error => {
+        collection.loading = false;
+        this.forceUpdate();
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      data: {
+        id: collection.id,
+      }
+    });
+
+    this._requests[request_id] = request_id;
+    this.forceUpdate();
+  },
+
+  /**
+   *  Update collection stats
+   */
+  _updateCollectionStats(update) {
+    var updated = false;
+
+    if (typeof update != 'object') {
+      return;
+    }
+
+    for (var collection in this.state.collections) {
+      collection = this.state.collections[collection];
+
+      if (collection.id != update.id) {
+        continue;
+      }
+
+      collection.photos  = update.photos;
+      collection.cover   = update.cover;
+      collection.updated = update.updated;
+
+      updated = true;
+      break;
+    }
+
+    if (!updated) {
+      return;
+    }
+
+    this.state.collections.sort(function(a, b) {
+      return parseInt(b.updated) - parseInt(a.updated);
+    });
+
+    this.forceUpdate();
   },
 
   /**
@@ -198,6 +405,55 @@ var PhotoLibrary = React.createClass({
         page:  this.state.page,
       }
     });
+  },
+
+  /**
+   *  File uploaded in storage
+   */
+  _createNewPhoto(photo) {
+    var request_id = Request.fetch(
+      '/api/photolibrary/addPhoto', {
+      success: response => {
+        this._addPhoto(response.photo);
+
+        if (response && response.collection) {
+          this._updateCollectionStats(response.collection);
+        }
+
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      error: error => {
+        this._requests[request_id] = null;
+        delete this._requests[request_id];
+      },
+
+      data: {
+        file_id:    photo.id,
+        collection: this.state.collection ? this.state.collection : 0,
+      }
+    });
+
+    this._requests[request_id] = request_id;
+  },
+
+  /**
+   *  Add new photo
+   */
+  _addPhoto(photo) {
+    if (this.state.page != 1) {
+      return;
+    }
+
+    if (this.state.collection != photo.collection_id) {
+      return;
+    }
+
+    var photos = this.state.photos;
+    photos.unshift(photo);
+
+    this.setState(photos);
   },
 
   /**
@@ -262,9 +518,13 @@ var PhotoLibrary = React.createClass({
       photo.loading = true;
       this._requests[request] = Request.fetch(
         '/api/photolibrary/deletePhoto', {
-          success: () => {
+          success: response => {
             photo.loading = false;
             photo.deleted = true;
+
+            if (response && response.collection) {
+              this._updateCollectionStats(response.collection);
+            }
 
             this._requests[request] = null;
             delete this._requests[request];
@@ -309,9 +569,13 @@ var PhotoLibrary = React.createClass({
       photo.loading = true;
       this._requests[request] = Request.fetch(
         '/api/photolibrary/restorePhoto', {
-          success: () => {
+          success: response => {
             photo.loading = false;
             photo.deleted = false;
+
+            if (response && response.collection) {
+              this._updateCollectionStats(response.collection);
+            }
 
             this._requests[request] = null;
             delete this._requests[request];
@@ -402,24 +666,49 @@ var PhotoLibrary = React.createClass({
     var collections = null;
     var cover       = null;
 
-    if (!this.state.collection) {
+    // Collections
+    if (!this.state.collections.length) {
       collections = (
-        <Collections
-          collections={this.state.collections}
-          onCollectionSelect={this._setCollection}
-          onCollectionCreate={this._addCollection}
-          onCollectionDelete={this._deleteCollection}
-          onCollectionRestore={this._restoreCollection}
-        />
+        <div className="loader" />
       );
     }
     else {
-      cover = (
-        <Collection
-          onCollectionSelect={this._setCollection}
-          onCollectionDelete={this._deleteCollection}
-        />
-      );
+      if (!this.state.collection) {
+        collections = (
+          <Collections
+            collections={this.state.collections}
+            default_collections={[0, -1]}
+            onCollectionSelect={this._selectCollection}
+            onCollectionEdit={this._editCollection}
+            onCollectionEditCancel={this._abortEditCollection}
+            onCollectionUpdate={this._updateCollection}
+            onCollectionDelete={this._deleteCollection}
+            onCollectionRestore={this._restoreCollection}
+          />
+        );
+      }
+      else {
+        for (var collection in this.state.collections) {
+          collection = this.state.collections[collection];
+
+          if (collection.id != this.state.collection) {
+            continue;
+          }
+
+          if (!collection.id) {
+            continue;
+          }
+
+          cover = (
+            <Cover
+              collection={collection}
+              onBack={() => {
+                this._selectCollection(0);
+              }}
+            />
+          );
+        }
+      }
     }
 
     photos = this.state.photos.map(photo => {
@@ -439,6 +728,12 @@ var PhotoLibrary = React.createClass({
         />
       );
     });
+
+    if (photos.length) {
+      photos.push(
+        <div key="clear" className="photolibrary__photos-clear" />
+      );
+    }
 
     if (this.state.loading) {
       loader = (
@@ -494,7 +789,7 @@ var PhotoLibrary = React.createClass({
 
             <TagsCloud
               group="photo-aperture"
-            />
+            /><br /><br /><br /><br /><br />
           </div>
         </div>
 
@@ -502,9 +797,8 @@ var PhotoLibrary = React.createClass({
           <div className="photolibrary__photos">
             {collections}
             {cover}
+            <div className="photolibrary__separator" />
             {photos}
-            <div className="floating-clear" />
-            <br />
             {loader}
             {paginator}
             <ButtonAttach

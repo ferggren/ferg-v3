@@ -6,8 +6,11 @@ $options_margin: 20px;
 $select_bg: (200, 200, 200);
 $select_bg_hover: (191, 191, 191);
 $buttons_bg: (90, 90, 90);
-$collection_title_bg: (90, 90, 90, 0.2);
+$collection_title_bg: (60, 60, 60, 0.7);
 
+/**
+ *  Basic wrappers
+ */
 .photolibrary__options-wrapper {
 	@include respond_to(screen_wide) {
 		float: right;
@@ -19,6 +22,10 @@ $collection_title_bg: (90, 90, 90, 0.2);
 		min-width: $options_width;
 	}
 }
+
+	.photolibrary__options {
+
+	}
 
 .photolibrary__photos-wrapper {
 	@include respond_to(screen_wide) {
@@ -33,6 +40,7 @@ $collection_title_bg: (90, 90, 90, 0.2);
 }
 
 	.photolibrary__photos {
+		margin: 0px -5px;
 
 		@include respond_to(screen_wide) {
 			min-width: 420px;
@@ -43,6 +51,18 @@ $collection_title_bg: (90, 90, 90, 0.2);
 		}
 	}
 
+/**
+ *	Separator
+ */
+.photolibrary__separator {
+	border-top: 1px solid #CCC;
+	height: 1px;
+	margin: 10px 5px;
+}
+
+/**
+ *  Photos
+ */
 .photolibrary__photo-wrapper {
 	float: left;
 	width: 25%;
@@ -56,6 +76,10 @@ $collection_title_bg: (90, 90, 90, 0.2);
 		width: 50%;
 	}
 }
+
+	.photolibrary__photos-clear {
+		clear: left;
+	}
 
 	.photolibrary__photo {
 		margin: 5px;
@@ -128,6 +152,9 @@ $collection_title_bg: (90, 90, 90, 0.2);
 		right: 10px;
 	}
 
+/**
+ *  Options
+ */
 .photolibrary__options {
 
 }
@@ -139,6 +166,9 @@ $collection_title_bg: (90, 90, 90, 0.2);
 	margin: 9px 0px;
 }
 
+/**
+ *  AttachAllButton
+ */
 .photolibrary__selector {
 	margin-top: 10px;
 	line-height: 25px;
@@ -169,6 +199,9 @@ $collection_title_bg: (90, 90, 90, 0.2);
 			background: #41556f;
 		}
 
+/**
+ *  Collections
+ */
 .photolibrary__collection-wrapper {
 	float: left;
 	width: 50%;
@@ -176,24 +209,155 @@ $collection_title_bg: (90, 90, 90, 0.2);
 
 	.photolibrary__collection {
 		margin: 5px;
-		height: 150px;
-		background-size: cover;
-		background-repeat: no-repeat;
+		height: 120px;
 		cursor: pointer;
 		position: relative;
 		background: #ecf1f5;
+		background-size: cover;
+		background-repeat: no-repeat;
 	}
 
-	.photolibrary__collection-title-wrapper {
+	.photolibrary__collections-clear {
+		clear: left;
+	}
+
+	.photolibrary__collection--deleted {
+		opacity: .6;
+	}
+
+	.photolibrary__collection-name-wrapper {
 		text-align: center;
-		line-height: 150px;
+		line-height: 120px;
 	}
 
-		.photolibrary__collection-title {
-			line-height: 24px;
+		.photolibrary__collection-name {
+			line-height: 20px;
 			display: inline-block;
 			border-radius: 3px;
-			padding: 0px 10px;
+			padding: 5px 10px;
 			margin: 0px 5px;
+			color: #FFF;
+			@include background_rgba(nth($collection_title_bg, 1), nth($collection_title_bg, 2), nth($collection_title_bg, 3), nth($collection_title_bg, 4));
+		}
+
+	.photolibrary__collection-edit, .photolibrary__collection-delete, .photolibrary__collection-abort, .photolibrary__collection-restore, .photolibrary__collection-photos {
+		position: absolute;
+		opacity: .8;
+		font-size: 12px;
+		color: #FFF !important;
+		padding: 0px 5px;
+		line-height: 20px;
+		border-radius: 3px;
+		@include background_rgba(nth($buttons_bg, 1), nth($buttons_bg, 2), nth($buttons_bg, 3), 0.7);
+	}
+
+		.photolibrary__collection-photos {
+			top: 10px;
+			right: 10px;
+		}
+
+		.photolibrary__collection-delete, .photolibrary__collection-restore {
+			right: 10px;
+			bottom: 10px;
+		}
+
+		.photolibrary__collection-abort, .photolibrary__collection-edit {
+			bottom: 10px;
+			left: 10px;
+		}
+
+		.photolibrary__collection-delete:hover, .photolibrary__collection-abort:hover, .photolibrary__collection-restore:hover, .photolibrary__collection-edit:hover {
+			opacity: 1;
+		}
+
+		.photolibrary__collection-loader {
+			position: absolute;
+			bottom: 15px;
+			right: 10px;
+		}
+
+	.photolibrary__collection-editor {
+		display: block;
+		line-height: 120px;
+		text-align: center;
+	}
+
+	.photolibrary__collection-editor input[type="text"] {
+		padding: 2px 5px; 
+		max-width: 100%;
+	}
+
+	.photolibrary__collections-collapse, .photolibrary__collections-expand {
+		display: block;
+		text-align: center;
+		cursor: pointer;
+		border-radius: 3px;
+		line-height: 25px;
+		margin: 5px 5px 15px 5px;
+	}
+
+	.photolibrary__collections-collapse {
+		background: #577294;
+		color: #FFF;
+	}
+
+	.photolibrary__collections-expand {
+		color: #577294;
+		background: #EEE;
+	}
+
+/**
+ *	Cover
+ */
+.photolibrary__cover-wrapper {
+
+}
+
+	.photolibrary__cover {
+		margin: 5px;
+		height: 120px;
+		position: relative;
+		background: #ecf1f5;
+		background-size: cover;
+		background-repeat: no-repeat;
+	}
+
+	.photolibrary__cover-photos, .photolibrary__cover-back {
+		position: absolute;
+		opacity: .8;
+		font-size: 12px;
+		color: #FFF !important;
+		padding: 0px 5px;
+		line-height: 20px;
+		border-radius: 3px;
+		@include background_rgba(nth($buttons_bg, 1), nth($buttons_bg, 2), nth($buttons_bg, 3), 0.7);
+	}
+		.photolibrary__cover-back {
+			top: 10px;
+			left: 10px;
+		}
+
+		.photolibrary__cover-photos {
+			top: 10px;
+			right: 10px;
+		}
+
+		.photolibrary__cover-back:hover {
+			cursor: pointer;
+			opacity: 1;
+		}
+
+	.photolibrary__cover-name-wrapper {
+		text-align: center;
+		line-height: 120px;
+	}
+
+		.photolibrary__cover-name {
+			line-height: 20px;
+			display: inline-block;
+			border-radius: 3px;
+			padding: 5px 10px;
+			margin: 0px 5px;
+			color: #FFF;
 			@include background_rgba(nth($collection_title_bg, 1), nth($collection_title_bg, 2), nth($collection_title_bg, 3), nth($collection_title_bg, 4));
 		}

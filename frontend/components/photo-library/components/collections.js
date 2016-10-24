@@ -15,93 +15,83 @@ require('styles/partials/loader');
 var Collections = React.createClass({
   getInitialState() {
     return {
-      expand: false,
-      editor: false,
+      expanded: false,
     }
   },
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextState.expand != this.state.expand) {
-      return true;
-    }
-
-    return true;
+  _expand() {
+    this.setState({expanded: true});
   },
 
-  _showNewCollectionForm() {
-    console.log('a');
-    this.setState({editor: true});
+  _collapse() {
+    this.setState({expanded: false});
   },
 
-  _hideNewCollectionForm() {
-    this.setState({editor: true});
-  },
-
-  _addNewCollection(collection_name) {
-    console.log(collection_name);
-    // this.setState({editor: false});
+  _makeCollection(collection) {
+    return (
+      <Collection
+        key={collection.id}
+        collection={collection}
+        onCollectionSelect={this.props.onCollectionSelect}
+        onCollectionEdit={this.props.onCollectionEdit}
+        onCollectionEditCancel={this.props.onCollectionEditCancel}
+        onCollectionUpdate={this.props.onCollectionUpdate}
+        onCollectionDelete={this.props.onCollectionDelete}
+        onCollectionRestore={this.props.onCollectionRestore}
+      />
+    );
+    return null;
   },
 
   render() {
-    var collections = [];
+    var collections  = [];
+    var show_all     = null;
+    var hide_all     = null;
+    var hidden_count = 0;
 
-    if (this.state.expand) {
-      collections = this.state.collections.map(collection => {
-        console.log(collection);
+    this.props.collections.forEach(collection => {
+      if (this.props.default_collections.indexOf(collection.id) >= 0) {
+        collections.unshift(this._makeCollection(collection));
+        return;
+      }
 
-        return null;
-      });
-    }
+      ++hidden_count;
 
-    if (!this.state.editor) {
-      collections.unshift(
-        <Collection
-          key="album_create"
-          onSelect={() => {this._showNewCollectionForm()}}
-          collection={{
-            title:     "Добавить альбом",
-            editable:  false,
-            id:        false,
-            edit_mode: false,
-          }}
-        />
-      );
-    }
-    else {
-      collections.unshift(
-        <Collection
-          key="album_editor"
-          onEdit={title => { this._addNewCollection(title)}}
-          onEditCancel={() => {this._hideNewCollectionForm();}}
-          collection={{
-            title:     "",
-            editable:  false,
-            id:        false,
-            edit_mode: true,
-          }}
-        />
+      if (!this.state.expanded) {
+        return;
+      }
+      
+      collections.push(this._makeCollection(collection));
+    });
+
+    if (!this.state.expanded && hidden_count) {
+      show_all = (
+        <div
+          className="photolibrary__collections-expand"
+          onClick={this._expand}
+        >
+          {Lang.get('photolibrary.collections_expand')}
+        </div>
       );
     }
 
-    collections.unshift(
-      <Collection
-        key="photos_all"
-        onSelect={() => {this.props.onCollectionSelect(0)}}
-        collection={{
-          title:     "Все фотографии",
-          editable:  false,
-          id:        false,
-          edit_mode: false,
-        }}
-      />
-    );
+    if (this.state.expanded) {
+      hide_all = (
+        <div
+          className="photolibrary__collections-collapse"
+          onClick={this._collapse}
+        >
+          {Lang.get('photolibrary.collections_collapse')}
+        </div>
+      );
+    }
 
     return (
-      <div
-        className="photolibrary__collections-wrapper"
-      >
+      <div className="photolibrary__collections-wrapper">
         {collections}
-        <div className="floating-clear" />
+        <div className="photolibrary__collections-clear" />
+        {show_all}
+        {hide_all}
       </div>
     );
   }
