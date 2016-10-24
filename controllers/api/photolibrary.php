@@ -11,6 +11,38 @@ class ApiPhotoLibrary_Controller extends AjaxController {
   }
 
   /**
+   *  Return tags by category
+   *
+   *  @param {int} collection Category id
+   *  @return {object} Tags list
+   */
+  public function actionGetTags($collection = 0) {
+    if (!$this->_checkCollectionId($collection)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    $key = "photos_{$collection}_";
+
+    $tags = Tags::getTagValues(array(
+      "{$key}iso",
+      "{$key}shutter_speed",
+      "{$key}aperture",
+      "{$key}camera",
+      "{$key}lens",
+      "{$key}category",
+    ));
+
+    return $this->jsonSuccess(array(
+      "iso"           => $tags["{$key}iso"],
+      "shutter_speed" => $tags["{$key}shutter_speed"],
+      "aperture"      => $tags["{$key}aperture"],
+      "camera"        => $tags["{$key}camera"],
+      "lens"          => $tags["{$key}lens"],
+      "category"      => $tags["{$key}category"],
+    ));
+  }
+
+  /**
    *  Delete photo
    *
    *  @param {int} page Page id
@@ -153,6 +185,14 @@ class ApiPhotoLibrary_Controller extends AjaxController {
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
         'added'         => $photo->photo_added,
+        'tags'          => array(
+          'iso' => '',
+          'shutter_speed' => '',
+          'aperture' => '',
+          'lens' => '',
+          'camera' => '',
+          'category' => '',
+        ),
       );
     }
 
@@ -434,6 +474,14 @@ class ApiPhotoLibrary_Controller extends AjaxController {
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
         'added'         => $photo->photo_added,
+        'tags'          => array(
+          'iso' => '',
+          'shutter_speed' => '',
+          'aperture' => '',
+          'lens' => '',
+          'camera' => '',
+          'category' => '',
+        ),
       ),
       'collection' => false,
     );

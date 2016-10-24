@@ -9,7 +9,7 @@ var React = require('react');
 var Lang  = require('libs/lang');
 
 var Photo = React.createClass({
-    /** for shouldComponentUpdate use **/
+  /** for shouldComponentUpdate use **/
   _loading:  false,
   _deleted:  false,
   _selected: false,

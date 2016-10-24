@@ -10,11 +10,12 @@ var Lang         = require('libs/lang');
 var Request      = require('libs/request');
 var Storage      = require('components/storage/');
 var Paginator    = require('components/paginator');
-var TagsCloud    = require('components/tags-cloud');
 var Photo        = require('./components/photo.js');
 var Cover        = require('./components/cover.js');
 var Collections  = require('./components/collections.js');
 var ButtonAttach = require('./components/button-attach.js');
+var Tags         = require('./components/tags.js');
+var PhotoEditor  = require('./components/editor.js');
 
 require('./photo-library.scss');
 require('styles/partials/floating_clear');
@@ -31,14 +32,17 @@ var PhotoLibrary = React.createClass({
 
   getInitialState() {
     return {
-      photos:      [],
-      loading:     false,
-      collections: [],
-      collection:  0,
-      page:        1,
-      pages:       1,
-      selected:    {},
-      tags:        {},
+      photos:         [],
+      loading:        false,
+      collections:    [],
+      collection:     0,
+      page:           1,
+      pages:          1,
+      selected:       {},
+      tags:           {},
+      tags_selected:  {},
+      editor_photo:   false,
+      editor_loading: false,
     };
   },
 
@@ -71,7 +75,37 @@ var PhotoLibrary = React.createClass({
    *  Load tags
    */
   _loadTags() {
-    console.log('load tags');
+    var collection = this.state.collection;
+    var request  = 'tags_' + collection;
+
+    if (this._requests[request]) {
+      Request.abort(this._requests[request]);
+
+      this._requests[request] = null;
+      delete this._requests[request];
+    }
+
+    this._requests[request] = Request.fetch(
+      '/api/photolibrary/getTags/', {
+      success: collection_tags => {
+        var tags = this.state.tags;
+        tags[collection] = collection_tags;
+
+        this.setState(tags)
+
+        this._requests[request] = null;
+        delete this._requests[request];
+      },
+
+      error: error => {
+        this._requests[request] = null;
+        delete this._requests[request];
+      },
+
+      data: {
+        collection
+      }
+    });
   },
 
   /**
@@ -149,9 +183,10 @@ var PhotoLibrary = React.createClass({
     var id = !collection.deleted ? collection.id : 0;
 
     this.setState({
-      collection: id,
-      page: 1,
-      pages: 1,
+      collection:    id,
+      page:          1,
+      pages:         1,
+      tags_selected: {},
     }, () => {
       this._loadPhotos();
       this._loadTags();
@@ -649,7 +684,34 @@ var PhotoLibrary = React.createClass({
    *  Show photo editor
    */
   _editPhoto(photo) {
-    console.log(photo);
+    if (this._requests.update_photo) {
+      Request.abort(this._requests.update_photo);
+
+      this._requests.update_photo = null;
+      delete this._requests.update_photo;
+    }
+
+    this.setState({
+      editor_photo:   photo,
+      editor_loading: false,
+    });
+  },
+
+  /**
+   *  Close photo editor
+   */
+  _abortEditPhoto() {
+    if (this._requests.update_photo) {
+      Request.abort(this._requests.update_photo);
+
+      this._requests.update_photo = null;
+      delete this._requests.update_photo;
+    }
+
+    this.setState({
+      editor_photo:   false,
+      editor_loading: false,
+    });
   },
 
   /**
@@ -665,6 +727,7 @@ var PhotoLibrary = React.createClass({
     var paginator   = null;
     var collections = null;
     var cover       = null;
+    var editor      = null;
 
     // Collections
     if (!this.state.collections.length) {
@@ -711,6 +774,8 @@ var PhotoLibrary = React.createClass({
       }
     }
 
+
+    // photos grid
     photos = this.state.photos.map(photo => {
       var selected = typeof this.state.selected[photo.id] != 'undefined';
 
@@ -735,16 +800,20 @@ var PhotoLibrary = React.createClass({
       );
     }
 
+    // photos placeholder
+    if (!this.state.loading && !this.state.photos.length) {
+      photos = Lang.get('photolibrary.photos_not_found');
+    }
+
+    // loader
     if (this.state.loading) {
       loader = (
         <div className="loader" />
       );
     }
-    else {
-      if (!this.state.photos.length) {
-        photos = Lang.get('photolibrary.photos_not_found');
-      }
 
+    // paginator
+    if (!this.state.loading) {
       paginator = (
         <Paginator
           page={this.state.page}
@@ -754,8 +823,23 @@ var PhotoLibrary = React.createClass({
       );
     }
 
+    // editor
+    if (this.state.editor_photo && this.state.tags[this.state.collection]) {
+      editor = (
+        <PhotoEditor
+          onClose={this._abortEditPhoto}
+          onUpdate={this._updatePhoto}
+          photo={this.state.editor_photo}
+          loading={this.state.editor_loading}
+          tags={this.state.tags[this.state.collection]}
+        />
+      );
+    }
+
     return (
       <div>
+        {editor}
+
         <Storage 
           onFileUpload={this._createNewPhoto}
           mediaTypes="image"
@@ -764,32 +848,13 @@ var PhotoLibrary = React.createClass({
           upload_access="private"
         />
 
-        <div className="photolibrary__options-wrapper">
-          <div className="photolibrary__options">
-
-            <TagsCloud
-              group="photo-camera"
+        <div className="photolibrary__tags-wrapper">
+          <div className="photolibrary__tags">
+            <Tags
+              onTagSelect={this._selectTag}
+              tags={this.state.tags[this.state.collection]}
+              selected={this.state.tags_selected}
             />
-            <div className="photolibrary__options-spacing" />
-
-            <TagsCloud
-              group="photo-lens"
-            />
-            <div className="photolibrary__options-spacing" />
-
-            <TagsCloud
-              group="photo-iso"
-            />
-            <div className="photolibrary__options-spacing" />
-
-            <TagsCloud
-              group="photo-shutter-speed"
-            />
-            <div className="photolibrary__options-spacing" />
-
-            <TagsCloud
-              group="photo-aperture"
-            /><br /><br /><br /><br /><br />
           </div>
         </div>
 
