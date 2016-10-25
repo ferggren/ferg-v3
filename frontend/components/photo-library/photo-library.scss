@@ -14,12 +14,12 @@ $collection_title_bg: (60, 60, 60, 0.7);
 .photolibrary__tags-wrapper {
 	@include respond_to(screen_wide) {
 		float: right;
-		min-width: $tags_width;
+		max-width: $tags_width;
 	}
 
 	@include respond_to(screen_tablet) {
 		float: right;
-		min-width: $tags_width;
+		max-width: $tags_width;
 	}
 }
 
@@ -365,16 +365,93 @@ $collection_title_bg: (60, 60, 60, 0.7);
 /**
  *	PhotoEditor
  */
-.photolibrary__editor-wrapper {
 
+.photolibrary__editor {
+	min-width: 280px;
 }
-
-	.photolibrary__editor {
-		min-width: 280px;
-	}
 
 	.photolibrary__editor-cover {
 		height: 150px;
 		background-size: cover;
 		background-repeat: no-repeat;
+		margin-bottom: 10px;
+	}
+
+.photolibrary__editor-tags-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		min-width: $tags_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		min-width: $tags_width;
+	}
+}
+
+	.photolibrary__editor-tags {
+		text-align: right;
+
+		@include respond_to(screen_mobile) {
+			text-align: center;
+		}
+	}
+
+	.photolibrary__editor-tags-spacing {
+		height: 1px;
+		background: #CCC;
+		margin: 10px 0px;
+	}
+
+.photolibrary__editor-info-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+}
+
+	.photolibrary__editor-info {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}
+
+	.photolibrary__editor-info input[type="text"] {
+		margin-bottom: 10px;
+		padding: 2px 5px;
+
+		@include respond_to(screen_wide) {
+			min-width: 400px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 200px;
+		}
+
+		@include respond_to(screen_mobile) {
+			margin: 0px auto 10px auto;
+		}
+	}
+
+.photolibrary__editor-update {
+	line-height: 24px;
+	text-align: center;
+	padding: 0px 7px;
+	cursor: pointer;
+	background: #DDD;
+	border-radius: 3px;
+	color: #333;
+}
+
+	.photolibrary__editor-update:hover {
+		background: #CCC;
 	}

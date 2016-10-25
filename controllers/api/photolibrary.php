@@ -21,33 +21,15 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       return $this->jsonError('invalid_collection_id');
     }
 
-    $key = "photos_{$collection}_";
-
-    $tags = Tags::getTagValues(array(
-      "{$key}iso",
-      "{$key}shutter_speed",
-      "{$key}aperture",
-      "{$key}camera",
-      "{$key}lens",
-      "{$key}category",
-    ));
-
-    return $this->jsonSuccess(array(
-      "iso"           => $tags["{$key}iso"],
-      "shutter_speed" => $tags["{$key}shutter_speed"],
-      "aperture"      => $tags["{$key}aperture"],
-      "camera"        => $tags["{$key}camera"],
-      "lens"          => $tags["{$key}lens"],
-      "category"      => $tags["{$key}category"],
-    ));
+    return $this->jsonSuccess(
+      $this->_getCollectionTags($collection)
+    );
   }
 
   /**
    *  Delete photo
    *
-   *  @param {int} page Page id
-   *  @param {string} tags List of comma-seperated tags
-   *  @param {int} collection Collection id
+   *  @param {int} photo_id Photo id
    *  @return {object} Photos
    */
   public function actionDeletePhoto($photo_id = 0) {
@@ -72,6 +54,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     $photo->photo_deleted = 1;
     $photo->save();
 
+    $this->_updatePhotoTags($photo);
+
     if ($photo->photo_collection_id) {
       if ($collection = $this->_updateCollection($photo->photo_collection_id)) {
         return $this->jsonSuccess(array(
@@ -86,9 +70,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
   /**
    *  Restore photo
    *
-   *  @param {int} page Page id
-   *  @param {string} tags List of comma-seperated tags
-   *  @param {int} collection Collection id
+   *  @param {int} photo_id Photo id
    *  @return {object} Photos
    */
   public function actionRestorePhoto($photo_id = 0) {
@@ -113,6 +95,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     $photo->photo_deleted = 0;
     $photo->save();
 
+    $this->_updatePhotoTags($photo);
+
     if ($photo->photo_collection_id) {
       if ($collection = $this->_updateCollection($photo->photo_collection_id)) {
         return $this->jsonSuccess(array(
@@ -122,6 +106,81 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     }
 
     return $this->jsonSuccess();
+  }
+
+  /**
+   *  Update photo
+   *
+   *  @param {int} page Page id
+   *  @param {string} tags List of comma-seperated tags
+   *  @param {int} collection Collection id
+   *  @return {object} Photos
+   */
+  public function actionUpdatePhoto($id = 0, $collection = 0) {
+    if (!is_string($id) || !preg_match('#^\d{1,10}$#', $id)) {
+      return $this->jsonError('invalid_photo_id');
+    }
+
+    if (!$photo = PhotoLibrary::find($id)) {
+      return $this->jsonError('invalid_photo_id');
+    }
+
+    if ($photo->user_id != User::get_user_id()) {
+      if (!User::hasAccess('admin')) {
+        return $this->jsonError('invalid_photo_id');
+      }
+    }
+
+    if ($photo->photo_deleted) {
+      return $this->jsonError('invalid_photo_id');
+    }
+
+    if ($collection && !$this->_checkCollectionId($collection)) {
+      return $this->jsonError('invalid_collection_id');
+    }
+
+    $text_regexp = '[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]';
+
+    $fields = array(
+      'title_ru'      => "#^{$text_regexp}{1,50}$#ui",
+      'title_en'      => "#^{$text_regexp}{1,50}$#ui",
+      'gps'           => '#^-?\d{1,3}\.\d{1,20}[\s,]++-?\d{1,3}\.\d{1,20}$#ui',
+      'taken'         => '#^\d{4}\.\d{2}\.\d{2}$#ui',
+      'iso'           => '#^\d{2,7}$#ui',
+      'aperture'      => '#^f/\d(?:\.\d)?$#ui',
+      'shutter_speed' => '#^(\d{1,4}|1/\d{1,5})$#ui',
+      'camera'        => "#^{$text_regexp}{1,20}$#ui",
+      'lens'          => "#^{$text_regexp}{1,50}$#ui",
+      'category'      => "#^{$text_regexp}{1,150}$#ui",
+    );
+
+    foreach ($fields as $field => $regexp) {
+      $key = 'photo_' . $field;
+
+      $photo->$key = '';
+
+      if (!isset($_POST[$field]) || !$_POST[$field]) {
+        continue;
+      }
+
+      if (!is_string($_POST[$field])) {
+        return $this->jsonError('invalid_photo_' . $field);
+      }
+
+      if (!preg_match($regexp, $_POST[$field])) {
+        return $this->jsonError('invalid_photo_' . $field);
+      }
+
+      $photo->$key = trim($_POST[$field]);
+    }
+
+    $photo->save();
+    $this->_updatePhotoTags($photo);
+
+    return $this->jsonSuccess(array(
+      'collection' => $collection,
+      'tags'       => $this->_getCollectionTags($collection),
+    ));
   }
 
   /**
@@ -143,13 +202,29 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       return $this->jsonError('invalid_collection_id');
     }
 
-    $photos = PhotoLibrary::where('user_id', '=', User::get_user_id());
-    $photos->whereAnd('photo_deleted', '=', 0);
-    $photos->orderBy('file_id', 'desc');
+    $where = array();
+
+    if ($tags) {
+      if (!($where_in = $this->_makeTagsWhere($collection))) {
+        return $this->jsonSuccess($ret);
+      }
+
+      if (!count($where_in)) {
+        return $this->jsonSuccess($ret);
+      }
+
+      $where[] = "file_id IN (".implode(',', $where_in).")";
+    }
+
+    $where[] = "user_id = '".Database::escape(User::get_user_id())."'";
+    $where[] = "photo_deleted = 0";
 
     if ($collection) {
-      $photos->whereAnd('photo_collection_id', '=', $collection);
+      $where[] = "photo_collection_id = '".Database::escape($collection)."'";
     }
+
+    $photos = PhotoLibrary::orderBy('file_id', 'desc');
+    $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
       return $this->jsonSuccess($ret);
@@ -179,19 +254,20 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       $ret['photos'][] = array(
         'id'            => (int)$photo->file_id,
         'gps'           => $photo->photo_gps,
-        'taken'         => $photo->photo_taken,
+        'taken'         => (int)$photo->photo_taken,
         'title_ru'      => $photo->photo_title_ru,
         'title_en'      => $photo->photo_title_en,
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
-        'added'         => $photo->photo_added,
-        'tags'          => array(
-          'iso' => '',
-          'shutter_speed' => '',
-          'aperture' => '',
-          'lens' => '',
-          'camera' => '',
-          'category' => '',
+        'added'         => (int)$photo->photo_added,
+
+        'tags' => array(
+          'iso'           => $photo->photo_iso,
+          'shutter_speed' => $photo->photo_shutter_speed,
+          'aperture'      => $photo->photo_aperture,
+          'lens'          => $photo->photo_lens,
+          'camera'        => $photo->photo_camera,
+          'category'      => $photo->photo_category,
         ),
       );
     }
@@ -468,12 +544,12 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       'photo' => array(
         'id'            => (int)$photo->file_id,
         'gps'           => '',
-        'taken'         => '',
+        'taken'         => 0,
         'title_ru'      => '',
         'title_en'      => '',
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
-        'added'         => $photo->photo_added,
+        'added'         => (int)$photo->photo_added,
         'tags'          => array(
           'iso' => '',
           'shutter_speed' => '',
@@ -574,6 +650,167 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       'cover'   => $preview,
       'updated' => $collection->collection_updated,
     );
+  }
+
+  protected function _updatePhotoTags($photo) {
+    $user_id = User::get_user_id();
+
+    $tags = array(
+      'iso',
+      'shutter_speed',
+      'aperture',
+      'camera',
+      'lens',
+      'category',
+    );
+
+    foreach ($tags as $tag) {
+      $key    = 'photo_' . $tag;
+      $value  = $photo->$key;
+      $values = array();
+
+      if ($value && !$photo->photo_deleted) {
+        if ($tag != 'category') {
+          $values = array($photo->$key);
+        }
+        else {
+          foreach (explode(',', $value) as $_value) {
+            if (!($_value = trim($_value))) {
+              continue;
+            }
+
+            $values[] = $_value;
+          }
+        }
+      }
+
+      Tags::attachTag(
+        "photos_{$user_id}_0_{$tag}",
+        $photo->file_id,
+        $values
+      );
+
+      if ($photo->photo_collection_id) {
+        Tags::attachTag(
+          "photos_{$photo->photo_collection_id}_{$tag}",
+          $photo->file_id,
+          $values
+        );
+      }
+    }
+  }
+
+  /**
+   *  Return collections tags
+   *
+   *  @param {int} collection_id Collection id
+   *  @return {boolean} Is collection valid
+   */
+  protected function _getCollectionTags($collection) {
+    if (!$collection) {
+      $key = "photos_".User::get_user_id()."_0_";
+    }
+    else {
+      $key = "photos_{$collection}_";
+    }
+
+    $tags = Tags::getTagValues(array(
+      "{$key}iso",
+      "{$key}shutter_speed",
+      "{$key}aperture",
+      "{$key}camera",
+      "{$key}lens",
+      "{$key}category",
+    ));
+
+    return array(
+      "iso"           => $tags["{$key}iso"],
+      "shutter_speed" => $tags["{$key}shutter_speed"],
+      "aperture"      => $tags["{$key}aperture"],
+      "camera"        => $tags["{$key}camera"],
+      "lens"          => $tags["{$key}lens"],
+      "category"      => $tags["{$key}category"],
+    );
+  }
+
+  /**
+   *  Return photo id for tags in $_POST
+   */
+  protected function _makeTagsWhere($collection) {
+    if (!$collection) {
+      $key = "photos_".User::get_user_id()."_0_";
+    }
+    else {
+      $key = "photos_{$collection}_";
+    }
+
+    $tags = array(
+      "iso"           => "",
+      "shutter_speed" => "",
+      "aperture"      => "",
+      "camera"        => "",
+      "lens"          => "",
+      "category"      => "",
+    );
+
+    foreach ($tags as $tag => $value) {
+      if (!isset($_POST['tag_' . $tag]) || !$_POST['tag_' . $tag]) {
+        continue;
+      }
+
+      $value = $_POST['tag_' . $tag];
+
+      if (!is_string($value)) {
+        return false;
+      }
+
+      if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,50}$#ui', $value)) {
+        return false;
+      }
+
+      $tags[$tag] = $value;
+    }
+
+    $insert_all    = true;
+    $needed_amount = 0;
+    $photos_ids    = array();
+
+    foreach ($tags as $tag => $value) {
+      if (!$value) {
+        continue;
+      }
+
+      if (!count($photos = Tags::getTagTargets($key.$tag, $value))) {
+        return array();
+      }
+
+      foreach ($photos as $photo) {
+        if (!$insert_all && !isset($photos_ids[$photo])) {
+          continue;
+        }
+
+        if (!isset($photos_ids[$photo])) {
+          $photos_ids[$photo] = 0;
+        }
+
+        ++$photos_ids[$photo];
+      }
+
+      ++$needed_amount;
+      $insert_all = false;
+    }
+
+    $ret = array();
+
+    foreach ($photos_ids as $photo_id => $amount) {
+      if ($amount < $needed_amount) {
+        continue;
+      }
+
+      $ret[] = $photo_id;
+    }
+
+    return $ret;
   }
 }
 ?>

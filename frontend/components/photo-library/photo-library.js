@@ -109,6 +109,25 @@ var PhotoLibrary = React.createClass({
   },
 
   /**
+   *  Select tag
+   */
+  _selectTag(tag, value) {
+    var tags = this.state.tags_selected;
+
+    if (typeof tags[tag] != 'undefined' && tags[tag] == value) {
+      tags[tag] = null;
+      delete tags[tag];
+    }
+    else {
+      tags[tag] = value;
+    }
+
+    this.setState({
+      tags_selected: tags,
+    }, this._loadPhotos);
+  },
+
+  /**
    *  Load collections
    */
   _loadCollections() {
@@ -414,6 +433,19 @@ var PhotoLibrary = React.createClass({
 
     this.setState({loading: true});
 
+    var data = {
+      collection: this.state.collection ? this.state.collection : '',
+      page:       this.state.page,
+    };
+
+    if (Object.keys(this.state.tags_selected).length) {
+      data.tags = true;
+    }
+
+    for (var tag in this.state.tags_selected) {
+      data['tag_' + tag] = this.state.tags_selected[tag];
+    }
+
     this._requests.load_photos = Request.fetch(
       '/api/photolibrary/getPhotos/', {
       success: response => {
@@ -435,10 +467,7 @@ var PhotoLibrary = React.createClass({
         delete this._requests.load_photos;
       },
 
-      data: {
-        collection: this.state.collection ? this.state.collection : '',
-        page:  this.state.page,
-      }
+      data
     });
   },
 
@@ -717,8 +746,80 @@ var PhotoLibrary = React.createClass({
   /**
    *  Update photo info
    */
-  _updatePhoto(info) {
+  _updatePhoto(updated_photo, info) {
+    var request = 'update_' + updated_photo.id;
 
+    this.state.photos.forEach(photo => {
+      if (photo.id != updated_photo.id) {
+        return;
+      }
+
+      photo.loading = true;
+      this._requests[request] = Request.fetch(
+        '/api/photolibrary/updatePhoto', {
+          success: response => {
+            photo.loading = false;
+
+            photo.title_ru = info.title_ru;
+            photo.title_en = info.title_en;
+            photo.gps      = info.gps;
+            photo.taken    = info.taken;
+
+            photo.tags.aperture      = info.tags.aperture;
+            photo.tags.shutter_speed = info.tags.shutter_speed;
+            photo.tags.camera        = info.tags.camera;
+            photo.tags.lens          = info.tags.lens;
+            photo.tags.iso           = info.tags.iso;
+            photo.tags.category      = info.tags.category;
+
+            var tags = this.state.tags;
+            tags[response.collection] = response.tags;
+
+            this._requests[request] = null;
+            delete this._requests[request];
+
+            this.setState({
+              photos:         this.state.photos,
+              editor_loading: false,
+              editor_photo:   false,
+              tags,
+            });
+          },
+
+          error: error => {
+            photo.loading = false;
+
+            this._requests[request] = null;
+            delete this._requests[request];
+
+            this.setState({
+              photos:         this.state.photos,
+              editor_loading: false,
+            });
+          },
+
+          data: {
+            id:            photo.id,
+            collection:    this.state.collection,
+            title_ru:      info.title_ru,
+            title_en:      info.title_en,
+            gps:           info.gps,
+            taken:         info.taken,
+            iso:           info.tags.iso,
+            shutter_speed: info.tags.shutter_speed,
+            aperture:      info.tags.aperture,
+            camera:        info.tags.camera,
+            lens:          info.tags.lens,
+            category:      info.tags.category,
+          }
+        }
+      );
+    });
+
+    this.setState({
+      photos:         this.state.photos,
+      editor_loading: true,
+    });
   },
 
   render() {

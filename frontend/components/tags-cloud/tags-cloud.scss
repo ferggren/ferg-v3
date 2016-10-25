@@ -1,0 +1,22 @@
+.tags-cloud {
+	text-align: center;
+}
+
+	.tags-cloud__tag {
+		line-height: 24px;
+		display: inline-block;
+		padding: 0px 6px;
+		border-radius: 5px;
+		margin: 0px 5px 0px 0px;
+		cursor: pointer;
+		color: #666 !important;
+		font-size: 12px;
+	}
+
+	.tags-cloud__tag:hover, .tags-cloud__tag--selected {
+		color: #000 !important;
+	}
+
+	.tags-cloud__tag--selected {
+		background: #e5e5e5;
+	}
