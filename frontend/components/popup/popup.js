@@ -26,6 +26,7 @@ var Popups = {
       id:    popup_id,
       node:  popup_node,
       close: onclose,
+      top:   false,
     };
 
     Popups._updatePopupZ();
@@ -164,11 +165,11 @@ var Popups = {
     var max_id = 0;
 
     for (var popup_id in Popups._popups) {
-      Popups._popups[popup_id].node.style.style = ((10000 + popup_id) + '');
+      Popups._popups[popup_id].node.style.zIndex = ((10000 + popup_id) + '');
       max_id = Math.max(popup_id, max_id);
     }
     
-    Popups._popups[max_id].node.style.style = '20001';
+    Popups._popups[max_id].node.style.zIndex = '20001';
   },
 
   _init: false,
@@ -197,7 +198,8 @@ var Popups = {
    */
   _watchResize() {
     for (var popup_id in Popups._popups) {
-      var node = Popups._popups[popup_id].node;
+      var popup = Popups._popups[popup_id];
+      var node  = Popups._popups[popup_id].node;
 
       if (!node) {
         continue;
@@ -215,7 +217,14 @@ var Popups = {
       var offset_x = Math.max(0, ~~((w_w - c_w) / 2));
       var offset_y = Math.max(0, ~~((w_h - c_h) / 2));
 
-      node.style.top = offset_y + 'px';
+      if (popup.top === false) {
+        popup.top = offset_y;
+      }
+      else {
+        popup.top = Math.min(popup.top, offset_y);
+      }
+
+      node.style.top = popup.top + 'px';
       node.style.left = offset_x + 'px';
     }
   },
@@ -252,6 +261,8 @@ var Popup = React.createClass({
       <div>{this.props.children}</div>,
       this._popup.node
     );
+
+    Popups._watchResize();
   },
 
   render() {

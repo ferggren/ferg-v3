@@ -1,0 +1,20 @@
+.popup__window {
+	background: #FFF;
+	padding: 15px;
+	margin: 10px;
+	border-radius: 2px;
+}
+
+.popup__window-title {
+	font-size: 20px;
+	line-height: 20px;
+	color: #666;
+	margin: 0px 0px 15px 0px;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+.popup__window-content {
+	overflow-y: scroll;
+	overflow-x: hidden;
+}

@@ -8,6 +8,8 @@
 var React = require('react');
 var Popup = require('components/popup');
 
+require('./popup-window.scss');
+
 var PopupWindow = React.createClass({
   render() {
     var title = null;
