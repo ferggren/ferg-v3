@@ -21,7 +21,7 @@ module.exports = {
   'file_downloads':      '%downloads% rupluralize(%downloads% "загрузка" "загрузки" "загрузок")',
 
   'file_upload':  'Кликните или перенесите файлы для загрузки',
-  'file_delete':  'удалить',
+  'file_delete':  'x',
   'file_restore': 'восстановить',
 
   'upload_file_placeholder': 'Файл',

@@ -21,7 +21,7 @@ module.exports = {
   'file_downloads':      '%downloads% pluralize(%downloads% "download" "downloads")',
 
   'file_upload':  'Click or drop file to upload',
-  'file_delete':  'delete',
+  'file_delete':  'x',
   'file_restore': 'restore',
 
   'upload_file_placeholder': 'File',

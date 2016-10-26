@@ -49,7 +49,7 @@ var Photo = React.createClass({
     var edit    = null;
 
     // select button
-    if (!photo.deleted) {
+    if (!photo.deleted && this.props.multiselect !== false) {
       if (this.props.selected) {
         select = (
           <div

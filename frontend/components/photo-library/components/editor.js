@@ -15,9 +15,13 @@ require('styles/partials/floating_clear');
 
 var PhotoEditor = React.createClass({
   _loading: null,
+  _error:   false,
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this._loading != nextProps.loading) {
+      return true;
+    }
+    if (this._error != nextProps.error) {
       return true;
     }
 
@@ -41,6 +45,8 @@ var PhotoEditor = React.createClass({
         camera:        tags.camera,
         lens:          tags.lens,
         category:      tags.category,
+        fl:            tags.fl,
+        efl:           tags.efl,
       }
     }
   },
@@ -73,17 +79,23 @@ var PhotoEditor = React.createClass({
   },
 
   render() {
+    this._loading = this.props.loading;
+    this._error   = this.props.error;
+
     var photo = this.props.photo;
 
     var button = null;
     var tags   = [];
     var common = null;
     var loader = null;
+    var error  = null;
 
+    // loader
     if (this.props.loading) {
       loader = <div className="loader" />
     }
 
+    // update button
     if (!this.props.loading) {
       button = (
         <div className="photolibrary__editor-update" onClick={this._update}>
@@ -92,6 +104,7 @@ var PhotoEditor = React.createClass({
       );
     }
 
+    //tags select
     tags = [];
     for (var tag in this.props.tags) {
       tags.push(
@@ -113,11 +126,22 @@ var PhotoEditor = React.createClass({
       backgroundImage: "url('" + photo.preview + "')",
     };
 
+    // error
+    if (this.props.error) {
+      error = (
+        <div className="photolibrary__editor-error">
+          {this.props.error}
+        </div>
+      );
+    }
+
     return (
       <PopupWindow onClose={this.props.onClose}>
 
         <div className="photolibrary__editor">
           <div className="photolibrary__editor-cover" style={cover_style} />
+
+          {error}
 
           <div className="photolibrary__editor-tags-wrapper">
             <div className="photolibrary__editor-tags">
@@ -164,7 +188,7 @@ var PhotoEditor = React.createClass({
                 <input
                   type="text"
                   ref="taken"
-                  defaultValue={photo.photo_taken}
+                  defaultValue={photo.taken}
                   placeholder={Lang.get('photolibrary.photo_taken')}
                   disabled={this.props.loading}
                 />

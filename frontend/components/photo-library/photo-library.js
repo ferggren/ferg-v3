@@ -16,6 +16,7 @@ var Collections  = require('./components/collections.js');
 var ButtonAttach = require('./components/button-attach.js');
 var Tags         = require('./components/tags.js');
 var PhotoEditor  = require('./components/editor.js');
+var Popups       = require('libs/popups-nice');
 
 require('./photo-library.scss');
 require('styles/partials/floating_clear');
@@ -43,6 +44,7 @@ var PhotoLibrary = React.createClass({
       tags_selected:  {},
       editor_photo:   false,
       editor_loading: false,
+      editor_error:   false,
     };
   },
 
@@ -253,6 +255,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         collection.loading = false;
         this.forceUpdate();
 
@@ -297,6 +301,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         collection.loading = false;
         this.forceUpdate();
 
@@ -335,6 +341,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         collection.loading = false;
         this.forceUpdate();
 
@@ -370,6 +378,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         collection.loading = false;
         this.forceUpdate();
 
@@ -462,6 +472,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         this.setState({loading: false});
         this._requests.load_photos = null;
         delete this._requests.load_photos;
@@ -489,6 +501,8 @@ var PhotoLibrary = React.createClass({
       },
 
       error: error => {
+        Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
         this._requests[request_id] = null;
         delete this._requests[request_id];
       },
@@ -599,6 +613,8 @@ var PhotoLibrary = React.createClass({
           },
 
           error: error => {
+            Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
             photo.loading = false;
 
             this._requests[request] = null;
@@ -650,6 +666,8 @@ var PhotoLibrary = React.createClass({
           },
 
           error: error => {
+            Popups.createPopup({content: Lang.get('photolibrary.' + error)});
+
             photo.loading = false;
 
             this._requests[request] = null;
@@ -673,16 +691,16 @@ var PhotoLibrary = React.createClass({
   /**
    *  On photo click -> return clicked photo
    */
-  _attachPhoto(photo) {
+  _selectPhoto(photo) {
     if (photo.deleted) {
       return;
     }
 
-    if (typeof this.props.onAttach != 'function') {
+    if (typeof this.props.onSelect != 'function') {
       return;
     }
 
-    this.props.onAttach([photo.id]);
+    this.props.onSelect([photo.id]);
   },
 
   /**
@@ -695,11 +713,11 @@ var PhotoLibrary = React.createClass({
       return;
     }
 
-    if (typeof this.props.onAttach != 'function') {
+    if (typeof this.props.onSelect != 'function') {
       return;
     }
 
-    this.props.onAttach(photos);
+    this.props.onSelect(photos);
   },
 
   /**
@@ -771,6 +789,8 @@ var PhotoLibrary = React.createClass({
             photo.tags.lens          = info.tags.lens;
             photo.tags.iso           = info.tags.iso;
             photo.tags.category      = info.tags.category;
+            photo.tags.fl            = info.tags.fl;
+            photo.tags.efl           = info.tags.efl;
 
             var tags = this.state.tags;
             tags[response.collection] = response.tags;
@@ -795,6 +815,7 @@ var PhotoLibrary = React.createClass({
             this.setState({
               photos:         this.state.photos,
               editor_loading: false,
+              editor_error:   Lang.get('photolibrary.' + error),
             });
           },
 
@@ -811,6 +832,8 @@ var PhotoLibrary = React.createClass({
             camera:        info.tags.camera,
             lens:          info.tags.lens,
             category:      info.tags.category,
+            fl:            info.tags.fl,
+            efl:           info.tags.efl,
           }
         }
       );
@@ -819,6 +842,7 @@ var PhotoLibrary = React.createClass({
     this.setState({
       photos:         this.state.photos,
       editor_loading: true,
+      editor_error:   false,
     });
   },
 
@@ -855,11 +879,7 @@ var PhotoLibrary = React.createClass({
         for (var collection in this.state.collections) {
           collection = this.state.collections[collection];
 
-          if (collection.id != this.state.collection) {
-            continue;
-          }
-
-          if (!collection.id) {
+          if (!collection.id || collection.id != this.state.collection) {
             continue;
           }
 
@@ -875,22 +895,20 @@ var PhotoLibrary = React.createClass({
       }
     }
 
-
-    // photos grid
+    // photo grid
     photos = this.state.photos.map(photo => {
-      var selected = typeof this.state.selected[photo.id] != 'undefined';
-
       return (
         <Photo
           key={photo.id}
           photo={photo}
-          selected={selected}
+          multiselect={this.props.multiple}
+          selected={typeof this.state.selected[photo.id] != 'undefined'}
           onPhotoDelete={this._deletePhoto}
           onPhotoRestore={this._restorePhoto}
           onPhotoSelect={this._setPhotoSelected}
           onPhotoUnselect={this._setPhotoUnselected}
           onPhotoEdit={this._editPhoto}
-          onPhotoClick={this._attachPhoto}
+          onPhotoClick={this._selectPhoto}
         />
       );
     });
@@ -903,7 +921,11 @@ var PhotoLibrary = React.createClass({
 
     // photos placeholder
     if (!this.state.loading && !this.state.photos.length) {
-      photos = Lang.get('photolibrary.photos_not_found');
+      photos = (
+        <div className="photolibrary__photos-not-found">
+          {Lang.get('photolibrary.photos_not_found')}
+        </div>
+      );
     }
 
     // loader
@@ -932,6 +954,7 @@ var PhotoLibrary = React.createClass({
           onUpdate={this._updatePhoto}
           photo={this.state.editor_photo}
           loading={this.state.editor_loading}
+          error={this.state.editor_error}
           tags={this.state.tags[this.state.collection]}
         />
       );

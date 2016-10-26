@@ -5,33 +5,51 @@
  * @copyright 2016 ferg
  */
 
-var React = require('react');
-var Popup = require('components/popup');
-
-require('./popup-window.scss');
+var React    = require('react');
+var ReactDOM = require('react-dom');
+var Popups   = require('libs/popups-nice');
 
 var PopupWindow = React.createClass({
-  render() {
-    var title = null;
+  _popup:    false,
+  _content:  false,
 
-    if (this.props.title) {
-      title = (
-        <div className="popup__window-title">
-          {this.props.title}
-        </div>
-      );
-    };
+  /**
+   *  Create new popup
+   */
+  componentDidMount() {
+    this._content = document.createElement('div');
 
-    return (
-      <Popup onClose={this.props.onClose}>
-        <div className="popup__window">
-          {title}
-          <div className="popup__window-content">
-            {this.props.children}
-          </div>
-        </div>
-      </Popup>
+    this._popup   = Popups.createPopup({
+      content: this._content,
+      onclose: this.props.onClose,
+    });
+
+    this.componentDidUpdate();
+  },
+
+  /**
+   *  Destroy created popup
+   */
+  componentWillUnmount() {
+    Popups.removePopup(this._popup.id);
+
+    this._popup    = false;
+  },
+
+  /**
+   *  Render component to popup
+   */
+  componentDidUpdate() {
+    ReactDOM.render(
+      <div>{this.props.children}</div>,
+      this._popup.node
     );
+
+    Popups.updatePopupsSize();
+  },
+
+  render() {
+    return null;
   }
 });
 

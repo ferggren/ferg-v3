@@ -145,14 +145,18 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       'title_ru'      => "#^{$text_regexp}{1,50}$#ui",
       'title_en'      => "#^{$text_regexp}{1,50}$#ui",
       'gps'           => '#^-?\d{1,3}\.\d{1,20}[\s,]++-?\d{1,3}\.\d{1,20}$#ui',
-      'taken'         => '#^\d{4}\.\d{2}\.\d{2}$#ui',
+      'taken'         => '#^(\d{4})\.(\d{2})\.(\d{2})$#ui',
       'iso'           => '#^\d{2,7}$#ui',
-      'aperture'      => '#^f/\d(?:\.\d)?$#ui',
+      'aperture'      => '#^f/\d{1,2}(?:\.\d)?$#ui',
       'shutter_speed' => '#^(\d{1,4}|1/\d{1,5})$#ui',
       'camera'        => "#^{$text_regexp}{1,20}$#ui",
       'lens'          => "#^{$text_regexp}{1,50}$#ui",
       'category'      => "#^{$text_regexp}{1,150}$#ui",
+      'fl'            => '#^\d{1,4}(?:\.\d{1,2})?$#ui',
+      'efl'           => '#^\d{1,4}(?:\.\d{1,2})?$#ui',
     );
+
+    $photo->photo_taken_timestamp = 0;
 
     foreach ($fields as $field => $regexp) {
       $key = 'photo_' . $field;
@@ -164,11 +168,18 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       }
 
       if (!is_string($_POST[$field])) {
-        return $this->jsonError('invalid_photo_' . $field);
+        return $this->jsonError('invalid_' . $field);
       }
 
-      if (!preg_match($regexp, $_POST[$field])) {
-        return $this->jsonError('invalid_photo_' . $field);
+      if (!preg_match($regexp, $_POST[$field], $data)) {
+        return $this->jsonError('invalid_' . $field);
+      }
+
+      if ($field == 'taken') {
+        $photo->photo_taken_timestamp = mktime(
+          0, 0, 0,
+          $data[2], $data[3], $data[1]
+        );
       }
 
       $photo->$key = trim($_POST[$field]);
@@ -254,7 +265,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       $ret['photos'][] = array(
         'id'            => (int)$photo->file_id,
         'gps'           => $photo->photo_gps,
-        'taken'         => (int)$photo->photo_taken,
+        'taken'         => $photo->photo_taken,
         'title_ru'      => $photo->photo_title_ru,
         'title_en'      => $photo->photo_title_en,
         'preview'       => $preview,
@@ -268,6 +279,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
           'lens'          => $photo->photo_lens,
           'camera'        => $photo->photo_camera,
           'category'      => $photo->photo_category,
+          'fl'            => $photo->photo_fl,
+          'efl'           => $photo->photo_efl,
         ),
       );
     }
@@ -498,12 +511,12 @@ class ApiPhotoLibrary_Controller extends AjaxController {
 
     if ($file->file_media != 'image') {
       $this->_actionDeleteFile($file);
-      return $this->jsonError('invalid_file');
+      return $this->jsonError('file_is_not_image');
     }
 
     if (!$file->file_preview) {
       $this->_actionDeleteFile($file);
-      return $this->jsonError('invalid_file');
+      return $this->jsonError('file_is_not_image');
     }
 
     if (!file_exists(ROOT_PATH . $file->file_path)) {
@@ -512,6 +525,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
     }
 
     if (!$this->_checkCollectionId($collection)) {
+      $this->_actionDeleteFile($file);
       return $this->jsonError('invalid_collection_id');
     }
 
@@ -519,7 +533,7 @@ class ApiPhotoLibrary_Controller extends AjaxController {
 
     if (!($size = getimagesize(ROOT_PATH . $file->file_path, $info))) {
       $this->_actionDeleteFile($file);
-      return $this->jsonError('invalid_file');
+      return $this->jsonError('file_is_not_image');
     }
 
     $photo = new PhotoLibrary;
@@ -544,19 +558,22 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       'photo' => array(
         'id'            => (int)$photo->file_id,
         'gps'           => '',
-        'taken'         => 0,
+        'taken'         => '',
         'title_ru'      => '',
         'title_en'      => '',
         'preview'       => $preview,
         'collection_id' => (int)$photo->photo_collection_id,
         'added'         => (int)$photo->photo_added,
-        'tags'          => array(
-          'iso' => '',
+
+        'tags' => array(
+          'iso'           => '',
           'shutter_speed' => '',
-          'aperture' => '',
-          'lens' => '',
-          'camera' => '',
-          'category' => '',
+          'aperture'      => '',
+          'lens'          => '',
+          'camera'        => '',
+          'category'      => '',
+          'fl'            => '',
+          'efl'           => '',
         ),
       ),
       'collection' => false,
@@ -662,6 +679,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       'camera',
       'lens',
       'category',
+      'fl',
+      'efl',
     );
 
     foreach ($tags as $tag) {
@@ -721,6 +740,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       "{$key}camera",
       "{$key}lens",
       "{$key}category",
+      "{$key}fl",
+      "{$key}efl",
     ));
 
     return array(
@@ -730,6 +751,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       "camera"        => $tags["{$key}camera"],
       "lens"          => $tags["{$key}lens"],
       "category"      => $tags["{$key}category"],
+      "fl"            => $tags["{$key}fl"],
+      "efl"           => $tags["{$key}efl"],
     );
   }
 
@@ -751,6 +774,8 @@ class ApiPhotoLibrary_Controller extends AjaxController {
       "camera"        => "",
       "lens"          => "",
       "category"      => "",
+      "fl"            => "",
+      "efl"           => "",
     );
 
     foreach ($tags as $tag => $value) {

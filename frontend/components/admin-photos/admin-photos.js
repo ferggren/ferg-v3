@@ -7,7 +7,8 @@ var AdminPhotos = React.createClass({
     return (
       <ContentWrapper>
         <PhotoLibrary
-        	onAttach={photos => {
+          multiple={false}
+        	onSelect={photos => {
         		console.log(photos);
         	}}
         />

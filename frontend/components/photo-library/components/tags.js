@@ -67,6 +67,22 @@ var Tags = React.createClass({
           selected={this.props.selected.category}
           onSelect={this.props.onTagSelect}
         />
+        <div className="photolibrary__tags-spacing" />
+
+        <TagsCloud
+          group="fl"
+          tags={this.props.tags.fl}
+          selected={this.props.selected.fl}
+          onSelect={this.props.onTagSelect}
+        />
+        <div className="photolibrary__tags-spacing" />
+
+        <TagsCloud
+          group="efl"
+          tags={this.props.tags.efl}
+          selected={this.props.selected.efl}
+          onSelect={this.props.onTagSelect}
+        />
       </div>
     );
   }
