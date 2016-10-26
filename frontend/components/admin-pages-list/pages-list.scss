@@ -1,0 +1,77 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$tags_width: 200px;
+$tags_margin: 20px;
+
+/**
+ *  Basic wrappers
+ */
+.pages-list__tags-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		max-width: $tags_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		max-width: $tags_width;
+	}
+}
+
+	.pages-list__tags {
+
+	}
+
+.pages-list__pages-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+}
+
+	.pages-list__pages {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}
+
+/**
+ *	Pages not found
+ */
+.pages-list__not-found {
+	line-height: 24px;
+	margin-bottom: 10px;
+}
+
+/**
+ *	Create button & loader
+ */
+
+.pages-list__create-loader, .pages-list__create {
+	height: 40px;
+	margin-bottom: 10px;
+	text-align: center;
+	line-height: 40px;
+}
+
+	.pages-list__create {
+		cursor: pointer;
+		background: #EEE;
+		border-radius: 3px;
+		color: #666;
+	}
+
+	.pages-list__create:hover {
+		background: #DDD;
+		color: #333;
+	}

@@ -5,8 +5,10 @@
  * @copyright 2016 ferg
  */
 
-var React = require('react');
-var Lang  = require('libs/lang');
+var React              = require('react');
+var Lang               = require('libs/lang');
+var { Link }           = require('react-router');
+var { browserHistory } = require('react-router');
 
 require('./footer.scss');
 require('styles/partials/floating_clear');
@@ -17,8 +19,26 @@ Lang.exportStrings(
 );
 
 var Footer = React.createClass({
+  _url:  false,
+  _lang: false,
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this._lang != Lang.getLang()) {
+      return true;
+    }
+
+    if (this._url != window.location.pathname) {
+      return true;
+    }
+    
+    return false;
+  },
+
   render() {
-    var url = window.location.pathname;
+    this._url  = window.location.pathname;
+    this._lang = Lang.getLang();
+
+    var url  = window.location.pathname;
     var lang = Lang.getLang() == 'ru' ? 'en' : 'ru';
 
     url = url.replace(/^\/(ru|en)\//, `/${lang}/`);

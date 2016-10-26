@@ -25,7 +25,7 @@ var RequestProgress = React.createClass({
 
   componentWillUnmount() {
     if (this._inverval) {
-      clearInterval(this.__inverval);
+      clearInterval(this._inverval);
       this._inverval = false;
     }
   },

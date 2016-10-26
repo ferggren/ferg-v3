@@ -36,26 +36,41 @@ var App = React.createClass({
   },
 });
 
+var NotFound = React.createClass({
+  componentWillMount() {
+    browserHistory.push('/'+Lang.getLang()+'/admin/storage/');
+  },
+
+  render() {
+    return null;
+  }
+});
+
 onready(() => {
   ReactDOM.render(
     <Router history={browserHistory}>
-      <Route path={Lang.getLang() + '/admin/'} component={App}>
-        <IndexRoute component={Photos} />
 
-        <Route path='notes' component={PagesList} />
-        <Route path='notes/:page_id' component={PageEditor} />
+      <Route path={'ru/admin/'} component={App}>
+        <IndexRoute component={Storage} />
 
-        <Route path='moments' component={PagesList} />
-        <Route path='moments/:page_id' component={PageEditor} />
-
-        <Route path='portfolio' component={PagesList} />
-        <Route path='portfolio/:page_id' component={PageEditor} />
-
-        <Route path='photos' component={Photos} />
+        <Route path='photos/' component={Photos} />
+        <Route path='pages/:page_type' component={PagesList} />
+        <Route path='pages/:page_type/:page_id' component={PageEditor} />
         <Route path='storage' component={Storage} />
-        
         <Route path='*' component={Storage} />
       </Route>
+
+      <Route path={'en/admin/'} component={App}>
+        <IndexRoute component={Storage} />
+
+        <Route path='photos/' component={Photos} />
+        <Route path='pages/:page_type' component={PagesList} />
+        <Route path='pages/:page_type/:page_id' component={PageEditor} />
+        <Route path='storage' component={Storage} />
+        <Route path='*' component={Storage} />
+      </Route>
+      
+      <Route path='*' component={NotFound} />
     </Router>,
     document.getElementById('react-root')
   );
