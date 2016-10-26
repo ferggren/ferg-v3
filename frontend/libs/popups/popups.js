@@ -218,6 +218,20 @@ var Popups = {
       return;
     }
 
+    if (document.addEventListener) {
+      document.addEventListener(
+        'keyup',
+        (e) => {
+          if (e.keyCode == 27) {
+            Popups._closeTopPopup();
+          }
+          
+          return true;
+        },
+        false
+      );
+    }
+
     window.addEventListener(
       'resize',
       () => { Popups.updatePopupsSize(); return true; },
