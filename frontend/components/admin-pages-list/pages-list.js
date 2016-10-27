@@ -12,6 +12,9 @@ var Popups    = require('libs/popups-nice');
 var TagsCloud = require('components/tags-cloud');
 var Paginator = require('components/paginator');
 var Wrapper   = require('components/view/content-wrapper');
+var Page      = require('./components/page');
+
+var { browserHistory } = require('react-router');
 
 require('./pages-list.scss');
 require('styles/partials/floating_clear');
@@ -26,8 +29,12 @@ var PagesList = React.createClass({
   _requests: {},
 
   componentWillReceiveProps(nextProps) {
-    this.setState(this.getInitialState(nextProps));
-    this.componentDidMount();
+    this.componentWillUnmount();
+
+    this.setState(
+      this.getInitialState(nextProps),
+      this.componentDidMount
+    );
   },
 
   getInitialState(props) {
@@ -83,19 +90,19 @@ var PagesList = React.createClass({
     this._requests.tags = Request.fetch(
       '/api/pages/getTags/', {
       success: tags => {
-        this.setState({tags});
-
         this._requests.tags = null;
         delete this._requests.tags;
+
+        this.setState({tags});
       },
 
       error: error => {
+        this._requests.tags = null;
+        delete this._requests.tags;
+
         Popups.createPopup({
           content: Lang.get('pages-list.error_' + error)
         });
-
-        this._requests.tags = null;
-        delete this._requests.tags;
       },
 
       data: {
@@ -126,32 +133,183 @@ var PagesList = React.createClass({
   _createPage() {
     this.setState({creating: true});
 
-    this._requests.tags = Request.fetch(
+    this._requests.create = Request.fetch(
       '/api/pages/createPage/', {
       success: page => {
+        this._requests.create = null;
+        delete this._requests.create;
+
         this.setState({creating: false});
-
         this._editPage(page);
-
-        this._requests.tags = null;
-        delete this._requests.tags;
       },
 
       error: error => {
+        this._requests.create = null;
+        delete this._requests.create;
+
         Popups.createPopup({
           content: Lang.get('pages-list.error_' + error)
         });
 
         this.setState({creating: false});
-
-        this._requests.tags = null;
-        delete this._requests.tags;
       },
 
       data: {
         type: this.state.type,
       }
     });
+  },
+
+  /**
+   *  Delete page
+   */
+  _deletePage(page) {
+    page.loading = true;
+    var key = "page_" + page.id;
+
+    this._requests[key] = Request.fetch(
+      '/api/pages/deletePage/', {
+      success: () => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.deleted = true;
+        page.loading = false;
+        this.forceUpdate();
+      },
+
+      error: error => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.loading = false;
+        this.forceUpdate();
+
+        Popups.createPopup({
+          content: Lang.get('pages-list.error_' + error)
+        });
+      },
+
+      data: {
+        id: page.id,
+      }
+    });
+
+    this.forceUpdate();
+  },
+
+  /**
+   *  Restore page
+   */
+  _restorePage(page) {
+    page.loading = true;
+    var key = "page_" + page.id;
+
+    this._requests[key] = Request.fetch(
+      '/api/pages/restorePage/', {
+      success: () => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.deleted = false;
+        page.loading = false;
+        this.forceUpdate();
+      },
+
+      error: error => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.loading = false;
+        this.forceUpdate();
+
+        Popups.createPopup({
+          content: Lang.get('pages-list.error_' + error)
+        });
+      },
+
+      data: {
+        id: page.id,
+      }
+    });
+
+    this.forceUpdate();
+  },
+
+  /**
+   *  Hide page
+   */
+  _hidePage(page) {
+    page.loading = true;
+    var key = "page_" + page.id;
+
+    this._requests[key] = Request.fetch(
+      '/api/pages/hidePage/', {
+      success: () => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.visible = false;
+        page.loading = false;
+        this.forceUpdate();
+      },
+
+      error: error => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.loading = false;
+        this.forceUpdate();
+
+        Popups.createPopup({
+          content: Lang.get('pages-list.error_' + error)
+        });
+      },
+
+      data: {
+        id: page.id,
+      }
+    });
+
+    this.forceUpdate();
+  },
+
+  /**
+   *  Restore page
+   */
+  _showPage(page) {
+    page.loading = true;
+    var key = "page_" + page.id;
+
+    this._requests[key] = Request.fetch(
+      '/api/pages/showPage/', {
+      success: () => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.visible = true;
+        page.loading = false;
+        this.forceUpdate();
+      },
+
+      error: error => {
+        this._requests[key] = null;
+        delete this._requests[key];
+
+        page.loading = false;
+        this.forceUpdate();
+
+        Popups.createPopup({
+          content: Lang.get('pages-list.error_' + error)
+        });
+      },
+
+      data: {
+        id: page.id,
+      }
+    });
+
+    this.forceUpdate();
   },
 
   /**
@@ -168,6 +326,8 @@ var PagesList = React.createClass({
     this._requests.pages = Request.fetch(
       '/api/pages/getPages/', {
       success: response => {
+        this._requests.pages = null;
+        delete this._requests.pages;
 
         this.setState({
           page:    response.page,
@@ -175,20 +335,17 @@ var PagesList = React.createClass({
           list:    response.list,
           loading: false,
         });
-
-        this._requests.pages = null;
-        delete this._requests.pages;
       },
 
       error: error => {
+        this._requests.pages = null;
+        delete this._requests.pages;
+
         Popups.createPopup({
           content: Lang.get('pages-list.error_' + error)
         });
 
         this.setState({loading: false});
-
-        this._requests.pages = null;
-        delete this._requests.pages;
       },
 
       data: {
@@ -206,7 +363,13 @@ var PagesList = React.createClass({
    *  Edit page
    */
   _editPage(page) {
-    console.log('edit', page);
+    if (page.loading) {
+      return;
+    }
+
+    browserHistory.push(
+      '/'+Lang.getLang()+'/admin/pages/' + this.state.type + '/' + page.id
+    );
   },
 
   /**
@@ -287,6 +450,24 @@ var PagesList = React.createClass({
     );
   },
 
+  _makePagesList() {
+    return this.state.list.map(page => {
+      return (
+        <div key={page.id}>
+          <Page
+            page={page}
+            onSelect={this._editPage}
+            onDelete={this._deletePage}
+            onRestore={this._restorePage}
+            onHide={this._hidePage}
+            onShow={this._showPage}
+          />
+          <div className="pages-list__pages-separator" />
+        </div>
+      );
+    });
+  },
+
   render() {
     var pages_loader    = null;
     var pages_list      = null;
@@ -319,7 +500,7 @@ var PagesList = React.createClass({
 
     // pages list
     if (this.state.list.length) {
-
+      pages_list = this._makePagesList();
     }
 
     // pages not found
