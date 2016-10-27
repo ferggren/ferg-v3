@@ -33,7 +33,7 @@ var PopupWindow = React.createClass({
   componentWillUnmount() {
     Popups.removePopup(this._popup.id);
 
-    this._popup    = false;
+    this._popup = false;
   },
 
   /**

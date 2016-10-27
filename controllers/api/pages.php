@@ -71,7 +71,7 @@ class ApiPages_Controller extends AjaxController {
         return $this->jsonSuccess($ret);
       }
 
-      $where[] = 'page_id IN (' . implode($pages) . ')';
+      $where[] = 'page_id IN (' . implode(',', $pages) . ')';
     }
 
     $where[] = "page_type = '" . Database::escape($type) . "'";
@@ -145,17 +145,129 @@ class ApiPages_Controller extends AjaxController {
   }
 
   /**
+   *  Update photo preview
+   *
+   *  @param {int} id Page id
+   *  @param {int} photo_id Photo id
+   *  @return {object} Photo's updated preview
+   */
+  public function actionUpdatePhoto($id, $photo_id) {
+    if (!($page = $this->_getPage($id, true))) {
+      return $this->jsonError('access_denied');
+    }
+
+    if ($page->page_deleted) {
+      return $this->jsonError('incorrect_page_id');
+    }
+
+    if ($page->page_photo_id == $photo_id) {
+      return $this->jsonSuccess($page->export()['preview']);
+    }
+
+    $page->page_photo_id = 0;
+
+    if ($photo_id && preg_match('#^\d++$#', $photo_id)) {
+      if (!($photo = PhotoLibrary::find($photo_id))) {
+        return $this->jsonError('incorrect_photo_id');
+      }
+
+      if ($photo->photo_deleted) {
+        return $this->jsonError('incorrect_photo_id');
+      }
+
+      $page->page_photo_id = $photo_id;
+    }
+
+    $page->save();
+
+    return $this->jsonSuccess($page->export()['preview']);
+  }
+
+  /**
+   *  Update photo date
+   *
+   *  @param {int} id Page id
+   *  @param {string} date Date
+   *  @return {object} Photo's updated date
+   */
+  public function actionUpdateDate($id, $date) {
+    if (!($page = $this->_getPage($id, true))) {
+      return $this->jsonError('access_denied');
+    }
+
+    if ($page->page_deleted) {
+      return $this->jsonError('incorrect_page_id');
+    }
+
+    if ($page->page_date == $date) {
+      return $this->jsonSuccess(array(
+        'date'      => $page->page_date,
+        'timestamp' => $page->page_date_timestamp,
+      ));
+    }
+
+    $page->page_date = '';
+    $page->page_date_timestamp = 0;
+
+    if ($date) {
+      if (!preg_match('#^(\d{4})\.(\d{1,2})\.(\d{1,2})$#u', $date, $data)) {
+        return $this->jsonError('incorrect_date');
+      }
+
+      $page->page_date = $date;
+      $page->page_date_timestamp = mktime(
+        0, 0, 0,
+        $data[2], $data[3], $data[1]
+      );
+    }
+
+    $page->save();
+
+    return $this->jsonSuccess(array(
+      'date'      => $page->page_date,
+      'timestamp' => $page->page_date_timestamp,
+    ));
+  }
+
+  /**
+   *  Update photo tags
+   *
+   *  @param {int} id Page id
+   *  @param {string} tags Tags
+   *  @return {object} Photo's updated date
+   */
+  public function actionUpdateTags($id, $tags) {
+    if (!($page = $this->_getPage($id, true))) {
+      return $this->jsonError('access_denied');
+    }
+
+    if ($page->page_deleted) {
+      return $this->jsonError('incorrect_page_id');
+    }
+
+    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,200}$#', $tags)) {
+      return $this->jsonError('incorrect_tags');
+    }
+
+    $page->page_tags = $tags;
+    $page->save();
+
+    $this->_updatePageTags($page);
+
+    return $this->jsonSuccess(array(
+      'tags' => Tags::getTagValues("pages_{$page->page_type}_all"),
+      'page_tags' => $page->page_tags,
+    ));
+  }
+
+  /**
    *  Return page info
    *
    *  @param {int} id Page id
    *  @return {object} Page info
    */
   public function actionGetPage($id) {
-    if (!preg_match('#^\d++$#', $id)) {
-      return $this->jsonError('incorrect_page_id');
-    }
-
-    if (!($page = MediaPages::find($id))) {
+    if (!($page = $this->_getPage($id, false))) {
       return $this->jsonError('incorrect_page_id');
     }
 
@@ -241,23 +353,11 @@ class ApiPages_Controller extends AjaxController {
    *  @param {int} id Page id
    *  @param {string} field Page field
    *  @param {int} value Page field value
-   *  @param {boolean} Status
+   *  @return {boolean} Status
    */
   protected function _changePageFlag($id, $field, $value) {
-    if (!User::isAuthenticated()) {
+    if (!($page = $this->_getPage($id, true))) {
       return $this->jsonError('access_denied');
-    }
-
-    if (!User::hasAccess('admin')) {
-      return $this->jsonError('access_denied');
-    }
-
-    if (!preg_match('#^\d++$#', $id)) {
-      return $this->jsonError('incorrect_page_id');
-    }
-
-    if (!($page = MediaPages::find($id))) {
-      return $this->jsonError('incorrect_page_id');
     }
 
     if (!in_array($field, array('deleted', 'visible'))) {
@@ -274,7 +374,77 @@ class ApiPages_Controller extends AjaxController {
     $page->$field = $value;
     $page->save();
 
+    $this->_updatePageTags($page);
+
     return $this->jsonSuccess();
+  }
+
+  /**
+   *  Get page object by page id
+   *
+   *  @param {int} id Page id
+   *  @param {boolean} check_access Check user access
+   *  @return {object} Pag object
+   */
+  protected function _getPage($id, $check_access = true) {
+    if ($check_access) {
+      if (!User::isAuthenticated()) {
+        return false;
+      }
+
+      if (!User::hasAccess('admin')) {
+        return false;
+      }
+    }
+
+    if (!preg_match('#^\d++$#', $id)) {
+      return false;
+    }
+
+    if (!($page = MediaPages::find($id))) {
+      return false;
+    }
+
+    return $page;
+  }
+
+  /**
+   *  Update page tags
+   *
+   *  @param {object} page Page object
+   */
+  protected function _updatePageTags($page) {
+    $values         = array();
+    $values_visible = array();
+    $values_all     = array();
+
+    foreach (explode(',', $page->page_tags) as $tag) {
+      if (!($tag = trim($tag))) {
+        continue;
+      }
+
+      $values[] = $tag;
+    }
+
+    if (!$page->page_deleted) {
+      $values_all = $values;
+
+      if ($page->page_visible) {
+        $values_visible = $values;
+      }
+    }
+
+    Tags::attachTag(
+      "pages_{$page->page_type}_all",
+      $page->page_id,
+      $values_all
+    );
+
+    Tags::attachTag(
+      "pages_{$page->page_type}_visible",
+      $page->page_id,
+      $values_visible
+    );
   }
 }
 ?>

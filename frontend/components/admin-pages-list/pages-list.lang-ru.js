@@ -1,11 +1,12 @@
 module.exports = {
-	pages_not_found: 'Страницы не найдены',
-	create_new_page: 'Добавить страницу',
+  pages_not_found: 'Страницы не найдены',
+  create_new_page: 'Добавить страницу',
   page_show:       'показать',
   page_hide:       'скрыть',
   page_restore:    'восстановить',
   page_delete:     'x',
+  tags_is_empty:   'Тэги не найдены',
 
-	// api errors
+  // api errors
   error_incorrect_type: 'Некорректный тип страницы',
 };

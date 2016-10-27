@@ -24,9 +24,52 @@ class MediaPages extends Database {
     }
 
     if ($this->page_photo_id) {
-
+      $ret['preview'] = $this->_makePreview($this->page_photo_id);
     }
 
     return $ret;
+  }
+
+  protected function _makePreview($photo_id) {
+    $ret = array(
+      'big'   => '',
+      'small' => '',
+    );
+
+    if (!$photo_id) {
+      return $ret;
+    }
+
+    if (!($photo = PhotoLibrary::find($photo_id))) {
+      return $ret;
+    }
+
+    if ($photo->photo_deleted) {
+      $this->page_photo_id = 0;
+      $this->save();
+
+      return $ret;
+    }
+
+    return array(
+      'big' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'crop'   => true,
+          'width'  => 1920,
+          'align'  => 'center',
+          'valign' => 'middle',
+        )
+      ),
+
+      'small' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'crop'   => true,
+          'width'  => 500,
+          'height' => 200,
+          'align'  => 'center',
+          'valign' => 'middle',
+        )
+      ),
+    );
   }
 }

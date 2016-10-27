@@ -46,7 +46,7 @@ var NicePopups = {
     var popup_window = NicePopups._makePopupWindow(options);
     var popup        = Popups.createPopup(options.onclose);
 
-    popup.node.appendChild(popup_window);
+    popup.node.appendChild(popup_window.window);
     popup_id = popup.id;
     options  = null;
 
@@ -54,7 +54,7 @@ var NicePopups = {
 
     return {
       id:   popup_id,
-      node: popup_window,
+      node: popup_window.content,
     };
   },
 
@@ -99,7 +99,10 @@ var NicePopups = {
 
     popup_window.appendChild(window_content);
 
-    return popup_window;
+    return {
+      window:  popup_window,
+      content: window_content,
+    };
   }
 }
 

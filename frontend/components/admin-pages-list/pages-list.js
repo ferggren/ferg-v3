@@ -119,7 +119,7 @@ var PagesList = React.createClass({
     this.setState({
       page:  1,
       pages: 1,
-      tag:   tag,
+      tag:   (this.state.tag == tag ? "" : tag),
     }, this._loadPages);
   },
 
@@ -385,6 +385,14 @@ var PagesList = React.createClass({
    *  Make tags cloud
    */
   _makeTagsCloud() {
+    if (!Object.keys(this.state.tags).length) {
+      return (
+        <div className="pages-list_tags-empty">
+          {Lang.get('pages-list.tags_is_empty')}
+        </div>
+      );
+    }
+
     return (
       <TagsCloud
         group={"pages_" + this.state.type + "_all"}

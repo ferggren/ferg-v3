@@ -50,10 +50,12 @@ var Preview = React.createClass({
    *  Make preview title
    */
   _makeTitle() {
+    var exists = !!this.props.page.preview.small;
+
     return (
       <div className="page-editor__preview-title">
         <span>
-          {Lang.get('page-editor.update_preview')}
+          {Lang.get('page-editor.' + (exists ? 'update' : 'set') + '_preview')}
         </span>
       </div>
     );

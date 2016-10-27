@@ -85,7 +85,7 @@ var PageEditor = React.createClass({
         delete this._requests.tags;
 
         Popups.createPopup({
-          content: Lang.get('pages-list.error_' + error)
+          content: Lang.get('page-editor.error_' + error)
         });
       },
 
@@ -116,7 +116,7 @@ var PageEditor = React.createClass({
         delete this._requests.page;
 
         Popups.createPopup({
-          content: Lang.get('pages-list.error_' + error)
+          content: Lang.get('page-editor.error_' + error)
         });
       },
 
@@ -135,7 +135,39 @@ var PageEditor = React.createClass({
       return;
     }
 
-    console.log('photo', photo_id);
+    this.setState({loading: true});
+
+    this._requests.update = Request.fetch(
+      '/api/pages/updatePhoto/', {
+      success: preview => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        var page = this.state.page;
+        page.preview = preview;
+
+        this.setState({page});
+
+        this.setState({loading: false});
+      },
+
+      error: error => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        this.setState({loading: false});
+
+        Popups.createPopup({
+          content: Lang.get('page-editor.error_' + error)
+        });
+      },
+
+      data: {
+        type:     this.state.type,
+        id:       this.state.id,
+        photo_id: photo_id,
+      }
+    });
   },
 
   /**
@@ -146,18 +178,85 @@ var PageEditor = React.createClass({
       return;
     }
 
-    console.log('date', date);
+    this.setState({loading: true});
+
+    this._requests.update = Request.fetch(
+      '/api/pages/updateDate/', {
+      success: response => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        var page       = this.state.page;
+        page.date      = response.date;
+        page.timestamp = response.timestamp;
+
+        this.setState({page});
+
+        this.setState({loading: false});
+      },
+
+      error: error => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        this.setState({loading: false});
+
+        Popups.createPopup({
+          content: Lang.get('page-editor.error_' + error)
+        });
+      },
+
+      data: {
+        type: this.state.type,
+        id:   this.state.id,
+        date
+      }
+    });
   },
 
   /**
-   *  Update page tag
+   *  Update page tags
    */
-  _selectTag(group, tag) {
+  _updateTag(group, tags) {
     if (this.state.loading) {
       return;
     }
 
-    console.log('tag', tag);
+    this.setState({loading: true});
+
+    this._requests.update = Request.fetch(
+      '/api/pages/updateTags/', {
+      success: response => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        var page = this.state.page;
+        page.tags = response.page_tags;
+
+        this.setState({
+          tags:    response.tags,
+          loading: false,
+          page,
+        });
+      },
+
+      error: error => {
+        this._requests.update = null;
+        delete this._requests.update;
+
+        this.setState({loading: false});
+
+        Popups.createPopup({
+          content: Lang.get('page-editor.error_' + error)
+        });
+      },
+
+      data: {
+        type: this.state.type,
+        id:   this.state.id,
+        tags
+      }
+    });
   },
 
   _makeTagsSelector() {
@@ -168,7 +267,7 @@ var PageEditor = React.createClass({
         value={this.state.page.tags}
         values={Object.keys(this.state.tags)}
         multiple={true}
-        onSelect={this._selectTag}
+        onSelect={this._updateTag}
       />
     );
   },

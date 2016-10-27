@@ -1,7 +1,7 @@
 @import 'styles/mixins/background_rgba';
 @import 'styles/mixins/respond_to';
 
-$tags_width: 200px;
+$tags_width: 220px;
 $tags_margin: 20px;
 $buttons_bg: (90, 90, 90);
 
@@ -21,7 +21,8 @@ $buttons_bg: (90, 90, 90);
 }
 
 	.pages-list__tags {
-
+		min-width: $tags_width;
+		text-align: center;
 	}
 
 .pages-list__pages-wrapper {
