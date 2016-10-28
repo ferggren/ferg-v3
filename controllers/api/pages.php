@@ -245,7 +245,7 @@ class ApiPages_Controller extends AjaxController {
       return $this->jsonError('incorrect_page_id');
     }
 
-    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,200}$#', $tags)) {
+    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,200}$#iu', $tags)) {
       return $this->jsonError('incorrect_tags');
     }
 
@@ -258,6 +258,44 @@ class ApiPages_Controller extends AjaxController {
       'tags' => Tags::getTagValues("pages_{$page->page_type}_all"),
       'page_tags' => $page->page_tags,
     ));
+  }
+
+  /**
+   *  Update page versions
+   *
+   *  @param {int} id Page id
+   *  @return {boolean} Status
+   */
+  public function actionUpdateVersions($id) {
+    if (!($page = $this->_getPage($id, true))) {
+      return $this->jsonError('incorrect_page_id');
+    }
+
+    if ($page->page_deleted) {
+      return $this->jsonError('incorrect_page_id');
+    }
+
+    $versions = array();
+
+    $res = Database::from(array(
+      'media_entries_content ec',
+      'media_entries e',
+    ));
+
+    $res->whereAnd('e.entry_key', '=', 'page_' . $page->page_id);
+    $res->whereAnd('ec.entry_id', '=', 'e.entry_id', false);
+    $res->whereAnd('ec.entry_lang', 'IN', array('ru', 'en'));
+    $res->whereAnd('ec.entry_visible', '=', '1');
+    $res = $res->get();
+
+    foreach ($res as $entry) {
+      $versions[] = $entry->entry_lang;
+    }
+
+    $page->page_versions = implode(',', $versions);
+    $page->save();
+
+    return $this->jsonSuccess();
   }
 
   /**

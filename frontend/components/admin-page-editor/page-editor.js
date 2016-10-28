@@ -13,6 +13,7 @@ var Window    = require('components/popup-window');
 var Tags      = require('components/tags-selector');
 var Wrapper   = require('components/view/content-wrapper');
 var Preview   = require('./components/preview');
+var Editor    = require('components/media-editor');
 
 require('./page-editor.scss');
 require('styles/partials/floating_clear');
@@ -259,6 +260,37 @@ var PageEditor = React.createClass({
     });
   },
 
+  /**
+   *  Update page info
+   */
+  _updatePageInfo() {
+    var key = "update_info";
+
+    if (this._requests[key]) {
+      Request.abort(this._requests[key]);
+
+      this._requests[key] = null;
+      delete this._requests[key];
+    }
+
+    this._requests.update = Request.fetch(
+      '/api/pages/updateVersions/', {
+      success: () => {
+        this._requests[key] = null;
+        delete this._requests[key];
+      },
+
+      error: error => {
+        this._requests[key] = null;
+        delete this._requests[key];
+      },
+
+      data: {
+        id: this.state.id,
+      }
+    });
+  },
+
   _makeTagsSelector() {
     return (
       <Tags
@@ -331,7 +363,14 @@ var PageEditor = React.createClass({
           <div className="floating-clear" />
 
           <div className="page-editor__editor">
-            EDITOR
+            <Editor
+              onUpdate={this._updatePageInfo}
+              entry_key={"page_" + this.state.page.id}
+              langs={[
+                Lang.getLang(),
+                Lang.getLang() == "en" ? "ru" : "en"
+              ]}
+            />
           </div>
         </div>
       </Wrapper>

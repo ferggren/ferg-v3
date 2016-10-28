@@ -5,8 +5,9 @@
  * @copyright 2016 ferg
  */
 
-var React = require('react');
-var Lang  = require('libs/lang');
+var React    = require('react');
+var Lang     = require('libs/lang');
+var NiceTime = require('libs/nice-time');
 
 require('styles/partials/loader');
 
@@ -58,16 +59,40 @@ var Page = React.createClass({
   },
 
   _makeVersions() {
-    return null;
+    return (
+      <div className="pages-list__page-button pages-list__page-versions">
+        {this.props.page.versions.join(', ')}
+      </div>
+    );
   },
 
   _makeDate() {
-    return null;
+    return (
+      <div className="pages-list__page-button pages-list__page-date">
+        {NiceTime.niceDateFormat(this.props.page.timestamp)}
+      </div>
+    );
   },
 
   _makeIcoHidden() {
     return (
       <div className="pages-list__page-hidden" />
+    );
+  },
+
+  _makeTitle() {
+    return (
+      <div className="pages-list__page-title">
+        {this.props.page.title}
+      </div>
+    );
+  },
+
+  _makeDesc() {
+    return (
+      <div className="pages-list__page-desc">
+        {this.props.page.desc}
+      </div>
     );
   },
 
@@ -86,6 +111,18 @@ var Page = React.createClass({
     var versions       = null;
     var date           = null;
     var ico_hidden     = null;
+    var title          = null;
+    var desc           = null;
+
+    // title
+    if (page.title) {
+      title = this._makeTitle();
+    }
+
+    // desc
+    if (page.desc) {
+      desc = this._makeDesc();
+    }
 
     // button delete
     if (!page.deleted && !page.loading) {
@@ -125,12 +162,12 @@ var Page = React.createClass({
     }
 
     // versions
-    if (page.versions.length) {
+    if (page.versions.length && !page.loading) {
       versions = this._makeVersions();
     }
 
     // date
-    if (page.date) {
+    if (page.date && !page.loading) {
       date = this._makeDate();
     }
 
@@ -141,6 +178,10 @@ var Page = React.createClass({
 
     var class_name = "pages-list__page";
     var style      = {};
+
+    if (!page.visible) {
+      class_name += " pages-list__page--hidden";
+    }
 
     if (page.deleted) {
       class_name += " pages-list__page--deleted";
@@ -157,6 +198,8 @@ var Page = React.createClass({
         onClick={e => {
           this.props.onSelect(page);
         }}>
+        {title}
+        {desc}
         {button_delete}
         {button_restore}
         {button_show}

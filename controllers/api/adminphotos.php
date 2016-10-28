@@ -10,6 +10,12 @@ class ApiAdminPhotos_Controller extends AjaxController {
     return $this->jsonError('access_denied');
   }
 
+  /**
+   *  Return photo info
+   *
+   *  @param {int} photo_id Photo id
+   *  @return {object} Photo info
+   */
   public function actionGetPhotoUrl($photo_id) {
     if (!is_string($photo_id) || !preg_match('#^\d{1,10}$#', $photo_id)) {
       return $this->jsonError('invalid_photo_id');

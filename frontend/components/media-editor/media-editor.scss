@@ -1,0 +1,257 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$photos_width: 240px;
+$photos_margin: 30px;
+$buttons_bg: (90, 90, 90);
+
+/**
+ *  Basic wrappers
+ */
+.media-editor__photos-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		max-width: $photos_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		max-width: $photos_width;
+	}
+
+	@include respond_to(screen_phone) {
+		margin-bottom: 15px;
+	}
+}
+
+	.media-editor__photos {
+		min-width: $photos_width;
+	}
+
+.media-editor__common-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $photos_width + $photos_margin;
+		min-width: $screen_tablet - $photos_width - $photos_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $photos_width + $photos_margin;
+		min-width: $screen_tablet - $photos_width - $photos_margin - 60px;
+	}
+}
+
+	.media-editor__common {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}
+
+/**
+ *	Lang select
+ */
+.media-editor__langs {
+	display: block;
+	border-bottom: 1px solid #DDD;
+	margin-bottom: 15px;
+}
+
+	.media-editor__lang {
+		font-size: 12px;
+		display: inline-block;
+		padding: 6px 14px;
+		cursor: pointer;
+		margin: 0px 5px 0px 0px;
+		border-radius: 3px 3px 0px 0px;
+		background: #EEE;
+	}
+
+		.media-editor__lang--selected, .media-editor__lang:hover {
+			background: #DDD;
+		}
+
+/**
+ *	Error
+ */
+.media-editor__error {
+	padding: 0px 5px;
+	border-radius: 3px;
+	line-height: 24px;
+	margin-bottom: 10px;
+	background: #fff3f3;
+	color: #333;
+	font-weight: bold;
+}
+
+/**
+ *	Photos
+ */
+.media-editor__photos {
+	max-height: 500px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+
+	@include respond_to(screen_phone) {
+		max-height: 200px;
+	}
+}
+
+.media-editor__photo {
+	height: 80px;
+	cursor: pointer;
+	background: #EEE;
+	background-position: 50% 50%;
+	background-size: cover;
+	background-repeat: no-repeat;
+	margin-bottom: 5px;
+	position: relative;
+}
+
+	.media-editor__photo--create {
+		line-height: 80px;
+		text-align: center;
+		font-size: 24px;
+		color: #999;
+	}
+
+	.media-editor__photo--create:hover {
+		color: #666;
+	}
+
+	.media-editor__photo-button {
+		position: absolute;
+		opacity: .8;
+		font-size: 12px;
+		color: #FFF !important;
+		padding: 0px 5px;
+		line-height: 20px;
+		border-radius: 3px;
+		@include background_rgba(nth($buttons_bg, 1), nth($buttons_bg, 2), nth($buttons_bg, 3), 0.7);
+	}
+
+		.media-editor__photo-button:hover {
+			opacity: 1;
+		}
+
+		.media-editor__photo-button--title {
+			left: 10px;
+			bottom: 10px;
+			overflow: hidden;
+			white-space: nowrap;
+			max-width: 200px;
+		}
+
+		.media-editor__photo-button--restore, .media-editor__photo-button--delete {
+			right: 10px;
+			bottom: 10px;
+		}
+
+	.media-editor__photo-loader {
+		position: absolute;
+		right: 10px;
+		bottom: 15px;
+	}
+
+/**
+ *	Editor
+ */
+.media-editor__editor {
+	margin-bottom: 10px;
+}
+
+	.media-editor__editor input[type="text"], .media-editor__editor textarea {
+		width: 100%;
+		margin: 0px 0px 10px 0px;
+		border: 1px solid #CCC;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box;
+		border-radius: 3px;
+		padding: 2px 6px;
+		color: #666;
+		font-size: 14px;
+		line-height: 20px;
+	}
+
+	.media-editor__editor input[type="text"] {
+		overflow: hidden;
+	}
+
+	.media-editor__editor textarea {
+		min-height: 500px;
+	}
+
+	.media-editor__editor label {
+		display: block;
+		position: relative;
+		line-height: 20px;
+		margin-bottom: 10px;
+		padding-left: 20px;
+	}
+
+	.media-editor__editor label input[type="checkbox"] {
+		position: absolute;
+		top: 5px;
+		left: 0px;
+	}
+
+/**
+ *	Update & Preview buttons
+ */
+.media-editor__buttons {
+
+}
+
+	.media-editor__button-wrapper {
+		display: inline-block;
+		line-height: 24px;
+		height: 24px;
+		margin-bottom: 10px;
+	}
+
+	.media-editor__button-wrapper--update {
+		width: 60%;
+
+		@include respond_to(screen_phone) {
+			width: 100%;
+		}
+	}
+
+	.media-editor__button-wrapper--preview {
+		width: 40%;
+
+		@include respond_to(screen_phone) {
+			width: 100%;
+		}
+	}
+
+		.media-editor__button {
+			border-radius: 3px;
+			cursor: pointer;
+			text-align: center;
+			background: #EEE;
+			color: #666;
+		}
+
+			.media-editor__button:hover {
+				color: #333;
+			}
+
+			.media-editor__button--update {
+				margin-right: 5px;			
+
+				@include respond_to(screen_phone) {
+					margin-right: 0px;
+				}
+			}
+
+			.media-editor__button--preview {
+				margin-left: 5px;			
+
+				@include respond_to(screen_phone) {
+					margin-left: 0px;
+				}
+			}

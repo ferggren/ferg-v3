@@ -6,25 +6,52 @@ class MediaPages extends Database {
 
   public function export() {
     $ret = array(
-      'id'       => (int)$this->page_id,
-      'type'     => $this->page_type,
-      'visible'  => !!$this->page_visible,
-      'versions' => array(),
-      'date'     => $this->page_date,
-      'timetamp' => (int)$this->page_date_timestamp,
-      'tags'     => $this->page_tags,
-      'preview'  => array(
-        'big'  => '',
+      'id'        => (int)$this->page_id,
+      'type'      => $this->page_type,
+      'visible'   => !!$this->page_visible,
+      'versions'  => array(),
+      'date'      => $this->page_date,
+      'timestamp' => (int)$this->page_date_timestamp,
+      'tags'      => $this->page_tags,
+      'title'     => '',
+      'desc'      => '',
+      'preview'   => array(
+        'big'   => '',
         'small' => '',
       ),
     );
 
+    $entry_lang = false;
+
     if ($this->page_versions) {
       $ret['versions'] = explode(',', $this->page_versions);
+
+      if (in_array(Lang::getLang(), $ret['versions'])) {
+        $entry_lang = Lang::getLang();
+      }
+      else {
+        $entry_lang = $ret['versions'][0];
+      }
     }
 
     if ($this->page_photo_id) {
       $ret['preview'] = $this->_makePreview($this->page_photo_id);
+    }
+
+    $entry = Database::from(array(
+      'media_entries_content ec',
+      'media_entries e',
+    ));
+
+    $entry->whereAnd('e.entry_key', '=', 'page_' . $this->page_id);
+    $entry->whereAnd('ec.entry_id', '=', 'e.entry_id', false);
+    $entry->whereAnd('ec.entry_lang', '=', $entry_lang);
+    $entry->whereAnd('ec.entry_visible', '=', '1');
+    $entry->limit(1);
+
+    if (count($entry = $entry->get())) {
+      $ret['title'] = $entry[0]->entry_title;
+      $ret['desc']  = $entry[0]->entry_desc;
     }
 
     return $ret;

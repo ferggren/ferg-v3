@@ -14,12 +14,12 @@ $collection_title_bg: (60, 60, 60, 0.7);
 .photolibrary__tags-wrapper {
 	@include respond_to(screen_wide) {
 		float: right;
-		max-width: $tags_width;
+		width: $tags_width;
 	}
 
 	@include respond_to(screen_tablet) {
 		float: right;
-		max-width: $tags_width;
+		width: $tags_width;
 	}
 }
 
@@ -91,6 +91,7 @@ $collection_title_bg: (60, 60, 60, 0.7);
 		height: 90px;
 		background-size: cover;
 		background-repeat: no-repeat;
+		background-position: 50% 50%;
 		cursor: pointer;
 		position: relative;
 	}
@@ -220,6 +221,7 @@ $collection_title_bg: (60, 60, 60, 0.7);
 		background: #ecf1f5;
 		background-size: cover;
 		background-repeat: no-repeat;
+		background-position: 50% 50%;
 	}
 
 	.photolibrary__collections-clear {
@@ -325,6 +327,7 @@ $collection_title_bg: (60, 60, 60, 0.7);
 		background: #ecf1f5;
 		background-size: cover;
 		background-repeat: no-repeat;
+		background-position: 50% 50%;
 	}
 
 	.photolibrary__cover-photos, .photolibrary__cover-back {
@@ -379,6 +382,7 @@ $collection_title_bg: (60, 60, 60, 0.7);
 		height: 150px;
 		background-size: cover;
 		background-repeat: no-repeat;
+		background-position: 50% 50%;
 		margin-bottom: 10px;
 	}
 
