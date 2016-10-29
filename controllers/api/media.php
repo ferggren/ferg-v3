@@ -36,6 +36,20 @@ class ApiMedia_Controller extends AjaxController {
   }
 
   /**
+   *  Translate raw text to html
+   *
+   *  @param {string} text Raw text
+   *  @return {string} Translated text
+   */
+  public function actionGetPreview($text) {
+    if (iconv_strlen($text) > 65535) {
+      return $this->jsonError('incorrect_text');
+    }
+
+    return $this->jsonSuccess($this->_translateToHtml($text));
+  }
+
+  /**
    *  Update entry
    *
    *  @param {string} key Entry key
@@ -307,6 +321,230 @@ class ApiMedia_Controller extends AjaxController {
    *  Translate raw text to html
    */
   protected function _translateToHtml($text_raw) {
+    $text_raw = $this->_translateBlock($text_raw);
+    $text_raw = $this->_translateH($text_raw);
+    $text_raw = $this->_translatePhotos($text_raw);
+    $text_raw = $this->_translatePhotoGrid($text_raw);
+    $text_raw = $this->_translateP($text_raw);
+    $text_raw = $this->_removeSpaces($text_raw);
     return $text_raw;
+  }
+
+  /**
+   *  Translate photos
+   */
+  protected function _translatePhotos($text_raw) {
+    preg_match_all(
+      '#<Photo(Grid|Left|Right|Parallax)?\s++id=(\d++)(?:\s++file="[^"]*+")?(?:\s++desc="([^"]*+)")?\s*+/>#uis',
+      $text_raw,
+      $data,
+      PREG_SET_ORDER
+    );
+
+    foreach ($data as $photo) {
+      $replace = '';
+
+      if ($file = PhotoLibrary::find($photo[2])) {
+        $replace = $this->_makePhoto(
+          $file,
+          $photo[1] ? strtolower($photo[1]) : 'default',
+          isset($photo[3]) ? $photo[3] : ''
+        );
+      }
+
+      $text_raw = str_replace(
+        $photo[0],
+        $replace,
+        $text_raw
+      );
+    }
+
+    return $text_raw;
+  }
+
+  /**
+   *  Translate H[1234]
+   */
+  protected function _translateH($text_raw) {
+    $text_raw = preg_replace(
+      '#<h([12345])>(.*?)</h\\1>#uis',
+      '<h$1 class="page__h page__h$1">$2</h$1>',
+      $text_raw
+    );
+
+    return $text_raw;
+  }
+
+  /**
+   *  Translate PhotoGrid
+   */
+  protected function _translatePhotoGrid($text_raw) {
+    $text_raw = preg_replace(
+      '#</PhotoGrid>\s*+<PhotoGrid>#uis',
+      '',
+      $text_raw
+    );
+
+    $text_raw = preg_replace(
+      '#<PhotoGrid>(.*?)</PhotoGrid>#uis',
+      '<div class="page__photo_grid">$1<div class="page__clear"></div></div>',
+      $text_raw
+    );
+
+    return $text_raw;
+  }
+
+  /**
+   *  Translate block's
+   */
+  protected function _translateBlock($text_raw) {
+    $text_raw = preg_replace(
+      '#<block>(.*?)</block>#uis',
+      '<div class="page__block">$1</div>',
+      $text_raw
+    );
+
+    return $text_raw;
+  }
+
+  /**
+   *  Translate p's
+   */
+  protected function _translateP($text_raw) {
+    $text_raw = preg_replace(
+      '#<p>(.*?)</p>#uis',
+      '<div class="page__paragraph">$1<div class="page__clear"></div></div>',
+      $text_raw
+    );
+
+    return $text_raw;
+  }
+
+  /**
+   *  Remove spaces
+   */
+  protected function _removeSpaces($text) {
+    $tags = implode('|', array(
+      'table', 'td', 'tr', 'tbody', 'thead',
+      'div',
+      'ul', 'li', 'ol',
+      'd[dtl]',
+      'script', 'style', 'meta', 'body', 'html', 'head', 'title', 'link',
+      'form',
+      'img',
+      'br',
+      'p',
+      'a',
+      'h[123456]',
+    ));
+
+    $text = preg_replace(
+      "#\s++(</?(?:{$tags})(?=[\s<>])[^<>]*+>)#uis",
+      "$1",
+      $text
+    );
+
+    $text = preg_replace(
+      "#(</?(?:{$tags})(?=[\s<>])[^<>]*+>)\s++#uis",
+      "$1",
+      $text
+    );
+
+    return $text;
+  }
+
+  /**
+   *  Make photo code
+   */
+  protected function _makePhoto($photo, $type, $desc) {
+    if ($photo->photo_deleted) {
+      return '';
+    }
+
+    $previews = array(
+      'small' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'crop'   => true,
+          'width'  => 200,
+          'height' => 150,
+          'align'  => 'center',
+          'valign' => 'middle',
+      )),
+
+      'medium' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'width'  => 980,
+      )),
+
+      'big' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'width'  => 1980,
+      )),
+    );
+
+    if ($type == 'left' || $type == 'right') {
+      $ret  = '<div class="page__cover_photo page__cover_photo--' . $type . '">';
+      $ret .= '<div class="page__cover_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+
+      if ($desc) {
+        $ret .= '<div class="page__cover_photo-desc">';
+        $ret .= htmlspecialchars($desc);
+        $ret .= '</div>';
+      }
+      
+      $ret .= '</div>';
+
+      return $ret;
+    }
+
+    if ($type == 'default') {
+      $ret  = '<div class="page__photo">';
+      $ret .= '<img src="' . $previews['medium'] . '" />';
+
+      if ($desc) {
+        $ret .= '<div class="page__photo-desc">';
+        $ret .= htmlspecialchars($desc);
+        $ret .= '</div>';
+      }
+
+      $ret .= '</div>';
+
+      return $ret;
+    }
+
+    if ($type == 'grid') {
+      $ret  = '<PhotoGrid>';
+
+      $ret .= '<div class="page__grid_photo">';
+      $ret .= '<div class="page__grid_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+
+      if ($desc) {
+        $ret .= '<div class="page__grid_photo-desc">';
+        $ret .= htmlspecialchars($desc);
+        $ret .= '</div>';
+      }
+
+      $ret .= '</div>';
+      $ret .= '</PhotoGrid>';
+
+      return $ret;
+    }
+
+    if ($type == 'parallax') {
+      $ret  = '<div class="page__parallax_photo">';
+      $ret .= '<div class="page__parallax_photo-image" style="background-image: url(\''.$previews['big'].'\')"></div>';
+
+      if ($desc) {
+        $ret .= '<div class="page__parallax_photo-desc">';
+        $ret .= htmlspecialchars($desc);
+        $ret .= '</div>';
+      }
+
+      $ret .= '</div>';
+
+      return $ret;
+    }
+
+    return '';
   }
 }

@@ -5,14 +5,14 @@
  * @copyright 2016 ferg
  */
 
-var React   = require('react');
-var Lang    = require('libs/lang');
-var Request = require('libs/request');
-var Popups  = require('libs/popups-nice');
-var Window  = require('components/popup-window');
-var Photos  = require('./components/photos');
-var Langs   = require('./components/langs');
-var Editor  = require('./components/editor');
+var React       = require('react');
+var Lang        = require('libs/lang');
+var Request     = require('libs/request');
+var Popups      = require('libs/popups-nice');
+var PopupWindow = require('components/popup-window');
+var Photos      = require('./components/photos');
+var Langs       = require('./components/langs');
+var PageContent = require('components/page-content');
 
 require('./media-editor.scss');
 require('styles/partials/floating_clear');
@@ -34,6 +34,7 @@ var MediaEditor = React.createClass({
     }
 
     return {
+      preview: false,
       entry:   false,
       lang:    langs[0],
       langs:   langs,
@@ -144,10 +145,102 @@ var MediaEditor = React.createClass({
   },
 
   /**
-   *  Insert photo into editor
+   *  Insert tag into editor
    */
-  _insertPhoto(photo) {
-    console.log('insert', photo);
+  _insertTag(tag_start, tag_end) {
+    tag_start = tag_start || '';
+    tag_end   = tag_end || '';
+
+    if (this.state.loading) {
+      return false;
+    }
+
+    if (!this.refs.text) {
+      return false;
+    }
+
+    var text = this.refs.text.value;
+
+    var select_start = this.refs.text.selectionStart;
+    var select_end   = this.refs.text.selectionEnd;
+
+    if (isNaN(select_start)) {
+        select_start = select_end = value.length;
+    }
+
+    if (!tag_end) {
+      text = text.substring(0, select_start) + tag_start + text.substring(select_end, text.length);
+    }
+    else {
+      text = text.substring(0, select_end) + tag_end + text.substring(select_end, text.length);
+      text = text.substring(0, select_start) + tag_start + text.substring(select_start, text.length);
+    }
+
+    this.refs.text.value = text;
+
+    if (this.refs.text.setSelectionRange) {
+      if (!tag_end) {
+        this.refs.text.setSelectionRange(
+          select_start + tag_start.length,
+          select_start + tag_start.length
+        );
+      }
+      else {
+        this.refs.text.setSelectionRange(
+          select_end + tag_start.length + tag_end.length,
+          select_end + tag_start.length + tag_end.length
+        );
+      }
+    }
+
+    return true;
+  },
+
+  /**
+   *  Make nice indent
+   */
+  _makeIndent() {
+    if (this.state.loading) {
+      return false;
+    }
+
+    if (!this.refs.text) {
+      return false;
+    }
+
+    var text = this.refs.text.value;
+
+    var select_start = this.refs.text.selectionStart;
+
+    if (isNaN(select_start)) {
+      return false;
+    }
+
+    var value    = this.refs.text.value;
+    var indents  = 0;
+    var position = select_start;
+
+    while (--position >= 0) {
+      var char = value.charAt(position);
+
+      if (char == "\r" || char == "\n") {
+        break;
+      }
+
+      if (char != " ") {
+        indents = 0;
+        continue;
+      }
+
+      ++indents;
+    }
+
+    if (!indents) {
+      return false;
+    }
+
+    this._insertTag("\n" + (new Array(indents + 1).join(' ')));
+    return true;
   },
 
   /**
@@ -270,8 +363,6 @@ var MediaEditor = React.createClass({
           loading: false,
           entry,
         });
-
-        this.props.onUpdate();
       },
 
       error: error => {
@@ -295,8 +386,54 @@ var MediaEditor = React.createClass({
     });
   },
 
+  /**
+   *  Show entry preview
+   */
   _showPreview(entry) {
-    console.log('preview', entry);
+    this.setState({
+      loading: true,
+      error: false,
+    });
+
+    this._requests.preview_netry = Request.fetch(
+      '/api/media/getPreview/', {
+      success: (html) => {
+        this._requests.preview_netry = null;
+        delete this._requests.preview_netry;
+
+        var entry = {
+          title:   this.refs.title.value,
+          desc:    this.refs.desc.value,
+          html:    html,
+        };
+
+        this.setState({
+          loading: false,
+          preview: entry,
+        });
+      },
+
+      error: error => {
+        this._requests.preview_netry = null;
+        delete this._requests.preview_netry;
+
+        this.setState({
+          loading: false,
+          error:   Lang.get('media-editor.error_' + error)
+        });
+      },
+
+      data: {
+        text: this.refs.text.value,
+      }
+    });
+  },
+
+  /**
+   *  Close preview
+   */
+  _closePreview() {
+    this.setState({preview: false});
   },
 
   /**
@@ -306,7 +443,7 @@ var MediaEditor = React.createClass({
     return (
       <Photos
         photos={this.state.photos}
-        onSelect={this._insertPhoto}
+        onTagSelect={this._insertTag}
         onAttach={this._addPhotos}
         onDelete={this._deletePhoto}
         onRestore={this._restorePhoto}
@@ -381,6 +518,21 @@ var MediaEditor = React.createClass({
             ref="text"
             defaultValue={this.state.entry.text}
             placeholder={Lang.get('media-editor.entry_text')}
+            onKeyDown={e => {
+              if (e.keyCode == 9 && this._insertTag("  ")) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+
+              if (e.keyCode == 13 && this._makeIndent()) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+
+              return true;
+            }}
           />
         </form>
       </div>
@@ -426,6 +578,22 @@ var MediaEditor = React.createClass({
     );
   },
 
+  /**
+   *  Show preview
+   */
+  _makePreview() {
+    return (
+      <PopupWindow onClose={this._closePreview}>
+        <PageContent
+          content={this.state.preview.html}
+          title={this.state.preview.title}
+          desc={this.state.preview.desc}
+          photo={false}
+        />
+      </PopupWindow>
+    );
+  },
+
   render() {
     var photos        = null;
     var photos_loader = null;
@@ -434,6 +602,7 @@ var MediaEditor = React.createClass({
     var editor        = null;
     var langs         = null;
     var buttons       = null;
+    var preview       = null;
 
     // editor
     if (this.state.entry) {
@@ -470,9 +639,14 @@ var MediaEditor = React.createClass({
       langs = this._makeLangs();
     }
 
+    if (this.state.preview) {
+      preview = this._makePreview();
+    }
+
     return (
       <div className="media-editor">
         {langs}
+        {preview}
 
         <div className="media-editor__photos-wrapper">
           <div className="media-editor__photos">

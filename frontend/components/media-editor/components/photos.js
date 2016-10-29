@@ -128,7 +128,7 @@ var Photos = React.createClass({
       return (
         <Photo
           key={photo.id}
-          onSelect={this.props.onSelect}
+          onTagSelect={this.props.onTagSelect}
           onDelete={this.props.onDelete}
           onRestore={this.props.onRestore}
           photo={photo}

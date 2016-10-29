@@ -1,0 +1,194 @@
+@import 'styles/mixins/respond_to';
+$window_padding: 10px;
+$margin_bottom: 20px;
+
+/**
+ *	Common
+ */
+.page {
+	font-family: Verdana, sans-serif;
+}
+
+	.page a {
+		color: #6da3bd;
+	}
+
+		.page a:hover {
+			text-decoration: underline;
+		}
+
+	.page__clear {
+		clear: both;
+	}
+
+/**
+ *	Titles
+ */
+.page__h {
+	font-family: 'Fira Sans',sans-serif;
+	margin: 0px 0px $margin_bottom 0px;
+	font-size: 28px;
+	line-height: 34px;
+	letter-spacing: 1px;
+	color: #555;
+}
+
+/**
+ *	PhotoGrid
+ */
+.page__photo_grid {
+	margin-top: $margin_bottom;
+	margin-bottom: $margin_bottom;
+	text-align: center;
+	vertical-align: top;
+}
+
+/**
+ *	Page block
+ */
+.page__block {
+	min-width: $screen_phone - $window_padding * 2;
+	max-width: $screen_wide - $window_padding * 2;
+	padding: 0px $window_padding;
+
+	@include respond_to(screen_wide) {
+		margin: auto;
+		width: $screen_wide - $window_padding;
+	}
+}
+
+/**
+ *	Paragraph
+ */
+.page__paragraph {
+	color: #000;
+	font-size: 14px;
+	line-height: 22px;
+	letter-spacing: -0.003em;
+	font-style: normal;
+	margin-bottom: $margin_bottom;
+}
+
+/**
+ *	Photo
+ */
+.page__photo {
+	margin: $margin_bottom 0px;
+}
+
+	.page__photo img {
+		max-width: 100%;
+	}
+
+	.page__photo-desc {
+		line-height: 20px;
+		font-size: 14px;
+		text-align: center;
+	}
+
+/**
+ *	Photo - grid
+ */
+.page__grid_photo {
+	width: 25%;
+	display: inline-block;
+	vertical-align:top;
+
+	@include respond_to(screen_tablet) {
+		width: 33%;
+	}
+
+	@include respond_to(screen_phone) {
+		width: 50%;
+	}
+}
+
+	.page__grid_photo-image {
+		height: 130px;
+		width: 90%;
+		background: #EEE;
+		background-position: 50% 50%;
+		background-size: cover;
+		background-repeat: no-repeat;
+		margin: 0px auto 15px auto;
+	}
+
+	.page__grid_photo-desc {
+		font-size: 12px;
+		line-height: 16px;
+		text-align: center;
+		margin-bottom: $margin_bottom;
+	}
+
+/**
+ *	Photo - cover
+ */
+.page__cover_photo {
+
+}
+
+	.page__cover_photo--right {
+		float: right;
+	}
+
+	.page__cover_photo--left {
+		float: left;
+	}
+
+	.page__cover_photo-image {
+		width: 150px;
+		height: 100px;
+		background: #EEE;
+		background-position: 50% 50%;
+		background-size: cover;
+		background-repeat: no-repeat;
+		margin-bottom: 15px;
+	}
+
+	.page__cover_photo--right .page__cover_photo-image {
+		margin-left: 15px;
+	}
+
+	.page__cover_photo--left .page__cover_photo-image {
+		margin-right: 15px;
+	}
+
+	.page__cover_photo-desc {
+		font-size: 12px;
+		line-height: 16px;
+		text-align: center;
+		margin-bottom: $margin_bottom;
+	}
+
+/**
+ *	Photo - parallax
+ */
+.page__parallax_photo {
+	height: 400px;
+	margin: $margin_bottom 0px;
+
+	@include respond_to(screen_tablet) {
+		height: 300px;
+	}
+
+	@include respond_to(screen_phone) {
+		height: 200px;
+	}
+}
+
+	.page__parallax_photo-image {
+		width: 100%;
+		height: 100%;
+		background: #EEE;
+		background-position: 50% 50%;
+		background-size: cover;
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+	}
+
+	.page__parallax_photo-desc {
+		font-size: 12px;
+		line-height: 16px;
+		text-align: center;
+		margin-bottom: $margin_bottom;
+	}

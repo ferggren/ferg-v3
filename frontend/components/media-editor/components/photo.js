@@ -9,12 +9,12 @@ var React = require('react');
 var Lang   = require('libs/lang');
 
 var Photo = React.createClass({
-  _loading: false,
-  _deleted: false,
+  _loading:   false,
+  _deleted:   false,
 
   getInitialState() {
     return {
-      show_library: false,
+      show_tags: false,
     }
   },
 
@@ -27,7 +27,34 @@ var Photo = React.createClass({
       return true;
     }
 
+    if (this.state.show_tags != nextState.show_tags) {
+      return true;
+    }
+
     return false;
+  },
+
+  _insertTag(tag, photo) {
+    tag  = '<' + tag + ' ';
+    tag += 'id=' + photo.id + ' ';
+    tag += 'file="' + photo.name + '" ';
+    tag += 'desc="" ';
+    tag += '/>'
+
+    this.setState({show_tags: false});
+    this.props.onTagSelect(tag);
+  },
+
+  _showTags() {
+    this.setState({show_tags: true});
+  },
+
+  _hideTags() {
+    this.setState({show_tags: false});
+  },
+
+  _swapTags() {
+    this.setState({show_tags: !this.state.show_tags});
   },
 
   render() {
@@ -39,6 +66,7 @@ var Photo = React.createClass({
     var remove  = null;
     var restore = null;
     var loader  = null;
+    var buttons = null;
 
     // loading
     if (photo.loading) {
@@ -59,6 +87,33 @@ var Photo = React.createClass({
           {Lang.get('media-editor.photo_restore')}
         </div>
       );
+    }
+
+    // buttons
+    if (this.state.show_tags && !photo.loading && !photo.deleted) {
+      buttons = [
+        {name: "img", tag: "Photo"},
+        {name: "<", tag: "PhotoLeft"},
+        {name: ">", tag: "PhotoRight"},
+        {name: "-", tag: "PhotoGrid"},
+        {name: "pl", tag: "PhotoParallax"},
+      ];
+
+      buttons = buttons.map(button => {
+        return (
+          <div
+            key={button.tag}
+            className="media-editor__photo-button media-editor__photo-tag"
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              this._insertTag(button.tag, photo);
+            }}>
+            {button.name}
+          </div>
+        );
+      });
     }
 
     // delete
@@ -82,8 +137,17 @@ var Photo = React.createClass({
         className="media-editor__photo"
         style={{backgroundImage: "url('" + photo.preview +"')"}}
         onClick={e => {
-          this.props.onSelect(photo.id);
+          this._swapTags();
+        }}
+        onMouseEnter={e => {
+          this._showTags();
+        }}
+        onMouseLeave={e => {
+          this._hideTags();
         }}>
+        <div className="media-editor__photo-tags">
+          {buttons}
+        </div>
         <div className="media-editor__photo-button media-editor__photo-button--title">
           {photo.name}
         </div>
