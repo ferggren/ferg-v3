@@ -10,24 +10,16 @@
 		<link rel="alternate" hreflang="en-us" href="//ferg.in/en/" />
 
 		<title>@section('site_title')@lang("site.title")@show</title>
+		
+		<script>window.__CURRENT_LANG = '{{Lang::getLang()}}';</script>
 
-		<!--
-		<link href="/v_@file_hash('/public/css/site.css')/css/site.css" rel="stylesheet" />
-
-		<script src="/v_@file_hash('/public/js/rocky.js')/js/rocky.js"></script>
-		<script src="/v_@file_hash('/public/js/popup.js')/js/popup.js"></script>
-		<script src="/v_@file_hash('/public/js/lang.js')/js/lang.js"></script>
-		<script src="/v_@file_hash('/public/js/app.js')/js/app.js"></script>
-		<script src="/v_@file_hash('/public/js/storage.js')/js/storage.js"></script>
-		<script src="/v_@file_hash('/public/js/paginator.js')/js/paginator.js"></script>
-		@if (Lang::getLang() == 'ru')
-		<script src="/v_@file_hash('/public/js/lang/site_ru.js')/js/lang/site_ru.js"></script>
+		@if (Config::get('app.env') == 'dev')
+			<link href="/assets/site/site.css?v=@build_hash" rel="stylesheet" />
+			<script src="/assets/site/site.js?v=@build_hash" defer></script>
 		@else
-		<script src="/v_@file_hash('/public/js/lang/site_en.js')/js/lang/site_en.js"></script>
+			<link href="/assets/v_@file_hash('/public/assets/site/site.css')/site/site.css" rel="stylesheet" />
+			<script src="/assets/v_@file_hash('/public/assets/site/site.js')/site/site.js" defer></script>
 		@endif
-
-		<script>Lang.setLang('{{Lang::getLang()}}');</script>
-		-->
 	</head>
 
 	<body>
