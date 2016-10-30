@@ -7,7 +7,7 @@ let WebpackDevServer    = null; // require later
 
 // Modes: production dev dev-server profile
 const NODE_ENV      = process.env.NODE_ENV || 'production';
-const ROOT_PATH     = path.join(__dirname, '/frontend');
+const ROOT_PATH     = path.join(__dirname, '/src');
 const PUBLIC_PATH   = '/assets/';
 const BUILD_PATH    = path.join(__dirname, '/public' + PUBLIC_PATH);
 
