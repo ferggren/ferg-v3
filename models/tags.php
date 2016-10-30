@@ -4,161 +4,146 @@
  */
 class Tags {
   /**
-   *  Return all tags in tag group
+   *  Return all tags in the group(s)
    *
-   *  @param {object} tags List of tag groups
-   *  @return {object} Tags for each of the tag group
+   *  @param {object} groups List of groups
+   *  @return {object} Tags for each group
    */
-  public static function getTagValues($tags) {
-    if (!is_array($tags)) {
-      $tags = array($tags);
+  public static function getTags($groups) {
+    if (!is_array($groups)) {
+      $groups = array($groups);
+    }
+
+    if (!count($groups)) {
+      return array();
     }
 
     $ret = array();
-    $where_in = array();
 
-    foreach ($tags as $tag) {
-      $ret[$tag] = array();
-
-      if (!($tag = trim($tag))) {
-        continue;
-      }
-
-      $where_in[] = "'".Database::escape($tag)."'";
+    foreach ($groups as $group) {
+      $ret[$group] = array();
     }
 
-    if (!($where_in = implode(',', $where_in))) {
-      return count($ret) == 1 ? $ret[$tags[0]] : $ret;
-    }
-
-    $values = Database::from(array(
+    $res = Database::from(array(
+      'tags_groups tg',
       'tags t',
-      'tags_values tv',
     ));
 
-    $values->whereRaw(
-      "t.tag_name IN ({$where_in}) AND
-       tv.tag_id = t.tag_id AND
-       tv.amount > 0"
-    );
+    $res->whereAnd('tg.group_name', 'IN', array_keys($ret));
+    $res->whereAnd('t.group_id', '=', 'tg.group_id', false);
+    $res->whereAnd('t.tag_weight', '>', 0);
+    $res->orderBy('t.tag_name', 'asc');
 
-    $values->orderBy('tv.value', 'asc');
-
-    foreach ($values->get() as $value) {
-      if (!isset($ret[$value->tag_name])) {
+    foreach ($res->get() as $tag) {
+      if (!isset($ret[$tag->group_name])) {
         continue;
       }
 
-      $ret[$value->tag_name][$value->value] = (int)$value->amount;
+      $ret[$tag->group_name][$tag->tag_name] = (int)$tag->tag_weight;
     }
 
-    return count($ret) == 1 ? $ret[$tags[0]] : $ret;
+    return count($ret) == 1 ? $ret[$groups[0]] : $ret;
   }
 
   /**
    *  Return all targets attached to the tag
    *
-   *  @param {string} tag Tag group
-   *  @param {string} target_values Tag value
-   *  @return {object} List of tag targets
+   *  @param {string} tag_group Tags group
+   *  @param {string} tag_name Tag value
+   *  @return {object} List of targets
    */
-  public static function getTagTargets($tag, $target_value) {
-    if (!($tag_id = self::_getTagId($tag, false))) {
+  public static function getTagRelations($tag_group, $tag_name) {
+    if (!($group_id = self::_getGroupId($tag_group, false))) {
       return array();
     }
 
-    if (!($value = self::_getValueObject($tag_id, $target_value, false))) {
+    if (!($tag = self::_getTagObject($group_id, $tag_name, false))) {
       return array();
     }
 
-    $targets = Database::from('tags_targets');
-    $targets->whereAnd('value_id', '=', $value->value_id);
+    $res = Database::from('tags_relations');
+    $res->whereAnd('tag_id', '=', $tag->tag_id);
 
     $ret = array();
 
-    foreach ($targets->get() as $target) {
-      $ret[] = $target->target_id;
+    foreach ($res->get() as $rel) {
+      $ret[] = $rel->relation_id;
     }
 
     return $ret;
   }
 
   /**
-   *  Attach target to a tag
+   *  Attach tags to a target
    *
-   *  @param {string} tag Tag group
-   *  @param {int} target_id Target id
-   *  @param {string} target_values Tag value
+   *  @param {string} group_name Tags group
+   *  @param {int} relation_id Relation id
+   *  @param {string} target_tags Relation tags
+   *  @param {int} relation_weight Relation weight
    */
-  public static function attachTag($tag, $target_id, $target_values) {
-    if (!($tag_id = self::_getTagId($tag))) {
+  public static function attachTags($group_name, $relation_id, $relation_tags, $relation_weight = 1) {
+    if (!($group_id = self::_getGroupId($group_name))) {
       return false;
     }
 
-    if (!preg_match('#^\d++$#', $target_id)) {
+    if (!preg_match('#^\d++$#', $relation_id)) {
       return false;
     }
 
-    // decrease counters
-    $values = Database::from(array(
-      'tags_targets tt',
-      'tags_values tv',
-    ));
-    $values->whereAnd('tt.tag_id', '=', $tag_id);
-    $values->whereAnd('tt.target_id', '=', $target_id);
-    $values->whereAnd('tv.value_id', '=', 'tt.value_id', false);
+    // decrease weight
+    $res = Database::from('tags_relations');
+    $res->whereAnd('group_id', '=', $group_id);
+    $res->whereAnd('relation_id', '=', $relation_id);
 
-    foreach ($values->get() as $value) {
-      $tag_value = Database::from('tags_values');
-      $tag_value->whereAnd('value_id', '=', $value->value_id);
-      $tag_value = $tag_value->get();
+    foreach ($res->get() as $rel) {
+      $tag = Database::from('tags');
+      $tag->whereAnd('tag_id', '=', $rel->tag_id);
 
-      if (count($tag_value) != 1) {
+      if (count($tag = $tag->get()) != 1) {
         return false;
       }
 
-      $tag_value = $tag_value[0];
+      $tag = $tag[0];
 
-      $tag_value->amount = $tag_value->amount - 1;
-      $tag_value->save();
+      $tag->tag_weight = (int)$tag->tag_weight - (int)$rel->relation_weight;
+      $tag->save();
     }
 
     // remove attached tags
-    $delete = Database::from('tags_targets');
-    $delete->whereAnd('tag_id', '=', $tag_id);
-    $delete->whereAnd('target_id', '=', $target_id);
+    $delete = Database::from('tags_relations');
+    $delete->whereAnd('group_id', '=', $group_id);
+    $delete->whereAnd('relation_id', '=', $relation_id);
     $delete->delete();
 
     // attach tags
-    foreach ($target_values as $target_value) {
-      if (!($value = self::_getValueObject($tag_id, $target_value))) {
+    foreach ($relation_tags as $tag) {
+      if (!($tag = self::_getTagObject($group_id, $tag))) {
         continue;
       }
 
-      $rel = new Database('tags_targets');
-      $rel->tag_id = $tag_id;
-      $rel->value_id = $value->value_id;
-      $rel->target_id = $target_id;
+      $rel = new Database('tags_relations');
+      $rel->group_id = $group_id;
+      $rel->tag_id = $tag->tag_id;
+      $rel->relation_id = $relation_id;
+      $rel->relation_weight = (int)$relation_weight;
       $rel->save();
 
-      $value->amount = (int)$value->amount + 1;
-      $value->save();
+      $tag->tag_weight = (int)$tag->tag_weight + (int)$relation_weight;
+      $tag->save();
     }
 
     return true;
   }
 
   /**
-   *  Return tag group id by tag group name
+   *  Return group id
    *
-   *  @param {string} tag_name Tag name
-   *  @param {boolean} insert Create and return new tag group, if not exists
-   *  @return {int} Tag id
+   *  @param {string} group_name Group name
+   *  @param {boolean} insert Create group if not exists, 
+   *  @return {int} Group id
    */
-  protected static function _getTagId($tag_name, $insert = true) {
-    $tag_name = trim($tag_name);
-
-    if (!$tag_name) {
+  protected static function _getGroupId($group_name, $insert = true) {
+    if (!($group_name = trim($group_name))) {
       return false;
     }
 
@@ -167,62 +152,60 @@ class Tags {
     if ($cache === false) {
       $cache = array();
 
-      foreach(Database::from('tags')->get() as $row) {
-        $cache[$row->tag_name] = $row->tag_id;
+      foreach(Database::from('tags_groups')->get() as $row) {
+        $cache[$row->group_name] = $row->group_id;
       }
     }
 
-    if (isset($cache[$tag_name])) {
-      return $cache[$tag_name];
+    if (isset($cache[$group_name])) {
+      return $cache[$group_name];
     }
 
     if (!$insert) {
       return false;
     }
 
-    $tag = new Database('tags');
-    $tag->tag_name = $tag_name;
-    $tag->save();
+    $res = new Database('tags_groups');
+    $res->group_name = $group_name;
+    $res->save();
 
-    return $cache[$tag_name] = $tag->tag_id;
+    return $cache[$group_name] = $res->group_id;
   }
 
 
   /**
    *  Return tag object
    *
-   *  @param {int} tag_id Tag group id
-   *  @param {string} target_value Tag 
-   *  @param {boolean} insert Create and return new tag, if not exists
-   *  @return {int} Tag id
+   *  @param {int} group_id Tag group id
+   *  @param {string} tag_name Tag 
+   *  @param {boolean} insert Create new tag if not exists
+   *  @return {object} Tag object
    */
-  protected static function _getValueObject($tag_id, $target_value, $insert = true) {
-    $target_value = trim($target_value);
+  protected static function _getTagObject($group_id, $tag_name, $insert = true) {
+    if (!($tag_name = trim($tag_name))) {
+      return false;
+    }
 
-    $value = Database::from('tags_values');
-    $value->whereAnd('tag_id', '=', $tag_id);
-    $value->whereAnd('value', 'LIKE', $target_value);
-    $value = $value->get();
+    $res = Database::from('tags');
+    $res->whereAnd('group_id', '=', $group_id);
+    $res->whereAnd('tag_name', 'LIKE', $tag_name);
+    $res = $res->get();
 
-    if (count($value) > 0) {
-      if (count($value) != 1) {
-        return false;
-      }
-
-      return $value[0];
+    if (count($res) > 0) {
+      return count($res) == 1 ? $res[0] : false;
     }
 
     if (!$insert) {
       return false;
     }
 
-    $value = new Database('tags_values');
-    $value->tag_id = $tag_id;
-    $value->value = $target_value;
-    $value->amount = 0;
-    $value->save();
+    $res = new Database('tags');
+    $res->group_id = $group_id;
+    $res->tag_name = $tag_name;
+    $res->tag_weight = 0;
+    $res->save();
 
-    return $value;
+    return $res;
   }
 }
 ?>

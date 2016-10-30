@@ -245,7 +245,7 @@ class ApiPages_Controller extends ApiController {
       return $this->error('incorrect_page_id');
     }
 
-    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,200}$#iu', $tags)) {
+    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{0,200}$#iu', $tags)) {
       return $this->error('incorrect_tags');
     }
 
@@ -255,7 +255,7 @@ class ApiPages_Controller extends ApiController {
     $this->_updatePageTags($page);
 
     return $this->success(array(
-      'tags' => Tags::getTagValues("pages_{$page->page_type}_all"),
+      'tags' => Tags::getTags("pages_{$page->page_type}_all"),
       'page_tags' => $page->page_tags,
     ));
   }
@@ -340,7 +340,7 @@ class ApiPages_Controller extends ApiController {
 
     $visible = $this->_checkVisibility($visible);
 
-    return $this->success(Tags::getTagValues(
+    return $this->success(Tags::getTags(
       "pages_{$type}_{$visible}"
     ));
   }
@@ -382,7 +382,7 @@ class ApiPages_Controller extends ApiController {
       return false;
     }
 
-    return Tags::getTagTargets($key, $tag);
+    return Tags::getTagRelations($key, $tag);
   }
 
   /**
@@ -472,13 +472,13 @@ class ApiPages_Controller extends ApiController {
       }
     }
 
-    Tags::attachTag(
+    Tags::attachTags(
       "pages_{$page->page_type}_all",
       $page->page_id,
       $values_all
     );
 
-    Tags::attachTag(
+    Tags::attachTags(
       "pages_{$page->page_type}_visible",
       $page->page_id,
       $values_visible

@@ -703,14 +703,14 @@ class ApiPhotoLibrary_Controller extends ApiController {
         }
       }
 
-      Tags::attachTag(
+      Tags::attachTags(
         "photos_{$user_id}_0_{$tag}",
         $photo->file_id,
         $values
       );
 
       if ($photo->photo_collection_id) {
-        Tags::attachTag(
+        Tags::attachTags(
           "photos_{$photo->photo_collection_id}_{$tag}",
           $photo->file_id,
           $values
@@ -733,7 +733,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
       $key = "photos_{$collection}_";
     }
 
-    $tags = Tags::getTagValues(array(
+    $tags = Tags::getTags(array(
       "{$key}iso",
       "{$key}shutter_speed",
       "{$key}aperture",
@@ -805,7 +805,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
         continue;
       }
 
-      if (!count($photos = Tags::getTagTargets($key.$tag, $value))) {
+      if (!count($photos = Tags::getTagRelations($key.$tag, $value))) {
         return array();
       }
 
