@@ -1,68 +1,68 @@
 <?php
-class ApiStorage_Controller extends AjaxController {
+class ApiStorage_Controller extends ApiController {
   /**
    *  Return access error
    */
   public function actionIndex() {
-    return $this->jsonError('access_denied');
+    return $this->error('access_denied');
   }
 
   public function actionDeleteFile($file_id = false) {
     if (!User::isAuthenticated()) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if (!is_string($file_id) || !preg_match('#^\d{1,10}$#', $file_id)) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if (!$file = StorageFiles::find($file_id)) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if ($file->file_deleted) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if ($file->user_id != User::get_user_id()) {
       if (!User::hasAccess('admin')) {
-        return $this->jsonError('ivalid_file_id');
+        return $this->error('ivalid_file_id');
       }
     }
 
     $file->file_deleted = 1;
     $file->save();
 
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   public function actionRestoreFile($file_id = false) {
     if (!User::isAuthenticated()) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if (!is_string($file_id) || !preg_match('#^\d{1,10}$#', $file_id)) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if (!$file = StorageFiles::find($file_id)) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if (!$file->file_deleted) {
-      return $this->jsonError('ivalid_file_id');
+      return $this->error('ivalid_file_id');
     }
 
     if ($file->user_id != User::get_user_id()) {
       if (!User::hasAccess('admin')) {
-        return $this->jsonError('ivalid_file_id');
+        return $this->error('ivalid_file_id');
       }
     }
 
     $file->file_deleted = 0;
     $file->save();
     
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   /**
@@ -78,7 +78,7 @@ class ApiStorage_Controller extends AjaxController {
    */
   public function actionGetMediaStats($admin_mode = false, $media = '', $group = '') {
     if (!User::isAuthenticated()) {
-      return $this->jsonSuccess(array());
+      return $this->success(array());
     }
 
     $admin_mode = $admin_mode == 'enabled';
@@ -101,13 +101,13 @@ class ApiStorage_Controller extends AjaxController {
     }
 
     if ($group_id == -1) {
-      return $this->jsonSuccess(array());
+      return $this->success(array());
     }
 
     $media = self::_validateMedia($media);
     $media = self::_loadMediaStats($media, $admin_mode, $group_id);
 
-    return $this->jsonSuccess($media);
+    return $this->success($media);
   }
 
   /**
@@ -125,17 +125,17 @@ class ApiStorage_Controller extends AjaxController {
     $search = self::_validateSearch();
 
     if (!User::isAuthenticated()) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     // Nothing to return
     if (!count($search['media'])) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     // if group was not created yet
     if ($search['group_id'] == -1) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     // where query
@@ -163,7 +163,7 @@ class ApiStorage_Controller extends AjaxController {
     $count = StorageFiles::whereRaw($where);
 
     if (!($count = $count->count())) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     $rpp = $ret['rpp'];
@@ -197,7 +197,7 @@ class ApiStorage_Controller extends AjaxController {
     $files = $files->get();
 
     if (!count($files)) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     $ret['page'] = $search['page'];
@@ -212,7 +212,7 @@ class ApiStorage_Controller extends AjaxController {
       $ret['files'][] = $file->exportInfo();
     }
 
-    return $this->jsonSuccess($ret);
+    return $this->success($ret);
   }
 
   /**
@@ -224,11 +224,11 @@ class ApiStorage_Controller extends AjaxController {
   public function actionUpload() {
     // If file even uploaded?
     if (!isset($_FILES) || !is_array($_FILES)) {
-      return $this->jsonError('error_file_not_uploaded');
+      return $this->error('error_file_not_uploaded');
     }
 
     if (!isset($_FILES['upload']) || !is_array($_FILES['upload'])) {
-      return $this->jsonError('error_file_not_uploaded');
+      return $this->error('error_file_not_uploaded');
     }
 
     $upload = $_FILES['upload'];
@@ -237,20 +237,20 @@ class ApiStorage_Controller extends AjaxController {
     if (isset($upload['error']) && $upload['error']) {
       // No arrays are allowed here
       if (is_array($upload['error'])) {
-        return $this->jsonError('error_file_upload_error');
+        return $this->error('error_file_upload_error');
       }
 
       $error = $upload['error'];
 
       if ($error == UPLOAD_ERR_NO_FILE) {
-        return $this->jsonError('error_file_not_uploaded');
+        return $this->error('error_file_not_uploaded');
       }
 
       if ($error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE) {
-        return $this->jsonError('error_file_is_too_big');
+        return $this->error('error_file_is_too_big');
       }
 
-      return $this->jsonError('error_file_not_uploaded');
+      return $this->error('error_file_not_uploaded');
     }
 
     // check fields
@@ -259,36 +259,36 @@ class ApiStorage_Controller extends AjaxController {
         continue;
       }
 
-      return $this->jsonError('error_file_upload_error');
+      return $this->error('error_file_upload_error');
     }
 
     // get file info
     if (!is_array($file_info = self::_processUploadedFile($upload))) {
       if ($file_info) {
-        return $this->jsonError($file_info);
+        return $this->error($file_info);
       }
 
-      return $this->jsonError('error_file_upload_error');
+      return $this->error('error_file_upload_error');
     }
 
     // get user id
     if (!($file_info['user_id'] = self::_getUserId())) {
-      return $this->jsonError('error_file_upload_error');
+      return $this->error('error_file_upload_error');
     }
 
     // get group id
     if (!($file_info['group_id'] = self::_getGroupId($file_info))) {
-      return $this->jsonError('error_file_upload_error');
+      return $this->error('error_file_upload_error');
     }
 
     // get file hash
     if (!($file_info['hash'] = self::_makeFileHash($file_info))) {
-      return $this->jsonError('error_file_upload_error');
+      return $this->error('error_file_upload_error');
     }
 
     // move file
     if (!($file_info['path'] = self::_moveUploadedFile($file_info))) {
-      return $this->jsonError('storage.error_file_upload_error');
+      return $this->error('storage.error_file_upload_error');
     }
 
     // create entry
@@ -311,7 +311,7 @@ class ApiStorage_Controller extends AjaxController {
 
     $file->save();
 
-    return $this->jsonSuccess($file->exportInfo());
+    return $this->success($file->exportInfo());
   }
 
   /**

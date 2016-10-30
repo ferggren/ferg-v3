@@ -1,5 +1,5 @@
 <?php
-class ApiPages_Controller extends AjaxController {
+class ApiPages_Controller extends ApiController {
   static $_types = array(
     "portfolio",
     "moments",
@@ -9,7 +9,7 @@ class ApiPages_Controller extends AjaxController {
    *  Access error
    */
   public function actionIndex() {
-    return $this->jsonError('access_denied');
+    return $this->error('access_denied');
   }
 
   /**
@@ -20,22 +20,22 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionCreatePage($type) {
     if (!User::isAuthenticated()) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if (!User::hasAccess('admin')) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if (!in_array($type, self::$_types)) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     $page = new MediaPages;
     $page->page_type = $type;
     $page->save();
 
-    return $this->jsonSuccess($page->export());
+    return $this->success($page->export());
   }
 
   /**
@@ -55,7 +55,7 @@ class ApiPages_Controller extends AjaxController {
     );
 
     if (!in_array($type, self::$_types)) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     $visible = $this->_checkVisibility($visible);
@@ -64,11 +64,11 @@ class ApiPages_Controller extends AjaxController {
 
     if ($tag) {
       if (!($pages = $this->_getTagPages($type, $visible, $tag))) {
-        return $this->jsonSuccess($ret);
+        return $this->success($ret);
       }
 
       if (!count($pages)) {
-        return $this->jsonSuccess($ret);
+        return $this->success($ret);
       }
 
       $where[] = 'page_id IN (' . implode(',', $pages) . ')';
@@ -87,7 +87,7 @@ class ApiPages_Controller extends AjaxController {
     $pages->orderBy('page_id', 'DESC');
 
     if (!($count = $pages->count())) {
-      return $this->jsonSuccess($ret);
+      return $this->success($ret);
     }
 
     $rpp = 10;
@@ -105,7 +105,7 @@ class ApiPages_Controller extends AjaxController {
       $ret['list'][] = $page->export();
     }
 
-    return $this->jsonSuccess($ret);
+    return $this->success($ret);
   }
 
   /**
@@ -153,26 +153,26 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionUpdatePhoto($id, $photo_id) {
     if (!($page = $this->_getPage($id, true))) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if ($page->page_deleted) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if ($page->page_photo_id == $photo_id) {
-      return $this->jsonSuccess($page->export()['preview']);
+      return $this->success($page->export()['preview']);
     }
 
     $page->page_photo_id = 0;
 
     if ($photo_id && preg_match('#^\d++$#', $photo_id)) {
       if (!($photo = PhotoLibrary::find($photo_id))) {
-        return $this->jsonError('incorrect_photo_id');
+        return $this->error('incorrect_photo_id');
       }
 
       if ($photo->photo_deleted) {
-        return $this->jsonError('incorrect_photo_id');
+        return $this->error('incorrect_photo_id');
       }
 
       $page->page_photo_id = $photo_id;
@@ -180,7 +180,7 @@ class ApiPages_Controller extends AjaxController {
 
     $page->save();
 
-    return $this->jsonSuccess($page->export()['preview']);
+    return $this->success($page->export()['preview']);
   }
 
   /**
@@ -192,15 +192,15 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionUpdateDate($id, $date) {
     if (!($page = $this->_getPage($id, true))) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if ($page->page_deleted) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if ($page->page_date == $date) {
-      return $this->jsonSuccess(array(
+      return $this->success(array(
         'date'      => $page->page_date,
         'timestamp' => $page->page_date_timestamp,
       ));
@@ -211,7 +211,7 @@ class ApiPages_Controller extends AjaxController {
 
     if ($date) {
       if (!preg_match('#^(\d{4})\.(\d{1,2})\.(\d{1,2})$#u', $date, $data)) {
-        return $this->jsonError('incorrect_date');
+        return $this->error('incorrect_date');
       }
 
       $page->page_date = $date;
@@ -223,7 +223,7 @@ class ApiPages_Controller extends AjaxController {
 
     $page->save();
 
-    return $this->jsonSuccess(array(
+    return $this->success(array(
       'date'      => $page->page_date,
       'timestamp' => $page->page_date_timestamp,
     ));
@@ -238,15 +238,15 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionUpdateTags($id, $tags) {
     if (!($page = $this->_getPage($id, true))) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if ($page->page_deleted) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{1,200}$#iu', $tags)) {
-      return $this->jsonError('incorrect_tags');
+      return $this->error('incorrect_tags');
     }
 
     $page->page_tags = $tags;
@@ -254,7 +254,7 @@ class ApiPages_Controller extends AjaxController {
 
     $this->_updatePageTags($page);
 
-    return $this->jsonSuccess(array(
+    return $this->success(array(
       'tags' => Tags::getTagValues("pages_{$page->page_type}_all"),
       'page_tags' => $page->page_tags,
     ));
@@ -268,11 +268,11 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionUpdateVersions($id) {
     if (!($page = $this->_getPage($id, true))) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if ($page->page_deleted) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     $versions = array();
@@ -295,7 +295,7 @@ class ApiPages_Controller extends AjaxController {
     $page->page_versions = implode(',', $versions);
     $page->save();
 
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   /**
@@ -306,24 +306,24 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionGetPage($id) {
     if (!($page = $this->_getPage($id, false))) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if ($page->page_deleted) {
-      return $this->jsonError('incorrect_page_id');
+      return $this->error('incorrect_page_id');
     }
 
     if (!$page->page_visible) {
       if (!User::isAuthenticated()) {
-        return $this->jsonError('incorrect_page_id');
+        return $this->error('incorrect_page_id');
       }
 
       if (!User::hasAccess('admin')) {
-        return $this->jsonError('incorrect_page_id');
+        return $this->error('incorrect_page_id');
       }
     }
 
-    return $this->jsonSuccess($page->export());
+    return $this->success($page->export());
   }
 
   /**
@@ -335,12 +335,12 @@ class ApiPages_Controller extends AjaxController {
    */
   public function actionGetTags($type, $visible = 'visible') {
     if (!in_array($type, self::$_types)) {
-      return $this->jsonError('incorrect_type');
+      return $this->error('incorrect_type');
     }
 
     $visible = $this->_checkVisibility($visible);
 
-    return $this->jsonSuccess(Tags::getTagValues(
+    return $this->success(Tags::getTagValues(
       "pages_{$type}_{$visible}"
     ));
   }
@@ -395,18 +395,18 @@ class ApiPages_Controller extends AjaxController {
    */
   protected function _changePageFlag($id, $field, $value) {
     if (!($page = $this->_getPage($id, true))) {
-      return $this->jsonError('access_denied');
+      return $this->error('access_denied');
     }
 
     if (!in_array($field, array('deleted', 'visible'))) {
-      return $this->jsonError('incorrect_field');
+      return $this->error('incorrect_field');
     }
 
     $field = 'page_' . $field;
     $value = $value ? '1' : '0';
 
     if ($page->$field == $value) {
-      return $this->jsonSuccess();
+      return $this->success();
     }
 
     $page->$field = $value;
@@ -414,7 +414,7 @@ class ApiPages_Controller extends AjaxController {
 
     $this->_updatePageTags($page);
 
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   /**

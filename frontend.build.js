@@ -101,10 +101,10 @@ for (let section in site_sections) {
                 },
             }),
 
-            new webpack.optimize.CommonsChunkPlugin({
-                 name: section + "-common",
-                 minChunks: 3,
-            }),
+            // new webpack.optimize.CommonsChunkPlugin({
+            //      name: section + "-common",
+            //      minChunks: 3,
+            // }),
 
             new ExtractTextPlugin(section + '.css', {
                 allChunks: true,

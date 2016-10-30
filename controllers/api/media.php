@@ -1,10 +1,10 @@
 <?php
-class ApiMedia_Controller extends AjaxController {
+class ApiMedia_Controller extends ApiController {
   public static $user_auth = true;
   public static $user_access_level = 'admin';
 
   public function actionIndex() {
-    return $this->jsonError('access_denied');
+    return $this->error('access_denied');
   }
 
   /**
@@ -16,7 +16,7 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionGetEntry($key, $lang) {
     if (!($entry_id = $this->_getEntryId($key))) {
-      return $this->jsonError('incorrect_entry_key');
+      return $this->error('incorrect_entry_key');
     }
 
     if (!in_array($lang, array('ru', 'en'))) {
@@ -24,10 +24,10 @@ class ApiMedia_Controller extends AjaxController {
     }
 
     if (!($entry = $this->_getEntryContent($entry_id, $lang))) {
-      return $this->jsonError('internal_error');
+      return $this->error('internal_error');
     }
 
-    return $this->jsonSuccess(array(
+    return $this->success(array(
       "title"   => $entry->entry_title,
       "desc"    => $entry->entry_desc,
       "text"    => $entry->entry_text_raw,
@@ -43,10 +43,10 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionGetPreview($text) {
     if (iconv_strlen($text) > 65535) {
-      return $this->jsonError('incorrect_text');
+      return $this->error('incorrect_text');
     }
 
-    return $this->jsonSuccess($this->_translateToHtml($text));
+    return $this->success($this->_translateToHtml($text));
   }
 
   /**
@@ -61,7 +61,7 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionUpdateEntry($key, $lang, $title, $visible, $desc, $text) {
     if (!($entry_id = $this->_getEntryId($key))) {
-      return $this->jsonError('incorrect_entry_key');
+      return $this->error('incorrect_entry_key');
     }
 
     if (!in_array($lang, array('ru', 'en'))) {
@@ -69,19 +69,19 @@ class ApiMedia_Controller extends AjaxController {
     }
 
     if (!($entry = $this->_getEntryContent($entry_id, $lang))) {
-      return $this->jsonError('internal_error');
+      return $this->error('internal_error');
     }
 
     if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{0,100}$#iu', $title)) {
-      return $this->jsonError('incorrect_title');
+      return $this->error('incorrect_title');
     }
 
     if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{0,200}$#iu', $desc)) {
-      return $this->jsonError('incorrect_desc');
+      return $this->error('incorrect_desc');
     }
 
     if (iconv_strlen($text) > 65535) {
-      return $this->jsonError('incorrect_text');
+      return $this->error('incorrect_text');
     }
 
     $entry->entry_title     = $title;
@@ -91,7 +91,7 @@ class ApiMedia_Controller extends AjaxController {
     $entry->entry_visible   = $visible == 'visible' ? '1' : '0';
     $entry->save();
 
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   /**
@@ -102,10 +102,10 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionGetPhotos($key) {
     if (!($entry_id = $this->_getEntryId($key))) {
-      return $this->jsonError('incorrect_entry_key');
+      return $this->error('incorrect_entry_key');
     }
 
-    return $this->jsonSuccess(
+    return $this->success(
       $this->_getEntryPhotos($entry_id)
     );
   }
@@ -119,11 +119,11 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionAddPhotos($key, $photos) {
     if (!($entry_id = $this->_getEntryId($key))) {
-      return $this->jsonError('incorrect_entry_key');
+      return $this->error('incorrect_entry_key');
     }
 
     if (!preg_match('#^[0-9,]{1,500}$#', $photos)) {
-      return $this->jsonError('incorrect_photos_ids');
+      return $this->error('incorrect_photos_ids');
     }
 
     $insert = array();
@@ -158,7 +158,7 @@ class ApiMedia_Controller extends AjaxController {
       $photo->save();
     }
 
-    return $this->jsonSuccess(
+    return $this->success(
       $this->_getEntryPhotos($entry_id)
     );
   }
@@ -172,11 +172,11 @@ class ApiMedia_Controller extends AjaxController {
    */
   public function actionDeletePhoto($key, $photo_id) {
     if (!($entry_id = $this->_getEntryId($key))) {
-      return $this->jsonError('incorrect_entry_key');
+      return $this->error('incorrect_entry_key');
     }
 
     if (!preg_match('#^[0-9]{1,10}$#', $photo_id)) {
-      return $this->jsonError('incorrect_photos_ids');
+      return $this->error('incorrect_photos_ids');
     }
 
     $photo = Database::from('media_entries_photos');
@@ -185,16 +185,16 @@ class ApiMedia_Controller extends AjaxController {
     $photo = $photo->get();
 
     if (!count($photo)) {
-      return $this->jsonSuccess();
+      return $this->success();
     }
 
     if (count($photo) != 1) {
-      return $this->jsonError('internal_error');
+      return $this->error('internal_error');
     }
 
     $photo[0]->delete();
 
-    return $this->jsonSuccess();
+    return $this->success();
   }
 
   /**

@@ -11,6 +11,7 @@
 
 		<title>@section('site_title')@lang("site.title")@show</title>
 
+		<!--
 		<link href="/v_@file_hash('/public/css/site.css')/css/site.css" rel="stylesheet" />
 
 		<script src="/v_@file_hash('/public/js/rocky.js')/js/rocky.js"></script>
@@ -26,8 +27,7 @@
 		@endif
 
 		<script>Lang.setLang('{{Lang::getLang()}}');</script>
-
-		@if(Config::get('app.debug'))<script>Rocky.enableDebug();</script>@endif
+		-->
 	</head>
 
 	<body>
