@@ -1,7 +1,7 @@
 <?php
 $config = array(
-    // Enables debug output
-    'debug' => true,
+    // production || dev
+    'env' => 'production',
 
     // Controller that will be loaded by default
     // (if empty or incorrect controller was passed in url)
