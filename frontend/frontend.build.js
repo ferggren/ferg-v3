@@ -17,11 +17,11 @@ const DEV_SERVER_PROXY_PORT = process.env.DEV_SERVER_PROXY_PORT || 8080;
 const DEV_SERVER_PROXY_HOST = process.env.DEV_SERVER_PROXY_HOST || 'ferg.dev';
 
 let site_sections = {
-    'site': {
-
-    },
     'admin': {
         admin: ['admin'],
+    },
+    'site': {
+        site: ['site'],
     },
 };
 
