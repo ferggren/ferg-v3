@@ -21,7 +21,7 @@ var Navigation = React.createClass({
       return true;
     }
 
-    if (this._url != window.location.pathname) {
+    if (typeof window != 'undefined' && this._url != window.location.pathname) {
       return true;
     }
 
@@ -43,7 +43,7 @@ var Navigation = React.createClass({
   },
 
   render() {
-    this._url  = window.location.pathname;
+    this._url  = typeof window != 'undefined' ? window.location.pathname : '';
     this._lang = Lang.getLang();
     
     var links = this.props.links.map((link) => {

@@ -1,4 +1,8 @@
 module.exports = {
-  landing: 'Главная',
-  storage: 'Storage',
+  landing:   'Главная',
+  storage:   'Storage',
+  gallery:   'Галерея',
+  notes:     'Заметки',
+  moments:   'Моменты',
+  portfolio: 'Портфолио',
 };

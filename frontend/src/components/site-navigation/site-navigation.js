@@ -23,7 +23,7 @@ module.exports = React.createClass({
       return true;
     }
 
-    if (this._url != window.location.pathname) {
+    if (typeof window != 'undefined' && this._url != window.location.pathname) {
       return true;
     }
 
@@ -32,7 +32,7 @@ module.exports = React.createClass({
 
   render() {
     this._lang = Lang.getLang();
-    this._url  = window.location.pathname;
+    this._url  = typeof window != 'undefined' ? window.location.pathname : '';
     
     var navigation = [
       {
@@ -40,6 +40,30 @@ module.exports = React.createClass({
         match: /^\/(?:(?:ru|en)\/)?$/,
         align: 'left',
         link:  '/' + Lang.getLang() + '/',
+      },
+      {
+        name:  Lang.get('site-nav.gallery'),
+        match: /^\/(?:ru|en)\/gallery/,
+        align: 'left',
+        link:  '/' + Lang.getLang() + '/gallery/',
+      },
+      {
+        name:  Lang.get('site-nav.notes'),
+        match: /^\/(?:ru|en)\/notes/,
+        align: 'left',
+        link:  '/' + Lang.getLang() + '/notes/',
+      },
+      {
+        name:  Lang.get('site-nav.moments'),
+        match: /^\/(?:ru|en)\/moments/,
+        align: 'left',
+        link:  '/' + Lang.getLang() + '/moments/',
+      },
+      {
+        name:  Lang.get('site-nav.portfolio'),
+        match: /^\/(?:ru|en)\/portfolio/,
+        align: 'left',
+        link:  '/' + Lang.getLang() + '/portfolio/',
       },
       {
         name:  Lang.get('site-nav.storage'),

@@ -27,7 +27,7 @@ var Footer = React.createClass({
       return true;
     }
 
-    if (this._url != window.location.pathname) {
+    if (typeof window != 'undefined' && this._url != window.location.pathname) {
       return true;
     }
     
@@ -35,10 +35,10 @@ var Footer = React.createClass({
   },
 
   render() {
-    this._url  = window.location.pathname;
+    this._url  = typeof window != 'undefined' ? window.location.pathname : '/';
     this._lang = Lang.getLang();
 
-    var url  = window.location.pathname;
+    var url  = typeof window != 'undefined' ? window.location.pathname : '/';
     var lang = Lang.getLang() == 'ru' ? 'en' : 'ru';
 
     url = url.replace(/^\/(ru|en)\//, `/${lang}/`);

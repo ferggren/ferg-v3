@@ -61,16 +61,48 @@ $window_padding: 10px;
 			}
 		}
 
-			.site-header__contacts a {
-				margin: 0px 3px;
-			}
+		.site-header__contact {
+			display: block;
+			float: left;
+			width: 26px;
+			height: 26px;
+			margin: 0px 3px;
+			background-size: 26px 26px;
+			opacity: .85;
+		}
 
-			.site-header__contacts a img {
-				width: 26px;
-				height: 26px;
-				opacity: .85;
-			}
-
-			.site-header__contacts a img:hover {
+			.site-header__contact:hover {
 				opacity: 1;
+			}
+
+			.site-header__contact--mail {
+				background-image: url('./media/contacts/mail.png');
+			}
+
+			.site-header__contact--github {
+				background-image: url('./media/contacts/github.png');
+			}
+
+			.site-header__contact--instagram {
+				background-image: url('./media/contacts/instagram.png');
+			}
+
+			.site-header__contact--skype {
+				background-image: url('./media/contacts/skype.png');
+			}
+
+			.site-header__contact--telegram {
+				background-image: url('./media/contacts/telegram.png');
+			}
+
+			.site-header__contact--vk {
+				background-image: url('./media/contacts/vk.png');
+			}
+
+			.site-header__contact--facebook {
+				background-image: url('./media/contacts/facebook.png');
+			}
+
+			.site-header__contact--steam {
+				background-image: url('./media/contacts/steam.png');
 			}

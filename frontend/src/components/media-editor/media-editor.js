@@ -363,6 +363,8 @@ var MediaEditor = React.createClass({
           loading: false,
           entry,
         });
+
+        this.props.onUpdate();
       },
 
       error: error => {

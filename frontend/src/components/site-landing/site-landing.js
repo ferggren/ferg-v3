@@ -19,50 +19,76 @@ var SiteLanding = React.createClass({
         <div className="site-header">
           <div className="site-header__contacts-wrapper">
             <div className="site-header__contacts">
-              <a href="mailto:me@ferg.in">
-                <img src={require('./media/contacts/mail.png')} />
-              </a>
+              <a
+                href="mailto:me@ferg.in"
+                className="site-header__contact site-header__contact--mail"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://github.com/ferggren">
-                <img src={require('./media/contacts/github.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://github.com/ferggren" 
+                className="site-header__contact site-header__contact--github"
+              />
 
-              <a href="skype:ferggren?chat">
-                <img src={require('./media/contacts/skype.png')} />
-              </a>
+              <a
+                href="skype:ferggren?chat"
+                className="site-header__contact site-header__contact--skype"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://instagram.com/ferggren/">
-                <img src={require('./media/contacts/instagram.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://instagram.com/ferggren/"
+                className="site-header__contact site-header__contact--instagram"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://telegram.me/ferggren">
-                <img src={require('./media/contacts/telegram.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://telegram.me/ferggren"
+                className="site-header__contact site-header__contact--telegram"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://vk.com/id4867738">
-                <img src={require('./media/contacts/vk.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://vk.com/id4867738"
+                className="site-header__contact site-header__contact--vk"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.facebook.com/ferggren">
-                <img src={require('./media/contacts/facebook.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://www.facebook.com/ferggren"
+                className="site-header__contact site-header__contact--facebook"
+              />
 
-              <a target="_blank" rel="nofollow noopener noreferrer" href="https://steamcommunity.com/id/ferggren/">
-                <img src={require('./media/contacts/steam.png')} />
-              </a>
+              <a
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+                href="https://steamcommunity.com/id/ferggren/"
+                className="site-header__contact site-header__contact--steam"
+              />
 
               <div className="floating-clear" />
             </div>
           </div>
         </div>
 
-        <div className="landing-tags">
-          Feed tags
-        </div>
+        <ContentWrapper>
 
-        <div className="landing-feed">
-          Feed
-        </div>
+          <div className="landing-tags">
+            Feed tags
+          </div>
+
+          <br />
+
+          <div className="landing-feed">
+            Feed
+          </div>
+
+        </ContentWrapper>
       </div>
     );
   }
