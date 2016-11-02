@@ -11,6 +11,10 @@ var File     = require('./storage-file.js');
 
 var FilesList = React.createClass({
   render() {
+    if (this.props.files === false) {
+      return null;
+    }
+
     var files = null;
     var error = null;
 

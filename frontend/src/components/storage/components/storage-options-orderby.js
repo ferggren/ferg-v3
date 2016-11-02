@@ -10,11 +10,16 @@ var Lang  = require('libs/lang');
 
 var OrderBy = React.createClass({
   shouldComponentUpdate(nextProps) {
-    //only if orderby is changed
+    if (this._lang !== Lang.getLang()) {
+      return true;
+    }
+
     return nextProps.orderby !== this.props.orderby;
   },
 
   render() {
+    this._lang = Lang.getLang();
+    
     var buttons = [
       'latest',
       'popular',

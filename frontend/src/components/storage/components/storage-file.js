@@ -13,6 +13,7 @@ var StorageFile = React.createClass({
   /** for shouldComponentUpdate use **/
   _loading:      false,
   _file_deleted: false,
+  _lang:         false,
 
   /** update only when file is changed **/
   shouldComponentUpdate(nextProps) {
@@ -21,6 +22,10 @@ var StorageFile = React.createClass({
     }
 
     if (this._file_deleted !== nextProps.file.file_deleted) {
+      return true;
+    }
+
+    if (this._lang !== Lang.getLang()) {
       return true;
     }
 
@@ -75,8 +80,9 @@ var StorageFile = React.createClass({
   },
 
   render() {
-    this._loading = this.props.file.loading;
+    this._loading      = this.props.file.loading;
     this._file_deleted = this.props.file.file_deleted;
+    this._lang         = Lang.getLang();
 
     var ico       = null;
     var loader    = null;

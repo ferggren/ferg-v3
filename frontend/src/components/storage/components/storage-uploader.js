@@ -10,7 +10,10 @@ var Lang  = require('libs/lang');
 
 var Uploader = React.createClass({
   shouldComponentUpdate() {
-    // nevah
+    if (this._lang !== Lang.getLang()) {
+      return true;
+    }
+
     return false;
   },
 
@@ -82,6 +85,8 @@ var Uploader = React.createClass({
   },
 
   render() {
+    this._lang = Lang.getLang();
+    
     return (
       <div className="storage__uploader">
 

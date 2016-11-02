@@ -15,6 +15,10 @@ var Media = React.createClass({
       return true;
     }
 
+    if (this._lang !== Lang.getLang()) {
+      return true;
+    }
+
     // && media stats
     var len = Object.keys(this.props.media_stats).length;
     var len_next = Object.keys(nextProps.media_stats).length
@@ -34,8 +38,9 @@ var Media = React.createClass({
   },
 
   render() {
-    var stats = this.props.media_stats;
-    var total = 0;
+    this._lang = Lang.getLang();
+    var stats  = this.props.media_stats;
+    var total  = 0;
 
     for (var key in stats) {
       if (key == 'all') continue;

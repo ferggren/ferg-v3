@@ -36,7 +36,7 @@ var Storage = React.createClass({
     var media = media_types.length == 1 ? media_types[0] : 'all';
 
     return {
-      files:       [],
+      files:       false,
       uploads:     [],
       loading:     false,
       page:        1,
@@ -86,6 +86,10 @@ var Storage = React.createClass({
    * Clear all requests for deleting & restoring files
    */
   _clearFilesRequests() {
+    if (this.state.files === false) {
+      return;
+    }
+
     this.state.files.map(file => {
       if (typeof file._request_id == 'undefined') return;
       if (file._request_id === false) return;
@@ -555,7 +559,7 @@ var Storage = React.createClass({
         );
       }
 
-      if (!this.state.loading) {
+      if (this.state.files !== false && !this.state.loading) {
         paginator = (
           <div className="storage__paginator">
             <Paginator
