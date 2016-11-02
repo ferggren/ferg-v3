@@ -36,6 +36,7 @@ var SiteFooter = React.createClass({
   _swapLang(new_lang, new_location) {
     this.props.dispatch(setLang(new_lang));
     browserHistory.push(new_location);
+    Lang.setLang(new_lang);
   },
 
   render() {

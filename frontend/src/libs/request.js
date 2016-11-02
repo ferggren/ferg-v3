@@ -231,8 +231,8 @@ var Request = {
       }
 
       if (request.response.status != 'success') {
-        if (request.response.error) {
-          Request._error(request.id, request.response.error);
+        if (request.response.response) {
+          Request._error(request.id, request.response.response);
         }
         else {
           Request._error(request.id);

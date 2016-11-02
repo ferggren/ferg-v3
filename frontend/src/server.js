@@ -19,43 +19,130 @@ var app = express();
  *  Process requests
  */
 app.use((req, res) => {
-  match({routes, location: req.url}, (error, redirectLocation, renderProps) => {
-    if (redirectLocation) {
-      return res.redirect(301, redirectLocation.pathname + redirectLocation.search);
+  match({routes, location: req.url}, (error, redirect, render_props) => {
+    if (redirect) {
+      return res.redirect(301, redirect.pathname + redirect.search);
     }
 
     if (error) {
-      return res.status(500).send('Internal server error');
+      return res.status(500).end('Internal server error');
     }
 
-    if (!renderProps) {
-      return res.status(404).send('Not found')
+    if (!render_props) {
+      return res.status(404).end('Not found')
     }
 
+    // make store
     var store = configureStore();
 
-    // Set user lang
+    // parse lang
     var lang = getUserLang(req);
 
+    // dispatch lang into store
     store.dispatch(setLang(lang));
+
+    // Set lang (if components needed)
     Lang.setLang(lang);
 
-    // Set location
-    store.dispatch(setLocation(getLocation(req)));
+    // get current location
+    var loc = getLocation(req)
 
-    var component_html = ReactDOM.renderToString(
-      <Provider store={store}>
-        <RouterContext {...renderProps} />
-      </Provider>
+    // dispatch location info store
+    store.dispatch(setLocation(loc));
+
+    // make fetch params
+    var fetch_params = makeFetchParams(
+      req,
+      loc,
+      render_props.params
     );
 
-    console.log('done', store.getState());
-
-    return res.status(200).end(
-      renderHTML(component_html, store.getState())
-    );
+    // fetch components data (if needed)
+    fetchComponentsData(
+      store,
+      render_props.components,
+      fetch_params
+    ).then(() => {
+      // make component
+      return ReactDOM.renderToString(
+        <Provider store={store}>
+          <RouterContext {...render_props} />
+        </Provider>
+      )
+    }).then(html => {
+      // make HTML response
+      return renderHTML(html, store.getState());
+    }).then(html => {
+      // send HTML response
+      console.log('done', store.getState());
+      res.status(200).end(html);
+    }).catch(err => {
+      // catch error
+      console.log(err);
+      res.status(500).end('Internal server error');
+    })
   });
 });
+
+/**
+ *  Find all fetchData and make a promise
+ *
+ *  @param {object} store App store
+ *  @param {object} components React router components
+ *  @param {object} fetch_params Params for fetchData
+ *  @return {object} Promise
+ */
+function fetchComponentsData(store, components, fetch_params) {
+  var needs = [];
+
+  components.forEach(component => {
+    while (component.WrappedComponent) {
+      component = component.WrappedComponent;
+    }
+
+    if (!component.fetchData) {
+      return;
+    }
+
+    needs = needs.concat(component.fetchData(store, fetch_params));
+  });
+
+  return Promise.all(needs);
+}
+
+/**
+ *  Prepare params for fetchData
+ *
+ *  @param {obj} req Express req object
+ *  @param {string} location Location
+ *  @param {object} params React router params
+ *  @return {object} Args list
+ */
+function makeFetchParams(req, location, params) {
+  var ret = {};
+
+  var match = location.match(
+    /\/(?:ru|en)\/(notes|moments|portfolio)/
+  );
+
+  if (match) {
+    ret.page_type = match[1];
+  }
+
+  if (req.query) {
+    for (var key in req.query) {
+      ret[key] = req.query[key];
+    }
+  }
+
+  if (params) {
+    for (var key in params) {
+      ret[key] = params[key];
+    }
+  }
+
+  return ret;
+}
 
 /**
  *  Return user lang settings

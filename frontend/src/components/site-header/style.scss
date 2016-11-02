@@ -1,0 +1,108 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$header_height_phone: 200px;
+$header_height_tablet: 250px;
+$header_height_wide: 300px;
+$window_padding: 10px;
+
+.site-header {
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	min-width: $screen_phone;
+	background-image: url('./media/header.jpg');
+
+	@include respond_to(screen_phone) {
+		height: $header_height_phone;
+	}
+
+	@include respond_to(screen_tablet) {
+		height: $header_height_tablet;
+	}
+
+	@include respond_to(screen_wide) {
+		height: $header_height_wide;
+	}
+}
+
+	.site-header__contacts-wrapper {
+		position: relative;
+		min-width: $screen_phone;
+		max-width: $screen_wide;
+		text-align: right;
+		height: 46px + $window_padding;
+
+		@include respond_to(screen_phone) {
+			text-align: center;
+			padding-top: $header_height_phone - 46px - $window_padding;
+		}
+
+		@include respond_to(screen_tablet) {
+			padding-top: $header_height_tablet - 46px - $window_padding;
+		}
+
+		@include respond_to(screen_wide) {
+			padding-top: $header_height_wide - 46px - $window_padding;
+			width: $screen_wide;
+			margin: auto;
+		}
+	}
+
+		.site-header__contacts {
+			line-height: 10px;
+			padding: 10px 10px;
+			border-radius: 10px;
+			display: inline-block;
+			@include background_rgba(66, 66, 66, .5);
+
+			@include respond_to(screen_tablet) {
+				margin-right: $window_padding;
+			}
+		}
+
+		.site-header__contact {
+			display: block;
+			float: left;
+			width: 26px;
+			height: 26px;
+			margin: 0px 3px;
+			background-size: 26px 26px;
+			opacity: .85;
+		}
+
+			.site-header__contact:hover {
+				opacity: 1;
+			}
+
+			.site-header__contact--mail {
+				background-image: url('./media/contacts/mail.png');
+			}
+
+			.site-header__contact--github {
+				background-image: url('./media/contacts/github.png');
+			}
+
+			.site-header__contact--instagram {
+				background-image: url('./media/contacts/instagram.png');
+			}
+
+			.site-header__contact--skype {
+				background-image: url('./media/contacts/skype.png');
+			}
+
+			.site-header__contact--telegram {
+				background-image: url('./media/contacts/telegram.png');
+			}
+
+			.site-header__contact--vk {
+				background-image: url('./media/contacts/vk.png');
+			}
+
+			.site-header__contact--facebook {
+				background-image: url('./media/contacts/facebook.png');
+			}
+
+			.site-header__contact--steam {
+				background-image: url('./media/contacts/steam.png');
+			}

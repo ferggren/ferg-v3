@@ -9,7 +9,7 @@ var React   = require('react');
 var Lang    = require('libs/lang');
 var Request = require('libs/request');
 
-require('./tags-cloud.scss');
+require('./style.scss');
 
 var TagsCloud = React.createClass({
   _selected: false,

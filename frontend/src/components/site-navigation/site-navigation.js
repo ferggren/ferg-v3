@@ -31,6 +31,7 @@ var SiteNavigation = React.createClass({
 
   _getNavigation() {
     var url = this.props.location;
+    url = url.replace(/\?.*$/, '');
     
     return [
       {

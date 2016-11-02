@@ -3,6 +3,8 @@ import thunk from 'redux-thunk';
 var lang_reducer     = require('./reducers/lang');
 var location_reducer = require('./reducers/location');
 var title_reducer    = require('./reducers/title');
+var feed_reducer     = require('./reducers/feed');
+var tags_reducer     = require('./reducers/tags');
 
 var {
     applyMiddleware,
@@ -15,6 +17,8 @@ module.exports = function (initial_state = {}) {
     lang:     lang_reducer,
     location: location_reducer,
     title:    title_reducer,
+    feed:     feed_reducer,
+    tags:     tags_reducer,
   });
 
   return createStore(

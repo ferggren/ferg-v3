@@ -17,14 +17,27 @@ Lang.exportStrings('pages', require('./lang/en.js'), 'en');
 Lang.exportStrings('pages', require('./lang/ru.js'), 'ru');
 
 var SitePages = React.createClass({
+  getInitialState() {
+    console.log(this.props);
+
+    return {
+
+    }  
+  },
+
   componentWillMount() {
     Lang.setLang(this.props.lang);
     this._updateTitle();
   },
 
   componentDidUpdate(prevProps, prevState) {
-    Lang.setLang(this.props.lang);
-    this._updateTitle();
+    if (prevProps.lang != this.props.lang) {
+      Lang.setLang(this.props.lang);
+      this._updateTitle();
+    }
+  },
+
+  componentWillReceiveProps(nextProps) {
   },
 
   _updateTitle() {
@@ -39,6 +52,19 @@ var SitePages = React.createClass({
     );
   }
 });
+
+SitePages.fetchData = (store, params) => {
+  if (!params.page_type) {
+    return [];
+  }
+
+
+  console.log(' ');
+  console.log('fetch feed', store.getState().lang, params.page_type);
+  console.log(' ');
+
+  return [];
+}
 
 function mapStateToProps(state) {
   return {
