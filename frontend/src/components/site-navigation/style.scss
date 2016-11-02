@@ -1,0 +1,103 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$menu_height: 30px;
+$menu_offset_bottom: 20px;
+$menu_bg_color: (21, 21, 21, .8);
+
+$link_color: #FFF;
+$link_color_hover: #222;
+$link_font_size: 12px;
+$link_padding: 10px;
+
+.site-menu__wrapper {
+	@include background_rgba(nth($menu_bg_color, 1), nth($menu_bg_color, 2), nth($menu_bg_color, 3), nth($menu_bg_color, 4));
+	min-width: $screen_phone;
+	width: 100%;
+	z-index: 10;
+
+	@include respond_to(screen_wide) {
+		position: fixed;
+		top: 0px;
+		left: 0px;
+	}
+
+	@include respond_to(screen_tablet) {
+		position: fixed;
+		top: 0px;
+		left: 0px;
+	}
+}
+
+.site-menu__fixed-placeholder {
+	display: none;
+
+	@include respond_to(screen_wide) {
+		display: block;
+		height: $menu_height;
+	};
+
+	@include respond_to(screen_tablet) {
+		display: block;
+		height: $menu_height;
+	}
+}
+
+.site-menu {
+	min-width: $screen_phone;
+	max-width: $screen_wide;
+
+	@include respond_to(screen_wide) {
+		margin: auto;
+		width: $screen_wide;
+		height: $menu_height;
+	}
+}
+
+	.site-menu__navigation {
+		display: block;
+
+		@include respond_to(screen_phone) {
+			text-align: center;
+		}
+	}
+
+		.site-menu__navigation li {
+			display: inline-block;
+			height: $menu_height;
+			
+			@include respond_to(screen_tablet) {
+				display: block;
+				float: left;
+			}
+
+			@include respond_to(screen_wide) {
+				display: block;
+				float: left;
+			}
+		}
+
+		.site-menu__navigation--right {
+			@include respond_to(screen_tablet) {
+				float: right !important;
+			}
+
+			@include respond_to(screen_wide) {
+				float: right !important;
+			}
+		}
+
+			.site-menu__navigation a {
+				display: block;
+				height: $menu_height;
+				line-height: $menu_height;
+				padding: 0px $link_padding;
+				color: $link_color;
+				font-size: $link_font_size;
+				cursor: pointer;
+			}
+
+			.site-menu__navigation a:hover, .site-menu__navigation--current a {
+				@include background_rgba(255, 255, 255, .8);
+				color: $link_color_hover !important;
+			}

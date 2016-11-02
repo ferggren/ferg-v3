@@ -14,14 +14,12 @@ var Request   = require('libs/request');
 var Lang      = require('libs/lang');
 var Paginator = require('components/paginator');
 
-require('./storage.scss');
+require('./style');
 require('styles/partials/floating_clear');
 require('styles/partials/loader');
 
-Lang.exportStrings(
-  'storage',
-  require('./storage.lang-' + Lang.getLang() + '.js')
-);
+Lang.exportStrings('storage', require('./lang/en.js'), 'en');
+Lang.exportStrings('storage', require('./lang/ru.js'), 'ru');
 
 var Storage = React.createClass({
   /** stats request id **/

@@ -94,9 +94,10 @@
    *
    *  @param {strings} prefix Strings prefix
    *  @param {object} strings Strings list
+   *  @param {string} strings Strings lang
    *  @return {boolean} Result of operation
    */
-  exportStrings(prefix, strings) {
+  exportStrings(prefix, strings, lang) {
     if (typeof prefix != 'string') {
       return false;
     }
@@ -105,7 +106,7 @@
       return false;
     }
 
-    var key = Lang.getLang();
+    var key = lang || Lang.getLang();
 
     if (prefix.length) {
       key += '-' + prefix;

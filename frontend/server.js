@@ -7,4 +7,5 @@ ext_ignore.forEach(ext => {
   require.extensions[ext] = () => {}
 });
 
+require('babel-polyfill');
 require('./src/server.js');

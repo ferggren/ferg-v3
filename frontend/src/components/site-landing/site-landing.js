@@ -7,12 +7,36 @@
 
 var React          = require('react');
 var ContentWrapper = require('components/view/content-wrapper');
+var Lang           = require('libs/lang');
+var { setTitle }   = require('redux/actions/title');
+var { connect }    = require('react-redux');
 
-require('./site-landing.scss');
+require('./style.scss');
 require('styles/partials/floating_clear');
 require('styles/partials/loader');
 
+Lang.exportStrings('landing', require('./lang/en.js'), 'en');
+Lang.exportStrings('landing', require('./lang/ru.js'), 'ru');
+
 var SiteLanding = React.createClass({
+  componentWillMount() {
+    Lang.setLang(this.props.lang);
+    this._updateTitle();
+  },
+
+  componentDidMount() {
+
+  },
+
+  componentDidUpdate(prevProps, prevState) {
+    Lang.setLang(this.props.lang);
+    this._updateTitle();
+  },
+
+  _updateTitle() {
+    this.props.dispatch(setTitle(Lang.get('landing.title_default')));
+  },
+
   render() {
     return (
       <div>
@@ -94,4 +118,10 @@ var SiteLanding = React.createClass({
   }
 });
 
-module.exports = SiteLanding;
+function mapStateToProps(state) {
+  return {
+    lang: state.lang
+  }
+}
+
+module.exports = connect(mapStateToProps)(SiteLanding);

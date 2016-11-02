@@ -6,14 +6,16 @@ var Page     = require('components/site-page');
 var Pages    = require('components/site-pages');
 var Storage  = require('components/site-storage');
 var Menu     = require('components/site-navigation');
-var Footer   = require('components/view/footer');
+var Footer   = require('components/site-footer');
 var Progress = require('components/request-progress');
 var Gallery  = require('components/site-gallery');
 var Photo    = require('components/site-gallery-photo');
+var Title    = require('components/title-updater');
 
 var App = (props) => {
   return (
     <div>
+      <Title />
       <Menu />
       <Progress />
       {props.children ? React.cloneElement(props.children, props) : null}
