@@ -1,11 +1,11 @@
 var React           = require('react');
 var ReactDOM        = require('react-dom');
 var onready         = require('libs/onready');
-var routes          = require('./routes/site');
 var { Provider }    = require('react-redux');
 var configureStore  = require('redux/site-store');
 var { setLocation } = require('redux/actions/location');
 var { connect }     = require('react-redux');
+var routes          = require('./routes/site');
 
 var {Router, browserHistory} = require('react-router');
 

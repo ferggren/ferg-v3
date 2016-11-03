@@ -1,17 +1,17 @@
 var React               = require('react');
 var {Route, IndexRoute} = require('react-router');
 
-var Landing  = require('components/site-landing');
-var Page     = require('components/site-page');
-var Pages    = require('components/site-pages');
-var Storage  = require('components/site-storage');
-var Menu     = require('components/site-navigation');
-var Footer   = require('components/site-footer');
-var Progress = require('components/request-progress');
-var Gallery  = require('components/site-gallery');
-var Photo    = require('components/site-gallery-photo');
-var Title    = require('components/title-updater');
-var Lang     = require('components/lang-updater');
+var Landing  = require('components/site/route-landing');
+var Page     = require('components/site/route-page');
+var Pages    = require('components/site/route-pages');
+var Storage  = require('components/site/route-storage');
+var Gallery  = require('components/site/route-gallery');
+var Photo    = require('components/site/route-gallery-photo');
+var Menu     = require('components/site/view-navigation');
+var Footer   = require('components/site/view-footer');
+var Title    = require('components/site/view-title-updater');
+var Lang     = require('components/site/view-lang-updater');
+var Progress = require('components/shared/request-progress');
 
 var App = (props) => {
   return (

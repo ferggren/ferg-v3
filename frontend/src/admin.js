@@ -11,13 +11,13 @@ var {
   browserHistory
 } = require('react-router');
 
-var Photos      = require('components/admin-photos');
-var Storage     = require('components/admin-storage');
-var PageEditor  = require('components/admin-page-editor');
-var PagesList   = require('components/admin-pages-list');
-var Menu        = require('components/admin-navigation');
-var Footer      = require('components/view/footer');
-var Progress    = require('components/request-progress');
+var Photos      = require('components/admin/route-photos');
+var Storage     = require('components/admin/route-storage');
+var PageEditor  = require('components/admin/route-page-editor');
+var PagesList   = require('components/admin/route-pages-list');
+var Menu        = require('components/admin/view-navigation');
+var Footer      = require('components/admin/view-footer');
+var Progress    = require('components/shared/request-progress');
 
 require('styles/admin.scss');
 
