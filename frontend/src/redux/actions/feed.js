@@ -6,10 +6,11 @@ function loadStarted() {
   }
 }
 
-function loadSuccess(response) {
+function loadSuccess(response, lang) {
   return {
     type: 'FEED_LOAD_SUCCESS',
     response,
+    lang,
   }
 }
 
@@ -41,6 +42,8 @@ export function loadFeedPage(page) {
 
 export function loadFeed(page, tag) {
   return (dispatch, getState) => {
+    var lang = getState().lang;
+
     dispatch(setTag(tag));
     dispatch(loadStarted());
 
@@ -48,7 +51,7 @@ export function loadFeed(page, tag) {
       Request.fetch(
         '/api/feed/getFeed/', {
         success: response => {
-          dispatch(loadSuccess(response))
+          dispatch(loadSuccess(response, lang))
           resolve();
         },
 
@@ -60,8 +63,11 @@ export function loadFeed(page, tag) {
         data: {
           tag,
           page,
-          USER_LANG: getState().lang,
-        }
+          USER_LANG: lang,
+        },
+
+        cache:        true,
+        cache_expire: 3600,
       });
     })
   }

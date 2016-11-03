@@ -6,6 +6,7 @@ var initialState = {
   list:    [],
   error:   false,
   loading: false,
+  lang:    false,
 };
 
 module.exports = function(state = initialState, action) {
@@ -37,6 +38,7 @@ module.exports = function(state = initialState, action) {
       state.loading = false;
       state.page    = action.response.page;
       state.pages   = action.response.pages;
+      state.lang    = action.lang;
 
       return state;
     }

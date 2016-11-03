@@ -5,9 +5,10 @@
  * @copyright 2016 ferg
  */
 
-var React   = require('react');
-var Lang    = require('libs/lang');
-var Request = require('libs/request');
+var React    = require('react');
+var Lang     = require('libs/lang');
+var Request  = require('libs/request');
+var { Link } = require('react-router');
 
 require('./style.scss');
 
@@ -99,24 +100,35 @@ var TagsCloud = React.createClass({
     var cloud = [];
 
     cloud = tags.map(tag => {
-      var style     = { fontSize: tag.size+"em" };
-      var className = "tags-cloud__tag";
+      var className = "";
+
+      var props = {
+        key:       tag.tag,
+        style:     { fontSize: tag.size+"em" },
+        className: "tags-cloud__tag",
+      }
 
       if (this.props.selected == tag.tag) {
-        className += " tags-cloud__tag--selected";
+        props.className += " tags-cloud__tag--selected";
+      }
+
+      if (this.props.onSelect) {
+        props.onClick = e => {
+          e.preventDefault();
+          this.props.onSelect(this.props.group, tag.tag)
+        }
+      }
+
+      if (this.props.url) {
+        props.to = this.props.url.replace('%tag%', encodeURIComponent(tag.tag));
+      }
+
+      if (this.props.url_selected && this.props.selected == tag.tag) {
+        props.to = this.props.url_selected.replace('%tag%', encodeURIComponent(tag.tag));
       }
 
       return (
-        <a
-          key={tag.tag}
-          style={style}
-          className={className}
-          onClick={e => {
-            e.preventDefault();
-            this.props.onSelect(this.props.group, tag.tag);
-        }}>
-          {tag.tag}
-        </a>
+        <Link {...props}>{tag.tag}</Link>
       );
     });
 

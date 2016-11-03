@@ -5,7 +5,8 @@
  * @copyright 2016 ferg
  */
 
-var React = require('react');
+var React    = require('react');
+var { Link } = require('react-router');
 
 require('./paginator.scss');
 
@@ -127,20 +128,20 @@ var Paginator = React.createClass({
     }
 
     if (this.props.url && button.active) {
-      props.href = this.props.url.replace('%page%', button.page);
+      props.to = this.props.url.replace('%page%', button.page);
     }
 
     if (button.active && typeof this.props.onSelect == 'function') {
       props.onClick = (e) => {
-        e.preventDefault()
-        this.props.onSelect(button.page);
+        if (typeof this.props.onSelect == 'function') {
+          e.preventDefault();
+          this.props.onSelect(button.page);
+        }
       };
     }
 
     return (
-      <a {...props}>
-        {button.title}
-      </a>
+      <Link {...props}>{button.title}</Link>
     );
   },
 

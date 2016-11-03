@@ -11,6 +11,10 @@ class Feed_CliController extends CliController {
    *  Update feed
    */
   public function actionUpdate() {
+    $this->_inserted = 0;
+    $this->_deleted  = 0;
+    $this->_updated  = 0;
+
     $feed = array_merge(
       $this->_getPages(),
       $this->_getPhotos()
@@ -18,6 +22,13 @@ class Feed_CliController extends CliController {
 
     $this->_clearFeed($feed);
     $this->_updateFeed($feed);
+
+    printf(
+      "updated: %d\ninserted: %d\ndeleted: %d",
+      $this->_updated,
+      $this->_inserted,
+      $this->_deleted
+    );
   }
 
   /**
@@ -37,6 +48,7 @@ class Feed_CliController extends CliController {
 
       Tags::attachTags('feed', $row->feed_id, array());
       $row->delete();
+      ++$this->_deleted;
     }
   }
 
@@ -50,15 +62,29 @@ class Feed_CliController extends CliController {
 
       if (count($res = $res->get())) {
         $res = $res[0];
+        ++$this->_updated;
       }
       else {
         $res = new Feed;
         $res->feed_type      = $row['type'];
         $res->feed_target_id = $row['id'];
+        ++$this->_inserted;
+      }
+
+      if (!$row['title_ru'] && $row['title_en']) {
+        $row['title_ru'] = $row['title_en'];
+        $row['desc_ru']  = $row['desc_en'];
+      }
+
+      if (!$row['title_en'] && $row['title_ru']) {
+        $row['title_en'] = $row['title_ru'];
+        $row['desc_en']  = $row['desc_ru'];
       }
 
       $res->feed_title_ru = $row['title_ru'];
       $res->feed_title_en = $row['title_en'];
+      $res->feed_desc_ru  = $row['desc_ru'];
+      $res->feed_desc_en  = $row['desc_en'];
       $res->feed_preview  = $row['preview'];
       $res->feed_ratio    = $row['ratio'];
       $res->feed_order    = $row['order'];
@@ -99,8 +125,10 @@ class Feed_CliController extends CliController {
         'type'      => $page->page_type,
         'title_ru'  => '',
         'title_en'  => '',
+        'desc_ru'   => '',
+        'desc_en'   => '',
         'preview'   => '',
-        'ratio'     => 3,
+        'ratio'     => 10,
         'tags'      => $page->page_tags,
         'order'     => $page->page_date_timestamp ? $page->page_date_timestamp : $page->page_id,
       );
@@ -125,6 +153,7 @@ class Feed_CliController extends CliController {
 
       foreach ($entries->get() as $entry) {
         $info['title_' . $entry->entry_lang] = $entry->entry_title;
+        $info['desc_' . $entry->entry_lang]  = $entry->entry_desc;
       }
 
       $ret[] = $info;
@@ -157,6 +186,8 @@ class Feed_CliController extends CliController {
         'type'      => 'gallery',
         'title_ru'  => $photo->photo_title_ru,
         'title_en'  => $photo->photo_title_en,
+        'desc_ru'   => '',
+        'desc_en'   => '',
         'preview'   => '',
         'ratio'     => 1,
         'order'     => $photo->photo_taken_timestamp ? $photo->photo_taken_timestamp : $photo->file_id,

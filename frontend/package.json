@@ -23,6 +23,7 @@
     "extract-text-webpack-plugin": "*",
     "file-loader": "*",
     "json-loader": "*",
+    "node-fetch": "^1.6.3",
     "node-sass": "^3.4.2",
     "nodemon": "^1.11.0",
     "react": "^15.0.2",

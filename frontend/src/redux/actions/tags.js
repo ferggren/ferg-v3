@@ -46,7 +46,10 @@ export function loadTags(groups) {
 
         data: {
           groups: groups.join(','),
-        }
+        },
+
+        cache:        true,
+        cache_expire: 3600,
       });
     })
   }

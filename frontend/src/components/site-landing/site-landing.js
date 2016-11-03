@@ -14,6 +14,8 @@ var { connect }        = require('react-redux');
 var TagsCloud          = require('components/tags-cloud');
 var { loadTags }       = require('redux/actions/tags');
 var { browserHistory } = require('react-router');
+var Paginator          = require('components/paginator');
+var Grid               = require('components/site-grid');
 
 var {
   loadFeed,
@@ -22,92 +24,69 @@ var {
 } = require('redux/actions/feed');
 
 require('./style.scss');
-require('styles/partials/floating_clear');
 require('styles/partials/loader');
 
 Lang.exportStrings('landing', require('./lang/en.js'), 'en');
 Lang.exportStrings('landing', require('./lang/ru.js'), 'ru');
 
 var SiteLanding = React.createClass({
+  componentWillMount() {
+    this._updateTitle();
+  },
+
   componentDidMount() {
-    if (this.props.feed.list == false) {
-      this._loadFeed();  
-    }
-
-    else if (this.props.feed.error) {
-      this._loadFeed();
-    }
-
     if (typeof this.props.tags.list == 'undefined') {
       this._loadTags();
     }
 
-    else if (this.props.tags.list == false) {
-      this._loadTags();
-    }
-
-    else if (this.props.tags.error) {
-      this._loadTags();
-    }
-
+    this._updateFeedIfNeeded();
     this._updateTitle();
   },
 
   componentDidUpdate(prev_props) {
     if (prev_props.lang != this.props.lang) {
-      this._loadFeed();
       this._updateTitle();
+    }
+
+    this._updateFeedIfNeeded();
+  },
+
+  /**
+   *  Update feed if props is changed
+   */
+  _updateFeedIfNeeded() {
+    var feed = this.props.feed;
+    if (feed.loading) return;
+
+    var query = this.props.location.query;
+    var lang  = this.props.lang;
+    var page  = query.page ? parseInt(query.page) : 1;
+    var tag   = query.tag ? query.tag : '';
+
+    var update_needed = false;
+    update_needed = update_needed || feed.page != page;
+    update_needed = update_needed || feed.tag  != tag;
+    update_needed = update_needed || feed.lang != lang;
+
+    if (!update_needed) {
       return;
     }
+
+    this.props.dispatch(loadFeed(page, tag));
   },
 
-  _loadFeed() {
-    this.props.dispatch(loadFeed(
-      this.props.feed.page,
-      this.props.feed.tag
-    ));
-  },
-
+  /**
+   *  Load page tags
+   */
   _loadTags() {
     this.props.dispatch(loadTags("feed"));
   },
 
+  /**
+   *  Update page title
+   */
   _updateTitle() {
     this.props.dispatch(setTitle(Lang.get('landing.title_default')));
-  },
-
-  /**
-   *  Select feed group
-   *
-   *  @param {string} group Feed group
-   *  @param {string} tag Feed tag
-   */
-  _selectTag(group, tag) {
-    tag = this.props.feed.tag == tag ? '' : tag;
-
-    var url = '/' + this.props.lang + '/';
-    if (tag) url += '?tag=' + encodeURIComponent(tag);
-
-    browserHistory.push(url);
-
-    this.props.dispatch(loadFeedByTag(tag));
-  },
-
-  /**
-   *  Select feed page
-   *
-   *  @param {int} page Feed page
-   */
-  _selectPage(page) {
-    var tag = this.props.feed.tag;
-    var url = '/' + this.props.lang + '/?';
-
-    if (tag) url += 'tag=' + encodeURIComponent(tag) + '&';
-    url += 'page=' + page;
-
-    browserHistory.push(url);
-
-    this.props.dispatch(loadFeedPage(page));
   },
 
   /**
@@ -141,7 +120,7 @@ var SiteLanding = React.createClass({
 
     return (
       <div className="landing__grid">
-        GRID
+        <Grid list={this.props.feed.list}/>
       </div>
     );
   },
@@ -169,12 +148,18 @@ var SiteLanding = React.createClass({
       return;
     }
 
+    var tag = this.props.feed.tag;
+    var url = '/' + this.props.lang + '/?';
+
+    if (tag) url += 'tag=' + encodeURIComponent(tag) + '&';
+    url += 'page=%page%';
+
     return (
       <div className="landing__paginator">
         <Paginator
-          page={this.state.feed.page}
-          pages={this.state.feed.pages}
-          onSelect={this._selectPage}
+          page={this.props.feed.page}
+          pages={this.props.feed.pages}
+          url={url}
         />
       </div>
     );
@@ -211,13 +196,17 @@ var SiteLanding = React.createClass({
       );
     }
 
+    var url = '/' + this.props.lang + '/?tag=%tag%';
+    var url_selected = '/' + this.props.lang + '/';
+
     return (
       <div className="landing-feed__tags">
         <TagsCloud
           group={"feed"}
           tags={tags.list}
           selected={this.props.feed.tag}
-          onSelect={this._selectTag}
+          url={url}
+          url_selected={url_selected}
         />
       </div>
     );

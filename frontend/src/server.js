@@ -1,6 +1,3 @@
-const NODE_ENV  = process.env.NODE_ENV || 'production';
-const NODE_PORT = process.env.PORT || 3000;
-
 var React           = require('react');
 var ReactDOM        = require('react-dom/server');
 var express         = require('express');
@@ -62,21 +59,25 @@ app.use((req, res) => {
       store,
       render_props.components,
       fetch_params
-    ).then(() => {
+    )
+    .then(() => {
       // make component
       return ReactDOM.renderToString(
         <Provider store={store}>
           <RouterContext {...render_props} />
         </Provider>
       )
-    }).then(html => {
+    })
+    .then(html => {
       // make HTML response
       return renderHTML(html, store.getState());
-    }).then(html => {
+    })
+    .then(html => {
       // send HTML response
       console.log('done', store.getState());
       res.status(200).end(html);
-    }).catch(err => {
+    })
+    .catch(err => {
       // catch error
       console.log(err);
       res.status(500).end('Internal server error');

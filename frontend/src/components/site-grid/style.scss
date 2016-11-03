@@ -1,0 +1,56 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$header_bg: (90, 90, 90);
+
+.photo-grid {
+	margin-left: -10px;
+}
+
+.photo-grid__item-wrapper {
+	float: left;
+	
+	@include respond_to(screen_phone) {
+		width: 100% !important;
+	}
+}
+
+.photo-grid__item {
+	margin: 0px 0px 10px 10px;
+	display: block;
+	height: 150px;
+	background: #f5f5f5;
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	cursor: pointer;
+	position: relative;
+}
+
+	.photo-grid__item-header {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+	}
+
+	.photo-grid__item-title, .photo-grid__item-desc {
+		padding: 0px 10px;
+		border-radius: 3px;
+		color: #FFF;
+		@include background_rgba(nth($header_bg, 1), nth($header_bg, 2), nth($header_bg, 3), 0.6);
+	}
+
+	.photo-grid__item-title {
+		font-size: 18px;
+		line-height: 30px;
+	}
+
+	.photo-grid__item-desc {
+		font-size: 12px;
+		line-height: 20px;
+		letter-spacing: 1px;
+	}
+
+	.photo-grid__item-desc {
+		margin-top: 5px;
+	}
