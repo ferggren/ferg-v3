@@ -9,7 +9,6 @@ var React              = require('react');
 var Lang               = require('libs/lang');
 var { browserHistory } = require('react-router');
 var { connect }        = require('react-redux');
-var { setLang }        = require('redux/actions/lang');
 
 require('./style.scss');
 require('styles/partials/floating_clear');
@@ -34,14 +33,10 @@ var SiteFooter = React.createClass({
    *  Swap lang
    */
   _swapLang(new_lang, new_location) {
-    this.props.dispatch(setLang(new_lang));
     browserHistory.push(new_location);
-    Lang.setLang(new_lang);
   },
 
   render() {
-    Lang.setLang(this.props.lang);
-
     var lang = this.props.lang == 'ru' ? 'en' : 'ru';
     var url  = this.props.location;
 

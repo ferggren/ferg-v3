@@ -23,8 +23,10 @@ onready(() => {
     location = location.pathname + location.search;
 
     location = location.replace(/[?]$/, '');
-    location = location.replace(/^\/(en|ru)/, '');
-    location = '/' + state.lang + location;
+    if (!location.match(/^\/(en|ru)/)) {
+      location = location.replace(/^\/(en|ru)/, '');
+      location = '/' + state.lang + location;
+    }
 
     if (state.location == location) {
       return;

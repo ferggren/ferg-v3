@@ -19,41 +19,84 @@ class ApiTags_Controller extends ApiController {
       return $this->error('incorrect_tag_group');
     }
 
-    $ret = array();
+    $ret       = array();
+    $group2tag = array();
+    $tag2group = array();
 
     foreach(explode(',', $groups) as $group) {
       if (!($group = trim($group))) {
         continue;
       }
 
-      $ret[] = $group;
+      if (!($tag = $this->_getTag($group))) {
+        continue;
+      }
+
+      $group2tag[$group] = $tag;
+      $tag2group[$tag] = $group;
     }
 
-    if (!count($ret)) {
+    if (!count($tag2group)) {
       return $this->success();
     }
 
-    $tags = Tags::getTags($ret);
+    $tags_groups = Tags::getTags(array_keys($tag2group));
 
-    return $this->success(
-      count($ret) == 1 ? array($ret[0] => $tags) : $tags
-    );
+    if (count($tag2group) == 1) {
+      $tags_groups = array(array_keys($tag2group)[0] => $tags_groups);
+    }
+
+    foreach ($tags_groups as $tags_group => $tags) {
+      $ret[$tag2group[$tags_group]] = $tags;
+    }
+
+    return $this->success($ret);
   }
 
   /**
-   *  Return feed
-   *  
-   *  @param {int} page Page offset
-   *  @param {string} tag Search by tag
-   *  @return {object} Feed
+   *  Translate nice name into tags group name
+   *
+   *  @param {string} group Tags group nice name
+   *  @return {string} Tags group real name
    */
-  public function actionGetFeed($page = 1, $tag = '') {
-    $ret = array(
-      'page'  => 1,
-      'pages' => 1,
-      'list'  => array()
-    );
+  protected function _getTag($group) {
+    if ($group == 'feed') {
+      return 'feed';
+    }
 
-    return $this->success($ret);
+    if (in_array($group, array('notes', 'moments', 'portfolio'))) {
+      return "pages_{$group}_visible";
+    }
+
+    if (in_array($group, array('camera', 'lens', 'category'))) {
+      if (!($gallery_id = $this->_getGalleryCollectionId())) {
+        return false;
+      }
+
+      return "photos_{$gallery_id}_{$group}";
+    }
+
+    return false;
+  }
+
+  /**
+   *  Get gallery ID
+   */
+  protected function _getGalleryCollectionId() {
+    static $id = false;
+
+    if ($id !== false) {
+      return $id;
+    }
+
+    $res = Database::from('photolibrary_collections');
+    $res->whereAnd('collection_name', 'LIKE', 'gallery');
+    $res->whereAnd('user_id', '=', 1);
+
+    if (!count($res = $res->get())) {
+      return $id = 0;
+    }
+
+    return $id = $res[0]->collection_id;
   }
 }

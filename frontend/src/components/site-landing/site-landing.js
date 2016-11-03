@@ -5,23 +5,17 @@
  * @copyright 2016 ferg
  */
 
-var React              = require('react');
-var ContentWrapper     = require('components/view/content-wrapper');
-var SiteHeader         = require('components/site-header');
-var Lang               = require('libs/lang');
-var { setTitle }       = require('redux/actions/title');
-var { connect }        = require('react-redux');
-var TagsCloud          = require('components/tags-cloud');
-var { loadTags }       = require('redux/actions/tags');
-var { browserHistory } = require('react-router');
-var Paginator          = require('components/paginator');
-var Grid               = require('components/site-grid');
-
-var {
-  loadFeed,
-  loadFeedByTag,
-  loadFeedPage
-} = require('redux/actions/feed');
+var React          = require('react');
+var ContentWrapper = require('components/view/content-wrapper');
+var SiteHeader     = require('components/site-header');
+var Lang           = require('libs/lang');
+var { setTitle }   = require('redux/actions/title');
+var { connect }    = require('react-redux');
+var TagsCloud      = require('components/tags-cloud');
+var { loadTags }   = require('redux/actions/tags');
+var Paginator      = require('components/paginator');
+var Grid           = require('components/site-grid');
+var { loadFeed }   = require('redux/actions/feed');
 
 require('./style.scss');
 require('styles/partials/loader');
@@ -110,7 +104,7 @@ var SiteLanding = React.createClass({
       return;
     }
 
-    if (this.props.feed.list == false) {
+    if (this.props.feed.list == false || !this.props.feed.list.length) {
       return (
         <div className="landing__not_found">
           {Lang.get('landing.feed_not_found')}

@@ -170,6 +170,7 @@ class Feed_CliController extends CliController {
 
     $res = Database::from('photolibrary_collections');
     $res->whereAnd('collection_name', 'LIKE', 'gallery');
+    $res->whereAnd('user_id', '=', 1);
 
     if (!count($res = $res->get())) {
       return $ret;

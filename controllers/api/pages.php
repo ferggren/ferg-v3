@@ -77,7 +77,7 @@ class ApiPages_Controller extends ApiController {
     $where[] = "page_type = '" . Database::escape($type) . "'";
 
     if ($visible != 'all') {
-      $where[] = 'page_visible = ' . (($visible == 'visible') ? '0' : '1');
+      $where[] = 'page_visible = ' . (($visible == 'visible') ? '1' : '0');
     }
 
     $where[] = "page_deleted = 0";

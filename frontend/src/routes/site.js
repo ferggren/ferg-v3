@@ -11,11 +11,13 @@ var Progress = require('components/request-progress');
 var Gallery  = require('components/site-gallery');
 var Photo    = require('components/site-gallery-photo');
 var Title    = require('components/title-updater');
+var Lang     = require('components/lang-updater');
 
 var App = (props) => {
   return (
     <div>
       <Title />
+      <Lang />
       <Menu />
       <Progress />
       {props.children ? React.cloneElement(props.children, props) : null}

@@ -1,0 +1,59 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$tags_width: 220px;
+$tags_margin: 20px;
+
+
+/**
+ *  Basic wrappers
+ */
+.pages__tags-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		max-width: $tags_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		max-width: $tags_width;
+	}
+}
+
+	.pages__tags {
+		background-image: url('./media/cloud.png');
+		background-repeat: no-repeat;
+		background-position: 50% 0%;
+		min-width: $tags_width;
+		text-align: center;
+		padding-top: 32px;
+	}
+
+.pages__grid-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+}
+
+	.pages__grid {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}
+
+/**
+ *	Pages not found
+ */
+.pages__not-found, .pages__error {
+	
+}

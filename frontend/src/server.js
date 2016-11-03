@@ -61,6 +61,9 @@ app.use((req, res) => {
       fetch_params
     )
     .then(() => {
+      // set lang
+      Lang.setLang(lang);
+
       // make component
       return ReactDOM.renderToString(
         <Provider store={store}>

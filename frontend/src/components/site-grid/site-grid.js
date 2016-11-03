@@ -13,10 +13,6 @@ require('./style.scss');
 require('styles/partials/floating_clear');
 
 var SiteGrid = React.createClass({
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  },
-
   _makeItem(item) {
     var header = null;
     var title  = null;
