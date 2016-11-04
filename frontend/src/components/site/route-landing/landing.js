@@ -8,6 +8,7 @@
 var React          = require('react');
 var { connect }    = require('react-redux');
 var Lang           = require('libs/lang');
+var clone          = require('libs/clone');
 var { loadTags }   = require('redux/actions/tags');
 var { setTitle }   = require('redux/actions/title');
 var { loadFeed }   = require('redux/actions/feed');
@@ -112,9 +113,21 @@ var SiteLanding = React.createClass({
       );
     }
 
+    var list = this.props.feed.list;
+
+    if (this.props.feed.tag) {
+      var list = clone(list).map(item => {
+        if (item.type == 'gallery') {
+          item.url += '?tag=' + encodeURIComponent(this.props.feed.tag);
+        }
+
+        return item;
+      });
+    }
+
     return (
       <div className="landing__grid">
-        <Grid list={this.props.feed.list}/>
+        <Grid list={list}/>
       </div>
     );
   },

@@ -14,6 +14,8 @@ require('styles/site.scss');
 onready(() => {
   var store = configureStore(window.REDUX_INITIAL_STATE || {});
 
+  window.REDUX_INITIAL_STATE = null;
+
   /**
    *  Watch location changes
    */

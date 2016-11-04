@@ -212,24 +212,13 @@ function renderHTML(component_html, store) {
   html += '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
   html += '<meta http-equiv="X-UA-Compatible" content="IE=edge" />';
   html += '<meta name="viewport" content="width=device-width, initial-scale=1" />';
-    
   html += '<link rel="alternate" hreflang="x-default" href="//ferg.in/" />';
   html += '<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/" />';
   html += '<link rel="alternate" hreflang="en-us" href="//ferg.in/en/" />';
-  html += '<script>window.REDUX_INITIAL_STATE = ' + JSON.stringify(store) + ';</script>';
-  html += '<script>window.__CURRENT_LANG = "' + store.lang + '";</script>';
-
   html += '<title>' + (store.title ? store.title : 'ferg.in') + '</title>';
 
-  var rnd = Math.random();
-
-  if (NODE_ENV == 'dev') {
-    // html += '<link href="/assets/site/site.css?v='+rnd+'" rel="stylesheet" />';
-    html += '<script src="/assets/site/site.js?v='+rnd+'" defer></script>';
-  }
-  else {
+  if (NODE_ENV != 'dev') {
     html += '<link href="/assets/v_asdasdas/site/site.css" rel="stylesheet" />';
-    html += '<script src="/assets/v_adsasdas/site/site.js" defer></script>';
   }
 
   html += '</head>';
@@ -238,6 +227,17 @@ function renderHTML(component_html, store) {
   html += '<div class="site" id="react-root">';
   html += component_html;
   html += '</div>';
+
+  html += '<script>window.REDUX_INITIAL_STATE = ' + JSON.stringify(store) + ';</script>';
+  html += '<script>window.__CURRENT_LANG = "' + store.lang + '";</script>';
+
+  if (NODE_ENV == 'dev') {
+    html += '<script src="/assets/site/site.js?v='+Math.random()+'" async></script>';
+  }
+  else {
+    html += '<script src="/assets/v_adsasdas/site/site.js" async></script>';
+  }
+
   html += '</body>';
   html += '</html>';
 

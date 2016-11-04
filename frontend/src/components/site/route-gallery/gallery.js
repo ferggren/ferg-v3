@@ -6,41 +6,319 @@
  */
 
 var React        = require('react');
-var { setTitle } = require('redux/actions/title');
 var { connect }  = require('react-redux');
-var Wrapper      = require('components/site/view-wrapper');
+var { setTitle } = require('redux/actions/title');
+var { loadTags } = require('redux/actions/tags');
 var Lang         = require('libs/lang');
-
-require('styles/partials/loader');
+var Wrapper      = require('components/site/view-wrapper');
+var TagsCloud    = require('components/shared/tags-cloud');
+var Grid         = require('components/shared/photos-grid');
+var Paginator    = require('components/shared/paginator');
+var { loadGallery, setPage } = require('redux/actions/gallery');
 
 Lang.exportStrings('gallery', require('./lang/en.js'), 'en');
 Lang.exportStrings('gallery', require('./lang/ru.js'), 'ru');
 
+require('./styles.scss');
+require('styles/partials/loader');
+
 var SiteGallery = React.createClass({
   componentWillMount() {
-    Lang.setLang(this.props.lang);
     this._updateTitle();
+  },
+
+  componentDidMount() {
+    this._updateTitle();
+    this._loadGalleryIfNeeded();
+    this._loadTagsIfNeeded();
   },
 
   componentDidUpdate(prevProps, prevState) {
-    Lang.setLang(this.props.lang);
     this._updateTitle();
+    this._loadGalleryIfNeeded();
+
+    var query = this.props.location.query;
+    var page = query.page ? parseInt(query.page) : 1;
+
+    if (page != this.props.gallery.page) {
+      this.props.dispatch(setPage(page));
+    }
   },
 
+  /**
+   *  Load gallery tags if needed
+   */
+  _loadTagsIfNeeded() {
+    if (typeof this.props.tags.lens != 'undefined') return;
+
+    this.props.dispatch(loadTags([
+      'lens',
+      'camera',
+      'category'
+    ]));
+  },
+
+  /**
+   *  If needed update gallery photos
+   */
+  _loadGalleryIfNeeded() {
+    var gallery = this.props.gallery;
+
+    if (gallery.loading) return;
+
+    var query = this.props.location.query;
+    var lang  = this.props.lang;
+    var page  = query.page ? parseInt(query.page) : 1;
+    var tag   = query.tag ? query.tag : '';
+
+    var update = false;
+    update = update || !gallery.loaded;
+    update = update || gallery.tag  != tag;
+    update = update || gallery.lang != lang;
+
+    if (!update) return;
+
+    this.props.dispatch(loadGallery(tag));
+  },
+
+  /**
+   *  Update page title
+   */
   _updateTitle() {
-    this.props.dispatch(setTitle(Lang.get('gallery.title_default')));
+    if (!this.props.gallery.tag) {
+      this.props.dispatch(setTitle(Lang.get('gallery.title')));
+      return;
+    }
+
+    this.props.dispatch(setTitle(Lang.get(
+      'gallery.tag_title', {tag: this.props.gallery.tag}
+    )));
+  },
+
+  /**
+   *  Make gallery tag groups
+   */
+  _makeTagGroups() {
+    if (!this.props.tags || !this.props.tags.lens) {
+      return null;
+    }
+
+    var ret = [];
+
+    for (var group in this.props.tags) {
+      var tags = this.props.tags[group];
+
+      ret.push(
+        <div
+          key={group}
+          className={"gallery__tags-group gallery__tags-group--" + group}
+        >
+          {this._makeTags(group, tags)}
+        </div>
+      );
+    };
+
+    return ret;
+  },
+
+  /**
+   *  Make tags
+   */
+  _makeTags(group, tags) {
+    if (!tags) return null;
+
+    if (tags.loading) {
+      return <div className="loader" />;
+    }
+
+    if (tags.error) {
+      return (
+        <div className="gallery__error">
+          {Lang.get('gallery.error_' + tags.error)}
+        </div>
+      );
+    }
+
+    var url_selected = '/' + this.props.lang + '/gallery/';
+    var url_common   = url_selected + '?tag=%tag%';
+
+    return (
+      <TagsCloud
+        group={group}
+        tags={tags.list}
+        selected={this.props.gallery.tag}
+        url={url_common}
+        url_selected={url_selected}
+      />
+    );
+  },
+
+  /**
+   *  Make gallery loader
+   */
+  _makeGalleryLoader() {
+    if (!this.props.gallery.loading) return null;
+
+    return <div className="loader" />
+  },
+
+  /**
+   *  Make gallery error
+   */
+  _makeGalleryError() {
+    if (!this.props.gallery.error) return null;
+
+    return (
+      <div className="gallery__error">
+        {Lang.get('gallery.error_' + this.props.gallery.error)}
+      </div>
+    );
+  },
+
+  /**
+   *  Make gallery
+   */
+  _makeGallery() {
+    var gallery = this.props.gallery;
+
+    if (!gallery.loaded) return null;
+    if (gallery.loading) return null;
+    if (gallery.error) return null;
+
+    if (!gallery.photos.length) {
+      return (
+        <div className="gallery__error">
+          {Lang.get('gallery.photos_not_found')}
+        </div>
+      );
+    }
+
+    var start = Math.max((gallery.page - 1) * gallery.rpp, 0);
+    var stop  = Math.min(start + gallery.rpp, gallery.photos.length);
+
+    var photos = [];
+
+    for (var i = start; i < stop; ++i) {
+      var photo = gallery.photos[i];
+
+      var url = '/' + this.props.lang + '/gallery/';
+      url += photo.id;
+
+      if (gallery.tag) {
+        url += '?tag=' + encodeURIComponent(gallery.tag);
+      }
+
+      photos.push({
+        date:    0,
+        ratio:   photo.ratio,
+        title:   photo.title,
+        desc:    '',
+        url:     url,
+        preview: photo.preview,
+      });
+    }
+
+    return (
+      <Grid list={photos}/>
+    );
+  },
+
+  /**
+   *  Make gallery paginator
+   */
+  _makeGalleryPaginator() {
+    var gallery = this.props.gallery;
+
+    if (!gallery.loaded) return null;
+    if (gallery.loading) return null;
+    if (gallery.error) return null;
+
+    var page  = Math.max(gallery.page, 1);
+    var rpp   = gallery.rpp;
+    var count = gallery.photos.length;
+    var pages = Math.floor(count / rpp);
+
+    if ((pages * rpp) < count) ++pages;
+
+    var url = '/' + this.props.lang + '/gallery/?';
+    if (gallery.tag) url += 'tag=' + encodeURIComponent(gallery.tag) + '&';
+    url += 'page=%page%';
+
+    return (
+      <div className="pages__paginator">
+        <Paginator
+          page={page}
+          pages={pages}
+          url={url}
+        />
+      </div>
+    );
   },
 
   render() {
     return (
-      <Wrapper>Gallery</Wrapper>
+      <Wrapper>
+
+        <div className="gallery__tags-wrapper">
+          <div className="gallery__tags">
+            {this._makeTagGroups()}
+          </div>
+        </div>
+
+        <div className="gallery__grid-wrapper">
+          <div className="gallery__grid">
+            {this._makeGalleryLoader()}
+            {this._makeGalleryError()}
+            {this._makeGallery()}
+            {this._makeGalleryPaginator()}
+          </div>
+        </div>
+
+        <div className="floating-clear" />
+      </Wrapper>
     );
   }
 });
 
+SiteGallery.fetchData = (store, params) => {
+  var ret = [];
+
+  if (params.page && parseInt(params.page)) {
+    ret.push(
+      store.dispatch(setPage(params.page))
+    );
+  }
+
+  ret.push(
+    store.dispatch(loadGallery(
+      params.tag ? params.tag : ''
+    ))
+  );
+
+  ret.push(
+    store.dispatch(loadTags(
+      ['category', 'camera', 'lens']
+    ))
+  );
+
+  return ret;
+}
+
 function mapStateToProps(state) {
+  var tags = {};
+
+  if (state.tags.lens) {
+    tags = {
+      category: state.tags.category,
+      camera:   state.tags.camera,
+      lens:     state.tags.lens,
+    }
+  }
+
   return {
-    lang: state.lang
+    lang:    state.lang,
+    gallery: state.gallery,
+    tags,
   }
 }
 

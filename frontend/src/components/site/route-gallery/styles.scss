@@ -1,0 +1,67 @@
+@import 'styles/mixins/background_rgba';
+@import 'styles/mixins/respond_to';
+
+$tags_width: 220px;
+$tags_margin: 20px;
+
+/**
+ *  Basic wrappers
+ */
+.gallery__tags-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		max-width: $tags_width;
+	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		max-width: $tags_width;
+	}
+}
+
+
+	.gallery__tags-group {
+		background-repeat: no-repeat;
+		background-position: 50% 0%;
+		min-width: $tags_width;
+		text-align: center;
+		padding-top: 32px;
+		background-size: 32px 32px;
+		border-bottom: 1px solid #CCC;
+		padding-bottom: 10px;
+		margin-bottom: 10px;
+	}
+
+	.gallery__tags-group--camera {
+		background-image: url('./media/camera.png');
+	}
+
+	.gallery__tags-group--category {
+		background-image: url('./media/cloud.png');
+	}
+
+	.gallery__tags-group--lens {
+		background-image: url('./media/lens.png');
+	}
+
+.gallery__grid-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+
+	@include respond_to(screen_tablet) {
+		margin-right: $tags_width + $tags_margin;
+		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
+	}
+}
+
+	.gallery__grid {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
+	}

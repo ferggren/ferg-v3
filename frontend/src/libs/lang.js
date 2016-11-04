@@ -138,7 +138,7 @@
 
     for (var key in replacements) {
       var regexp = new RegExp(Lang._escapeRegexp('%'+key+'%'), 'g');
-      string = string.replace(regexp, replacements[key]);
+      string = string.replace(regexp, Lang._escapeHTML(replacements[key]));
     }
 
     if (string.indexOf('rupluralize') >= 0) {
@@ -265,6 +265,25 @@
     }
 
     Lang.lang = '';
+  },
+
+  /**
+   *  Escape HTML chars
+   *
+   *  @param {strign} string Unsafe string
+   *  @return {string} Escaped string
+   */
+  _escapeHTML(string) {
+    if (typeof string != 'string') {
+      return '';
+    }
+
+    return string
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   },
 }
 

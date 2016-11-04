@@ -3,5 +3,64 @@ class PhotoLibrary extends Database {
   protected static $table = 'photolibrary';
   protected static $primary_key = 'file_id';
   protected static $timestamps = false;
+
+  public function export($full_info = false) {
+    $export = array(
+      'id'            => (int)$this->file_id,
+      'gps'           => $this->photo_gps,
+      'taken'         => $this->photo_taken,
+      
+      'tags' => array(
+        'iso'           => $this->photo_iso,
+        'shutter_speed' => $this->photo_shutter_speed,
+        'aperture'      => $this->photo_aperture,
+        'lens'          => $this->photo_lens,
+        'camera'        => $this->photo_camera,
+        'category'      => $this->photo_category,
+        'fl'            => $this->photo_fl,
+        'efl'           => $this->photo_efl,
+      ),
+    );
+
+
+    if ($full_info) {
+      $export['added']         = (int)$this->photo_added;
+      $export['title_ru']      = $this->photo_title_ru;
+      $export['title_en']      = $this->photo_title_en;
+      $export['collection_id'] = (int)$this->photo_collection_id;
+    }
+
+    if (Lang::getLang() == 'ru') {
+      $export['title'] = $this->photo_title_ru;
+    }
+    else {
+      $export['title'] = $this->photo_title_en;
+    }
+
+    $export['ratio'] = 1;
+
+    if (preg_match('#^(\d{1,5})x(\d{1,5})$#', $this->photo_size, $data)) {
+      $export['ratio'] = round($data[1] / $data[2], 2);
+    }
+
+    $export['preview'] = StoragePreview::makePreviewLink(
+      $this->file_hash, array(
+        'crop'   => true,
+        'width'  => 500,
+        'height' => 150,
+        'align'  => 'center',
+        'valign' => 'middle',
+      )
+    );
+
+    $export['photo'] = StoragePreview::makePreviewLink(
+      $this->file_hash, array(
+        'crop'   => false,
+        'width'  => 1680,
+      )
+    );
+
+    return $export;
+  }
 }
 ?>
