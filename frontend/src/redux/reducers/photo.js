@@ -1,10 +1,11 @@
 var clone = require('libs/clone');
 
 var initialState = {
-  photos:  [],
+  id:     false,
+  prev:   [],
+  next:   [],
+  info:  {},
   tag:     '',
-  page:    false,
-  pages:   false,
   lang:    false,
   loaded:  false,
   loading: false,
@@ -13,10 +14,11 @@ var initialState = {
 
 module.exports = function(state = initialState, action) {
   switch (action.type) {
-    case 'GALLERY_LOAD_STARTED': {
+    case 'PHOTO_LOAD_STARTED': {
       state = clone(state);
 
-      state.photos  = [];
+      state.prev    = [];
+      state.next    = [];
       state.error   = false;
       state.loading = true;
       state.loaded  = false;
@@ -24,7 +26,7 @@ module.exports = function(state = initialState, action) {
       return state;
     }
 
-    case 'GALLERY_LOAD_ERROR': {
+    case 'PHOTO_LOAD_ERROR': {
       state = clone(state);
 
       state.error   = action.error;
@@ -32,17 +34,19 @@ module.exports = function(state = initialState, action) {
       state.loaded  = true;
       state.lang    = action.lang;
       state.tag     = action.tag;
+      state.id      = action.id;
 
       return state;
     }
 
-    case 'GALLERY_LOAD_SUCCESS': {
+    case 'PHOTO_LOAD_SUCCESS': {
       state = clone(state);
 
       state.tag     = action.tag;
-      state.photos  = action.response.photos;
-      state.page    = action.response.page;
-      state.pages   = action.response.pages;
+      state.id      = action.id;
+      state.info    = action.response.info;
+      state.prev    = action.response.prev;
+      state.next    = action.response.next;
       state.error   = false;
       state.loading = false;
       state.loaded  = true;

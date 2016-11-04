@@ -2,29 +2,31 @@ var Request = require('libs/request');
 
 function loadStarted() {
   return {
-    type: 'GALLERY_LOAD_STARTED',
+    type: 'PHOTO_LOAD_STARTED',
   }
 }
 
-function loadSuccess(response, lang, tag) {
+function loadSuccess(response, lang, tag, id) {
   return {
-    type: 'GALLERY_LOAD_SUCCESS',
+    type: 'PHOTO_LOAD_SUCCESS',
     lang,
     response,
     tag,
+    id,
   }
 }
 
-function loadError(error, lang, tag) {
+function loadError(error, lang, tag, id) {
   return {
-    type: 'GALLERY_LOAD_ERROR',
+    type: 'PHOTO_LOAD_ERROR',
     error,
     lang,
     tag,
+    id,
   }
 }
 
-export function loadGallery(page, tag) {
+export function loadPhoto(id, tag) {
   return (dispatch, getState) => {
     var lang = getState().lang;
 
@@ -32,21 +34,21 @@ export function loadGallery(page, tag) {
 
     return new Promise((resolve, reject) => {
       Request.fetch(
-        '/api/gallery/getPhotos/', {
+        '/api/gallery/getPhoto/', {
         success: response => {
-          dispatch(loadSuccess(response, lang, tag));
+          dispatch(loadSuccess(response, lang, tag, id));
           resolve();
         },
 
         error: error => {
-          dispatch(loadError(error, lang, tag));
+          dispatch(loadError(error, lang, tag, id));
           resolve();
         },
 
         data: {
           USER_LANG: lang,
           tag,
-          page,
+          id,
         },
 
         cache:        true,

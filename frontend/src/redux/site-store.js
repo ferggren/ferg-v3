@@ -8,6 +8,7 @@ var tags_reducer     = require('./reducers/tags');
 var pages_reducer    = require('./reducers/pages');
 var page_reducer     = require('./reducers/page');
 var gallery_reducer  = require('./reducers/gallery');
+var photo_reducer    = require('./reducers/photo');
 
 var {
     applyMiddleware,
@@ -25,6 +26,7 @@ module.exports = function (initial_state = {}) {
     pages:    pages_reducer,
     page:     page_reducer,
     gallery:  gallery_reducer,
+    photo:    photo_reducer,
   });
 
   return createStore(

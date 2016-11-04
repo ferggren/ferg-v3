@@ -14,7 +14,7 @@ var Wrapper      = require('components/site/view-wrapper');
 var TagsCloud    = require('components/shared/tags-cloud');
 var Grid         = require('components/shared/photos-grid');
 var Paginator    = require('components/shared/paginator');
-var { loadGallery, setPage } = require('redux/actions/gallery');
+var { loadGallery } = require('redux/actions/gallery');
 
 Lang.exportStrings('gallery', require('./lang/en.js'), 'en');
 Lang.exportStrings('gallery', require('./lang/ru.js'), 'ru');
@@ -36,13 +36,6 @@ var SiteGallery = React.createClass({
   componentDidUpdate(prevProps, prevState) {
     this._updateTitle();
     this._loadGalleryIfNeeded();
-
-    var query = this.props.location.query;
-    var page = query.page ? parseInt(query.page) : 1;
-
-    if (page != this.props.gallery.page) {
-      this.props.dispatch(setPage(page));
-    }
   },
 
   /**
@@ -75,10 +68,11 @@ var SiteGallery = React.createClass({
     update = update || !gallery.loaded;
     update = update || gallery.tag  != tag;
     update = update || gallery.lang != lang;
+    update = update || gallery.page != page;
 
     if (!update) return;
 
-    this.props.dispatch(loadGallery(tag));
+    this.props.dispatch(loadGallery(page, tag));
   },
 
   /**
@@ -193,14 +187,7 @@ var SiteGallery = React.createClass({
       );
     }
 
-    var start = Math.max((gallery.page - 1) * gallery.rpp, 0);
-    var stop  = Math.min(start + gallery.rpp, gallery.photos.length);
-
-    var photos = [];
-
-    for (var i = start; i < stop; ++i) {
-      var photo = gallery.photos[i];
-
+    var photos = gallery.photos.map(photo => {
       var url = '/' + this.props.lang + '/gallery/';
       url += photo.id;
 
@@ -208,15 +195,15 @@ var SiteGallery = React.createClass({
         url += '?tag=' + encodeURIComponent(gallery.tag);
       }
 
-      photos.push({
+      return {
         date:    0,
         ratio:   photo.ratio,
         title:   photo.title,
         desc:    '',
         url:     url,
         preview: photo.preview,
-      });
-    }
+      };
+    });
 
     return (
       <Grid list={photos}/>
@@ -233,13 +220,6 @@ var SiteGallery = React.createClass({
     if (gallery.loading) return null;
     if (gallery.error) return null;
 
-    var page  = Math.max(gallery.page, 1);
-    var rpp   = gallery.rpp;
-    var count = gallery.photos.length;
-    var pages = Math.floor(count / rpp);
-
-    if ((pages * rpp) < count) ++pages;
-
     var url = '/' + this.props.lang + '/gallery/?';
     if (gallery.tag) url += 'tag=' + encodeURIComponent(gallery.tag) + '&';
     url += 'page=%page%';
@@ -247,8 +227,8 @@ var SiteGallery = React.createClass({
     return (
       <div className="pages__paginator">
         <Paginator
-          page={page}
-          pages={pages}
+          page={gallery.page}
+          pages={gallery.pages}
           url={url}
         />
       </div>
@@ -281,27 +261,16 @@ var SiteGallery = React.createClass({
 });
 
 SiteGallery.fetchData = (store, params) => {
-  var ret = [];
-
-  if (params.page && parseInt(params.page)) {
-    ret.push(
-      store.dispatch(setPage(params.page))
-    );
-  }
-
-  ret.push(
+  return [
     store.dispatch(loadGallery(
+      params.page ? params.page : 1,
       params.tag ? params.tag : ''
-    ))
-  );
+    )),
 
-  ret.push(
     store.dispatch(loadTags(
       ['category', 'camera', 'lens']
     ))
-  );
-
-  return ret;
+  ];
 }
 
 function mapStateToProps(state) {

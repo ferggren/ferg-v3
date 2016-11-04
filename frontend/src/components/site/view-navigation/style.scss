@@ -15,6 +15,7 @@ $link_padding: 10px;
 	min-width: $screen_phone;
 	width: 100%;
 	z-index: 10;
+	position: relative;
 
 	@include respond_to(screen_wide) {
 		position: fixed;

@@ -4,13 +4,68 @@ class ApiGallery_Controller extends ApiController {
     return $this->error('access_denied');
   }
 
+
   /**
-   *  Return feed tags
+   *  Return photo info
    *  
+   *  @param {int} id Photo id
    *  @param {string} groups Comma-separated groups
    *  @return {object} Tags list
    */
-  public function actionGetPhotos($tag) {
+  public function actionGetPhoto($id, $tag) {
+    if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{0,50}$#uis', $tag)) {
+      return $this->error('incorrect_tag');
+    }
+
+    if (!($collection_id = $this->_getGalleryCollectionId())) {
+      return $this->error('not_found');
+    }
+
+    if ($tag) {
+      if (!($photos = $this->_getTagPhotos($tag))) {
+        return $this->error('not_found');
+      }
+
+      if (!in_array($id, $photos)) {
+        return $this->error('not_found');
+      }
+
+      $photos = null;
+    }
+
+    if (!($photo = PhotoLibrary::find($id))) {
+      return $this->error('not_found');
+    }
+
+    if ($photo->photo_deleted) {
+      return $this->error('not_found');
+    }
+
+    if ($photo->photo_collection_id != $collection_id) {
+      return $this->error('not_found');
+    }
+
+    return $this->success(array(
+      'next' => $this->_getPhotoNeighbors($id, $tag, 'next'),
+      'info' => $photo->export(),
+      'prev' => $this->_getPhotoNeighbors($id, $tag, 'prev'),
+    ));
+  }
+
+  /**
+   *  Return feed tags
+   *  
+   *  @param {int} page Page id
+   *  @param {string} groups Comma-separated groups
+   *  @return {object} Tags list
+   */
+  public function actionGetPhotos($page, $tag) {
+    $ret = array(
+      'page'   => 1,
+      'pages'  => 1,
+      'photos' => array(),
+    );
+
     if (!preg_match('#^[0-9a-zA-ZАаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя?.,?!\s:/_-]{0,50}$#uis', $tag)) {
       return $this->error('incorrect_tag');
     }
@@ -22,12 +77,12 @@ class ApiGallery_Controller extends ApiController {
     $where = array();
 
     if ($tag) {
-      if (!($where_in = $this->_makeTagWhere($collection_id, $tag))) {
-        return $this->success(array());
+      if (!($where_in = $this->_getTagPhotos($tag))) {
+        return $this->success($ret);
       }
 
       if (!count($where_in)) {
-        return $this->success(array());
+        return $this->success($ret);
       }
 
       $where[] = "file_id IN (".implode(',', $where_in).")";
@@ -37,17 +92,21 @@ class ApiGallery_Controller extends ApiController {
     $where[] = "photo_deleted = 0";
 
     $photos = PhotoLibrary::orderBy('photo_taken_timestamp', 'desc');
-    $photos = PhotoLibrary::orderBy('file_id', 'desc');
+    $photos->orderBy('file_id', 'desc');
     $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
-      return $this->success(array());
+      return $this->success($ret);
     }
 
-    $ret = array();
+    $rpp = 20;
+    $ret['page'] = is_numeric($page) ? (int)$page : 1;
+    $ret['pages'] = (int)($count / $rpp);
+    if (($ret['pages'] * $rpp) < $count) ++$ret['pages'];
+    if ($ret['page'] > $ret['pages']) $ret['page'] = $ret['pages'];
 
     foreach ($photos->get() as $photo) {
-      $ret[] = $photo->export();
+      $ret['photos'][] = $photo->export();
     }
 
     return $this->success($ret);
@@ -77,12 +136,23 @@ class ApiGallery_Controller extends ApiController {
   /**
    *  Return photos by tag
    *
-   *  @param {int} collection_id Collection ID
    *  @param {string} tag Tag
    *  @return {object} Photo IDs
    */
-  protected function _makeTagWhere($collection_id, $tag) {
-    if (!$tag) return array();
+  protected function _getTagPhotos($tag) {
+    static $ret = array();
+
+    if (!$tag) {
+      return array();
+    }
+
+    if (!($collection_id = $this->_getGalleryCollectionId())) {
+      return array();
+    }
+
+    if (isset($ret[$tag])) {
+      return $ret[$tag];
+    }
 
     $key = "photos_{$collection_id}_";
 
@@ -104,6 +174,51 @@ class ApiGallery_Controller extends ApiController {
       }
     }
 
-    return array_keys($uniq);
+    return $ret[$tag] = array_keys($uniq);
+  }
+
+  /**
+   *  Return photo neighbors
+   *
+   *  @param {int} id Photo id
+   *  @param {string} tag Photos tag
+   *  @param {string} type Neighbors type
+   *  @return {object} Photos list
+   */
+  protected function _getPhotoNeighbors($id, $tag, $type) {
+    $where = array();
+
+    if ($tag) {
+      if (!($where_in = $this->_getTagPhotos($tag))) {
+        return array();
+      }
+
+      if (!count($where_in)) {
+        return array();
+      }
+
+      $where[] = "file_id IN (".implode(',', $where_in).")";
+    }
+
+    if (!($collection_id = $this->_getGalleryCollectionId())) {
+      return array();
+    }
+
+    $where[] = "file_id ".($type == 'next' ? '>' : '<').' "'.Database::escape($id).'"';
+    $where[] = "photo_collection_id = '".Database::escape($collection_id)."'";
+    $where[] = "photo_deleted = 0";
+
+    $photos = PhotoLibrary::orderBy('photo_taken_timestamp', $type == 'next' ? 'asc' : 'desc');
+    $photos->orderBy('file_id', $type == 'next' ? 'asc' : 'desc');
+    $photos->whereRaw(implode(' AND ', $where));
+    $photos->limit(3);
+
+    $ret = array();
+
+    foreach ($photos->get() as $photo) {
+      $ret[] = $photo->export();
+    }
+
+    return $ret;
   }
 }
