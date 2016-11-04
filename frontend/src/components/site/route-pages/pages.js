@@ -106,7 +106,7 @@ var SitePages = React.createClass({
    */
   _getType() {
     var path  = this.props.location.pathname;
-    var match = path.match(/\/(notes|portfolio|moments)\//);
+    var match = path.match(/\/(blog|dev|events)\//);
 
     if (!match) {
       return false;
@@ -120,7 +120,7 @@ var SitePages = React.createClass({
    */
   _updateTitle() {
     this.props.dispatch(setTitle(Lang.get(
-      'pages.title_' + this.state.type + '_default'
+      'pages.title_' + this.state.type
     )));
   },
 

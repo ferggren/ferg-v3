@@ -1,3 +1,3 @@
 module.exports = {
-  title_default: 'Storage // ferg.in',
+  title_default: 'Storage / ferg.in',
 };

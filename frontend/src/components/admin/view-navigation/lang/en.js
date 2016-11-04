@@ -1,8 +1,8 @@
 module.exports = {
-  photos:    "Photos",
-  notes:     "Notes",
-  moments:   "Moments",
-  portfolio: "Portfolio",
-  storage:   "Storage",
-  home:      "Home",
+  photos:  "Photos",
+  blog:    "Blog",
+  events:  "Events",
+  dev:     "Projects",
+  storage: "Storage",
+  home:    "Home",
 };

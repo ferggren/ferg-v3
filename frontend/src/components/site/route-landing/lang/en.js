@@ -1,5 +1,5 @@
 module.exports = {
-  title_default: 'Programmer, engineer and enthusiast photographer from snowly Siberia // ferg.in',
+  title_default: 'Programmer, engineer and enthusiast photographer from snowly Siberia / ferg.in',
   
   feed_not_found: 'There is nothing to show yet',
   tags_not_found: '',

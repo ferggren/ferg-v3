@@ -1,8 +1,8 @@
 module.exports = {
-  landing:   'Home',
-  storage:   'Storage',
-  gallery:   'Gallery',
-  notes:     'Notes',
-  moments:   'Moments',
-  portfolio: 'Portfolio',
+  landing: 'Home',
+  storage: 'Storage',
+  gallery: 'Gallery',
+  blog:    'Blog',
+  events:  'Events',
+  dev:     'Projects',
 };

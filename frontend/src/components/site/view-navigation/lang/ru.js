@@ -1,8 +1,8 @@
 module.exports = {
-  landing:   'Главная',
-  storage:   'Storage',
-  gallery:   'Галерея',
-  notes:     'Заметки',
-  moments:   'Моменты',
-  portfolio: 'Портфолио',
+  landing: 'Главная',
+  storage: 'Storage',
+  gallery: 'Галерея',
+  blog:    'Блог',
+  events:  'События',
+  dev:     'Разработки',
 };

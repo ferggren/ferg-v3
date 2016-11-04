@@ -30,12 +30,12 @@ var routes = [
   <IndexRoute component={Landing} key="index" />,
   <Route path='gallery' component={Gallery} key="gallery" />,
   <Route path='gallery/:photo_id' component={Photo} key="gallery_photo" />,
-  <Route path='moments' component={Pages} key="moments" />,
-  <Route path='moments/:page_id' component={Page} key="moments_page" />,
-  <Route path='notes' component={Pages} key="notes" />,
-  <Route path='notes/:page_id' component={Page} key="notes_page" />,
-  <Route path='portfolio' component={Pages} key="portfolio" />,
-  <Route path='portfolio/:page_id' component={Page} key="portfolio_page"/>,
+  <Route path='events' component={Pages} key="events" />,
+  <Route path='events/:page_id' component={Page} key="events_page" />,
+  <Route path='blog' component={Pages} key="blog" />,
+  <Route path='blog/:page_id' component={Page} key="blog_page" />,
+  <Route path='dev' component={Pages} key="dev" />,
+  <Route path='dev/:page_id' component={Page} key="dev_page"/>,
   <Route path='storage' component={Storage} key="storage" />,
 ];
 

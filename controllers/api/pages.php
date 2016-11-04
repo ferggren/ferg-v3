@@ -1,9 +1,9 @@
 <?php
 class ApiPages_Controller extends ApiController {
   static $_types = array(
-    "portfolio",
-    "moments",
-    "notes",
+    "dev",
+    "events",
+    "blog",
   );
   /**
    *  Access error

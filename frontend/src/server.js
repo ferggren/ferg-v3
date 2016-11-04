@@ -126,7 +126,7 @@ function makeFetchParams(req, location, params) {
   var ret = {};
 
   var match = location.match(
-    /\/(?:ru|en)\/(notes|moments|portfolio)/
+    /\/(?:ru|en)\/(blog|events|dev)/
   );
 
   if (match) {

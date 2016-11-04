@@ -1,9 +1,5 @@
 <?php
 class ApiTags_Controller extends ApiController {
-  static $map = array(
-    'feed' => 'feed',
-  );
-
   public function actionIndex() {
     return $this->error('access_denied');
   }
@@ -64,7 +60,7 @@ class ApiTags_Controller extends ApiController {
       return 'feed';
     }
 
-    if (in_array($group, array('notes', 'moments', 'portfolio'))) {
+    if (in_array($group, array('blog', 'events', 'dev'))) {
       return "pages_{$group}_visible";
     }
 
