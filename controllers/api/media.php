@@ -250,7 +250,7 @@ class ApiMedia_Controller extends ApiController {
 
     $res->where('l.photo_id', 'IN', array_keys($entry_photos));
     $res->whereAnd('l.photo_deleted', '=', '0');
-    $res->whereAnd('f.photo_id', '=', 'l.photo_id', false);
+    $res->whereAnd('f.file_id', '=', 'l.file_id', false);
     $res->orderBy('l.photo_id', 'desc');
 
     foreach ($res->get() as $photo) {
