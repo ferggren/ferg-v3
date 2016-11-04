@@ -1,6 +1,6 @@
 /**
- * @file Site Grid
- * @name SiteGrid
+ * @file Photos Grid
+ * @name PhotosGrid
  * @author ferg <me@ferg.in>
  * @copyright 2016 ferg
  */
@@ -8,15 +8,17 @@
 var React    = require('react');
 var { Link } = require('react-router');
 var clone    = require('libs/clone');
+var NiceTime = require('libs/nice-time');
 
 require('./style.scss');
 require('styles/partials/floating_clear');
 
-var SiteGrid = React.createClass({
+var PhotosGrid = React.createClass({
   _makeItem(item) {
     var header = null;
     var title  = null;
     var desc   = null;
+    var date   = null;
 
     var item_props  = {
       to:        item.url,
@@ -61,9 +63,17 @@ var SiteGrid = React.createClass({
       );
     }
 
+    if (item.date) {
+      date = (
+        <div className="photo-grid__item-date">
+          {NiceTime.niceDateFormat(item.date)}
+        </div>
+      );
+    }
+
     return (
       <div {...wrapper_props}>
-        <Link {...item_props}>{header}</Link>
+        <Link {...item_props}>{header}{date}</Link>
       </div>
     );
   },
@@ -128,4 +138,4 @@ var SiteGrid = React.createClass({
   }
 });
 
-module.exports = SiteGrid;
+module.exports = PhotosGrid;

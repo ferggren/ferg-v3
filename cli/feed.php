@@ -81,13 +81,14 @@ class Feed_CliController extends CliController {
         $row['desc_en']  = $row['desc_ru'];
       }
 
-      $res->feed_title_ru = $row['title_ru'];
-      $res->feed_title_en = $row['title_en'];
-      $res->feed_desc_ru  = $row['desc_ru'];
-      $res->feed_desc_en  = $row['desc_en'];
-      $res->feed_preview  = $row['preview'];
-      $res->feed_ratio    = $row['ratio'];
-      $res->feed_order    = $row['order'];
+      $res->feed_title_ru  = $row['title_ru'];
+      $res->feed_title_en  = $row['title_en'];
+      $res->feed_desc_ru   = $row['desc_ru'];
+      $res->feed_desc_en   = $row['desc_en'];
+      $res->feed_preview   = $row['preview'];
+      $res->feed_ratio     = $row['ratio'];
+      $res->feed_order     = $row['order'];
+      $res->feed_timestamp = $row['timestamp'];
 
       $res->save();
 
@@ -131,6 +132,7 @@ class Feed_CliController extends CliController {
         'ratio'     => 10,
         'tags'      => $page->page_tags,
         'order'     => $page->page_date_timestamp ? $page->page_date_timestamp : $page->page_id,
+        'timestamp' => $page->page_date_timestamp,
       );
 
       if ($page->page_photo_id && $preview = $this->_getPagePreview($page->page_photo_id)) {
@@ -192,6 +194,7 @@ class Feed_CliController extends CliController {
         'preview'   => '',
         'ratio'     => 1,
         'order'     => $photo->photo_taken_timestamp ? $photo->photo_taken_timestamp : $photo->file_id,
+        'timestamp' => 0,
         'tags'      => implode(',', array(
           $photo->photo_lens,
           $photo->photo_camera,

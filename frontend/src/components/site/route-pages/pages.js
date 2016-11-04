@@ -221,6 +221,7 @@ var SitePages = React.createClass({
 
     var list = this.props.pages.list.map(page => {
       return {
+        date:    page.timestamp,
         ratio:   10,
         title:   page.title,
         desc:    page.desc,

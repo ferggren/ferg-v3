@@ -1,1 +1,1 @@
-module.exports = require('./site-grid');
+module.exports = require('./photos-grid');

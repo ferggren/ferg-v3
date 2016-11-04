@@ -63,6 +63,7 @@ class ApiFeed_Controller extends ApiController {
         'desc'    => (Lang::getLang() == 'ru' ? $row->feed_desc_ru : $row->feed_desc_en),
         'type'    => $row->feed_type,
         'url'     => $url,
+        'date'    => (int)$row->feed_timestamp,
       );
     }
 

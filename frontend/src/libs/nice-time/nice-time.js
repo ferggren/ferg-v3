@@ -7,10 +7,8 @@
 
 var Lang = require('libs/lang');
 
-Lang.exportStrings(
-  'nice-time',
-  require('./nice-time.' + Lang.getLang() + '.js')
-);
+Lang.exportStrings('nice-time', require('./lang/ru.js'), 'ru');
+Lang.exportStrings('nice-time', require('./lang/en.js'), 'en');
 
 var NiceTime = {
   /**
