@@ -85,14 +85,14 @@ class ApiGallery_Controller extends ApiController {
         return $this->success($ret);
       }
 
-      $where[] = "file_id IN (".implode(',', $where_in).")";
+      $where[] = "photo_id IN (".implode(',', $where_in).")";
     }
 
     $where[] = "photo_collection_id = '".Database::escape($collection_id)."'";
     $where[] = "photo_deleted = 0";
 
     $photos = PhotoLibrary::orderBy('photo_taken_timestamp', 'desc');
-    $photos->orderBy('file_id', 'desc');
+    $photos->orderBy('photo_id', 'desc');
     $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
@@ -197,19 +197,19 @@ class ApiGallery_Controller extends ApiController {
         return array();
       }
 
-      $where[] = "file_id IN (".implode(',', $where_in).")";
+      $where[] = "photo_id IN (".implode(',', $where_in).")";
     }
 
     if (!($collection_id = $this->_getGalleryCollectionId())) {
       return array();
     }
 
-    $where[] = "file_id ".($type == 'next' ? '>' : '<').' "'.Database::escape($id).'"';
+    $where[] = "photo_id ".($type == 'next' ? '>' : '<').' "'.Database::escape($id).'"';
     $where[] = "photo_collection_id = '".Database::escape($collection_id)."'";
     $where[] = "photo_deleted = 0";
 
     $photos = PhotoLibrary::orderBy('photo_taken_timestamp', $type == 'next' ? 'asc' : 'desc');
-    $photos->orderBy('file_id', $type == 'next' ? 'asc' : 'desc');
+    $photos->orderBy('photo_id', $type == 'next' ? 'asc' : 'desc');
     $photos->whereRaw(implode(' AND ', $where));
     $photos->limit(3);
 

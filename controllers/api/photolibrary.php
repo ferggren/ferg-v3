@@ -224,7 +224,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
         return $this->success($ret);
       }
 
-      $where[] = "file_id IN (".implode(',', $where_in).")";
+      $where[] = "photo_id IN (".implode(',', $where_in).")";
     }
 
     $where[] = "user_id = '".Database::escape(User::get_user_id())."'";
@@ -234,7 +234,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
       $where[] = "photo_collection_id = '".Database::escape($collection)."'";
     }
 
-    $photos = PhotoLibrary::orderBy('file_id', 'desc');
+    $photos = PhotoLibrary::orderBy('photo_id', 'desc');
     $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
@@ -253,36 +253,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
     );
 
     foreach ($photos->get() as $photo) {
-      $preview = StoragePreview::makePreviewLink(
-        $photo->file_hash,array(
-          'crop'   => true,
-          'width'  => 200,
-          'height' => 150,
-          'align'  => 'center',
-          'valign' => 'middle',
-      ));
-
-      $ret['photos'][] = array(
-        'id'            => (int)$photo->file_id,
-        'gps'           => $photo->photo_gps,
-        'taken'         => $photo->photo_taken,
-        'title_ru'      => $photo->photo_title_ru,
-        'title_en'      => $photo->photo_title_en,
-        'preview'       => $preview,
-        'collection_id' => (int)$photo->photo_collection_id,
-        'added'         => (int)$photo->photo_added,
-
-        'tags' => array(
-          'iso'           => $photo->photo_iso,
-          'shutter_speed' => $photo->photo_shutter_speed,
-          'aperture'      => $photo->photo_aperture,
-          'lens'          => $photo->photo_lens,
-          'camera'        => $photo->photo_camera,
-          'category'      => $photo->photo_category,
-          'fl'            => $photo->photo_fl,
-          'efl'           => $photo->photo_efl,
-        ),
-      );
+      $ret['photos'][] = $photo->export(true);
     }
 
     return $this->success($ret);
@@ -545,37 +516,8 @@ class ApiPhotoLibrary_Controller extends ApiController {
     $photo->photo_added = time();
     $photo->save();
 
-    $preview = StoragePreview::makePreviewLink(
-      $photo->file_hash,array(
-        'crop'   => true,
-        'width'  => 200,
-        'height' => 150,
-        'align'  => 'center',
-        'valign' => 'top',
-    ));
-
     $ret = array(
-      'photo' => array(
-        'id'            => (int)$photo->file_id,
-        'gps'           => '',
-        'taken'         => '',
-        'title_ru'      => '',
-        'title_en'      => '',
-        'preview'       => $preview,
-        'collection_id' => (int)$photo->photo_collection_id,
-        'added'         => (int)$photo->photo_added,
-
-        'tags' => array(
-          'iso'           => '',
-          'shutter_speed' => '',
-          'aperture'      => '',
-          'lens'          => '',
-          'camera'        => '',
-          'category'      => '',
-          'fl'            => '',
-          'efl'           => '',
-        ),
-      ),
+      'photo'      => $photo->export(true),
       'collection' => false,
     );
 
@@ -645,7 +587,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
     $preview = '';
 
     if (count($photo)) {
-      $collection->collection_cover_photo_id = $photo[0]->file_id;
+      $collection->collection_cover_photo_id = $photo[0]->photo_id;
       $collection->collection_cover_photo_hash = $photo[0]->file_hash;
       $collection->collection_updated = $photo[0]->photo_added;
 
@@ -705,14 +647,14 @@ class ApiPhotoLibrary_Controller extends ApiController {
 
       Tags::attachTags(
         "photos_{$user_id}_0_{$tag}",
-        $photo->file_id,
+        $photo->photo_id,
         $values
       );
 
       if ($photo->photo_collection_id) {
         Tags::attachTags(
           "photos_{$photo->photo_collection_id}_{$tag}",
-          $photo->file_id,
+          $photo->photo_id,
           $values
         );
       }

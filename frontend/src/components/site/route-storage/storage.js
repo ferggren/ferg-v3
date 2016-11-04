@@ -43,7 +43,7 @@ var SiteStorage = React.createClass({
     return (
       <Wrapper>
         <Storage 
-          onFileUpload={this.onFileSelect}
+          onFileUpload={() => {}}
           onFileSelect={this.onFileSelect}
           group="storage"
           mediaTypes="all"

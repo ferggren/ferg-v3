@@ -248,14 +248,14 @@ class ApiMedia_Controller extends ApiController {
       'storage_files f',
     ));
 
-    $res->where('l.file_id', 'IN', array_keys($entry_photos));
+    $res->where('l.photo_id', 'IN', array_keys($entry_photos));
     $res->whereAnd('l.photo_deleted', '=', '0');
-    $res->whereAnd('f.file_id', '=', 'l.file_id', false);
-    $res->orderBy('l.file_id', 'desc');
+    $res->whereAnd('f.photo_id', '=', 'l.photo_id', false);
+    $res->orderBy('l.photo_id', 'desc');
 
     foreach ($res->get() as $photo) {
-      $entry_photos[$photo->file_id] = array(
-        'id'      => $photo->file_id,
+      $entry_photos[$photo->photo_id] = array(
+        'id'      => $photo->photo_id,
         'name'    => $photo->file_name,
         'preview' => StoragePreview::makePreviewLink(
           $photo->file_hash,array(
