@@ -77,7 +77,7 @@ app.use((req, res) => {
     })
     .then(html => {
       // send HTML response
-      console.log('done', store.getState());
+      // console.log('done', store.getState());
       res.status(200).end(html);
     })
     .catch(err => {
@@ -224,7 +224,7 @@ function renderHTML(component_html, store) {
   var rnd = Math.random();
 
   if (NODE_ENV == 'dev') {
-    html += '<link href="/assets/site/site.css?v='+rnd+'" rel="stylesheet" />';
+    // html += '<link href="/assets/site/site.css?v='+rnd+'" rel="stylesheet" />';
     html += '<script src="/assets/site/site.js?v='+rnd+'" defer></script>';
   }
   else {
@@ -235,7 +235,7 @@ function renderHTML(component_html, store) {
   html += '</head>';
 
   html += '<body>';
-  html += '<div class="site-wrapper" id="react-root">';
+  html += '<div class="site" id="react-root">';
   html += component_html;
   html += '</div>';
   html += '</body>';

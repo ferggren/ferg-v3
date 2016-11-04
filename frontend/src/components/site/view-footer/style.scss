@@ -9,6 +9,14 @@ $footer_copy_color: #666;
 $footer_lang_color: $link_default_color;
 $footer_lang_color_hover: $link_default_color;
 
+.site-footer__placeholder {
+	height: 50px;
+	
+	@include respond_to(screen_phone) {
+		height: 90px;
+	}
+}
+
 .site-footer__wrapper {
 	position: absolute;
 	left: 0px;

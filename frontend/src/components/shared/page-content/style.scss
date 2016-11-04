@@ -5,26 +5,26 @@ $margin_bottom: 20px;
 /**
  *	Common
  */
-.page {
+.page-content {
 	font-family: Verdana, sans-serif;
 }
 
-	.page a {
+	.page-content a {
 		color: #6da3bd;
 	}
 
-		.page a:hover {
+		.page-content a:hover {
 			text-decoration: underline;
 		}
 
-	.page__clear {
+	.page-content__clear {
 		clear: both;
 	}
 
 /**
  *	Titles
  */
-.page__h {
+.page-content__h {
 	font-family: 'Fira Sans',sans-serif;
 	margin: 0px 0px $margin_bottom 0px;
 	font-size: 28px;
@@ -36,7 +36,7 @@ $margin_bottom: 20px;
 /**
  *	PhotoGrid
  */
-.page__photo_grid {
+.page-content__photo_grid {
 	margin-top: $margin_bottom;
 	margin-bottom: $margin_bottom;
 	text-align: center;
@@ -46,7 +46,7 @@ $margin_bottom: 20px;
 /**
  *	Page block
  */
-.page__block {
+.page-content__block {
 	min-width: $screen_phone - $window_padding * 2;
 	max-width: $screen_wide - $window_padding * 2;
 	padding: 0px $window_padding;
@@ -60,7 +60,7 @@ $margin_bottom: 20px;
 /**
  *	Paragraph
  */
-.page__paragraph {
+.page-content__paragraph {
 	color: #000;
 	font-size: 14px;
 	line-height: 22px;
@@ -72,15 +72,15 @@ $margin_bottom: 20px;
 /**
  *	Photo
  */
-.page__photo {
+.page-content__photo {
 	margin: $margin_bottom 0px;
 }
 
-	.page__photo img {
+	.page-content__photo img {
 		max-width: 100%;
 	}
 
-	.page__photo-desc {
+	.page-content__photo-desc {
 		line-height: 20px;
 		font-size: 14px;
 		text-align: center;
@@ -89,7 +89,7 @@ $margin_bottom: 20px;
 /**
  *	Photo - grid
  */
-.page__grid_photo {
+.page-content__grid_photo {
 	width: 25%;
 	display: inline-block;
 	vertical-align:top;
@@ -103,7 +103,7 @@ $margin_bottom: 20px;
 	}
 }
 
-	.page__grid_photo-image {
+	.page-content__grid_photo-image {
 		height: 130px;
 		width: 90%;
 		background: #EEE;
@@ -113,7 +113,7 @@ $margin_bottom: 20px;
 		margin: 0px auto 15px auto;
 	}
 
-	.page__grid_photo-desc {
+	.page-content__grid_photo-desc {
 		font-size: 12px;
 		line-height: 16px;
 		text-align: center;
@@ -123,19 +123,19 @@ $margin_bottom: 20px;
 /**
  *	Photo - cover
  */
-.page__cover_photo {
+.page-content__cover_photo {
 
 }
 
-	.page__cover_photo--right {
+	.page-content__cover_photo--right {
 		float: right;
 	}
 
-	.page__cover_photo--left {
+	.page-content__cover_photo--left {
 		float: left;
 	}
 
-	.page__cover_photo-image {
+	.page-content__cover_photo-image {
 		width: 150px;
 		height: 100px;
 		background: #EEE;
@@ -145,15 +145,15 @@ $margin_bottom: 20px;
 		margin-bottom: 15px;
 	}
 
-	.page__cover_photo--right .page__cover_photo-image {
+	.page-content__cover_photo--right .page-content__cover_photo-image {
 		margin-left: 15px;
 	}
 
-	.page__cover_photo--left .page__cover_photo-image {
+	.page-content__cover_photo--left .page-content__cover_photo-image {
 		margin-right: 15px;
 	}
 
-	.page__cover_photo-desc {
+	.page-content__cover_photo-desc {
 		font-size: 12px;
 		line-height: 16px;
 		text-align: center;
@@ -163,7 +163,7 @@ $margin_bottom: 20px;
 /**
  *	Photo - parallax
  */
-.page__parallax_photo {
+.page-content__parallax_photo {
 	height: 400px;
 	margin: $margin_bottom 0px;
 
@@ -176,7 +176,7 @@ $margin_bottom: 20px;
 	}
 }
 
-	.page__parallax_photo-image {
+	.page-content__parallax_photo-image {
 		width: 100%;
 		height: 100%;
 		background: #EEE;
@@ -186,7 +186,7 @@ $margin_bottom: 20px;
 		background-attachment: fixed;
 	}
 
-	.page__parallax_photo-desc {
+	.page-content__parallax_photo-desc {
 		font-size: 12px;
 		line-height: 16px;
 		text-align: center;

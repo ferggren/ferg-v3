@@ -226,7 +226,7 @@ var SitePages = React.createClass({
         title:   page.title,
         desc:    page.desc,
         url:     '/' + this.props.lang + '/' + page.type + '/' + page.id,
-        preview: (page.preview && page.preview.big) ? page.preview.big : '',
+        preview: (page.preview && page.preview.small) ? page.preview.small : '',
       }
     });
 

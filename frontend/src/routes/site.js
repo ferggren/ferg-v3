@@ -15,7 +15,7 @@ var Progress = require('components/shared/request-progress');
 
 var App = (props) => {
   return (
-    <div>
+    <div className="site-wrapper">
       <Title />
       <Lang />
       <Menu />

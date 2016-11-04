@@ -1,5 +1,6 @@
 @import 'styles/partials/reset';
 @import 'styles/variables/default';
+@import 'styles/mixins/respond_to';
 
 body, html {
 	height: 100%;
@@ -14,6 +15,13 @@ body {
 body, input, textarea {
 	font-family: $font_default_family;
 	font-size: $font_default_size;
+}
+
+.site {
+	max-width: 100%;
+	min-height: 100%;
+	height: 100%;
+	position: relative;
 }
 
 .site-wrapper {

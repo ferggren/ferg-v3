@@ -368,7 +368,7 @@ class ApiMedia_Controller extends ApiController {
   protected function _translateH($text_raw) {
     $text_raw = preg_replace(
       '#<h([12345])>(.*?)</h\\1>#uis',
-      '<h$1 class="page__h page__h$1">$2</h$1>',
+      '<h$1 class="page-content__h page-content__h$1">$2</h$1>',
       $text_raw
     );
 
@@ -387,7 +387,7 @@ class ApiMedia_Controller extends ApiController {
 
     $text_raw = preg_replace(
       '#<PhotoGrid>(.*?)</PhotoGrid>#uis',
-      '<div class="page__photo_grid">$1<div class="page__clear"></div></div>',
+      '<div class="page-content__photo_grid">$1<div class="page-content__clear"></div></div>',
       $text_raw
     );
 
@@ -400,7 +400,7 @@ class ApiMedia_Controller extends ApiController {
   protected function _translateBlock($text_raw) {
     $text_raw = preg_replace(
       '#<block>(.*?)</block>#uis',
-      '<div class="page__block">$1</div>',
+      '<div class="page-content__block">$1</div>',
       $text_raw
     );
 
@@ -413,7 +413,7 @@ class ApiMedia_Controller extends ApiController {
   protected function _translateP($text_raw) {
     $text_raw = preg_replace(
       '#<p>(.*?)</p>#uis',
-      '<div class="page__paragraph">$1<div class="page__clear"></div></div>',
+      '<div class="page-content__paragraph">$1<div class="page-content__clear"></div></div>',
       $text_raw
     );
 
@@ -483,11 +483,11 @@ class ApiMedia_Controller extends ApiController {
     );
 
     if ($type == 'left' || $type == 'right') {
-      $ret  = '<div class="page__cover_photo page__cover_photo--' . $type . '">';
-      $ret .= '<div class="page__cover_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+      $ret  = '<div class="page-content__cover_photo page-content__cover_photo--' . $type . '">';
+      $ret .= '<div class="page-content__cover_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
 
       if ($desc) {
-        $ret .= '<div class="page__cover_photo-desc">';
+        $ret .= '<div class="page-content__cover_photo-desc">';
         $ret .= htmlspecialchars($desc);
         $ret .= '</div>';
       }
@@ -498,11 +498,11 @@ class ApiMedia_Controller extends ApiController {
     }
 
     if ($type == 'default') {
-      $ret  = '<div class="page__photo">';
+      $ret  = '<div class="page-content__photo">';
       $ret .= '<img src="' . $previews['medium'] . '" />';
 
       if ($desc) {
-        $ret .= '<div class="page__photo-desc">';
+        $ret .= '<div class="page-content__photo-desc">';
         $ret .= htmlspecialchars($desc);
         $ret .= '</div>';
       }
@@ -515,11 +515,11 @@ class ApiMedia_Controller extends ApiController {
     if ($type == 'grid') {
       $ret  = '<PhotoGrid>';
 
-      $ret .= '<div class="page__grid_photo">';
-      $ret .= '<div class="page__grid_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+      $ret .= '<div class="page-content__grid_photo">';
+      $ret .= '<div class="page-content__grid_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
 
       if ($desc) {
-        $ret .= '<div class="page__grid_photo-desc">';
+        $ret .= '<div class="page-content__grid_photo-desc">';
         $ret .= htmlspecialchars($desc);
         $ret .= '</div>';
       }
@@ -531,11 +531,11 @@ class ApiMedia_Controller extends ApiController {
     }
 
     if ($type == 'parallax') {
-      $ret  = '<div class="page__parallax_photo">';
-      $ret .= '<div class="page__parallax_photo-image" style="background-image: url(\''.$previews['big'].'\')"></div>';
+      $ret  = '<div class="page-content__parallax_photo">';
+      $ret .= '<div class="page-content__parallax_photo-image" style="background-image: url(\''.$previews['big'].'\')"></div>';
 
       if ($desc) {
-        $ret .= '<div class="page__parallax_photo-desc">';
+        $ret .= '<div class="page-content__parallax_photo-desc">';
         $ret .= htmlspecialchars($desc);
         $ret .= '</div>';
       }

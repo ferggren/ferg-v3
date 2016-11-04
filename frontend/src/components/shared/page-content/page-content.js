@@ -21,7 +21,7 @@ var PageContent = React.createClass({
 
   render() {
     return (
-      <div className="page" dangerouslySetInnerHTML={this._getHTML()} />
+      <div className="page-content" dangerouslySetInnerHTML={this._getHTML()} />
     );
   }
 });

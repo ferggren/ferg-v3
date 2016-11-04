@@ -45,22 +45,26 @@ var SiteFooter = React.createClass({
     var className = 'site-footer__lang site-footer__lang--' + lang;
 
     return (
-      <div className="site-footer__wrapper">
-        <div className="site-footer">
-          <div className={className}>
-            <a href={url} onClick={e => {
-              e.preventDefault();
-              this._swapLang(lang, url);
-            }}>
-              {Lang.get('footer.swap_lang')}
-            </a>
-          </div>
+      <div>
+        <div className="site-footer__placeholder" />
 
-          <div className="site-footer__copy">
-            ferg.in &copy; 2013 – 2016
-          </div>
+        <div className="site-footer__wrapper">
+          <div className="site-footer">
+            <div className={className}>
+              <a href={url} onClick={e => {
+                e.preventDefault();
+                this._swapLang(lang, url);
+              }}>
+                {Lang.get('footer.swap_lang')}
+              </a>
+            </div>
 
-          <div className="floating-clear"></div>
+            <div className="site-footer__copy">
+              ferg.in &copy; 2013 – 2016
+            </div>
+
+            <div className="floating-clear"></div>
+          </div>
         </div>
       </div>
     );

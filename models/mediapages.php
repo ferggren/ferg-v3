@@ -4,7 +4,7 @@ class MediaPages extends Database {
   protected static $primary_key = 'page_id';
   protected static $timestamps = true;
 
-  public function export() {
+  public function export($export_html = false) {
     $ret = array(
       'id'        => (int)$this->page_id,
       'type'      => $this->page_type,
@@ -15,6 +15,7 @@ class MediaPages extends Database {
       'tags'      => $this->page_tags,
       'title'     => '',
       'desc'      => '',
+      'html'      => '',
       'preview'   => array(
         'big'   => '',
         'small' => '',
@@ -38,20 +39,26 @@ class MediaPages extends Database {
       $ret['preview'] = $this->_makePreview($this->page_photo_id);
     }
 
-    $entry = Database::from(array(
-      'media_entries_content ec',
-      'media_entries e',
-    ));
+    if ($entry_lang) {
+      $entry = Database::from(array(
+        'media_entries_content ec',
+        'media_entries e',
+      ));
 
-    $entry->whereAnd('e.entry_key', '=', 'page_' . $this->page_id);
-    $entry->whereAnd('ec.entry_id', '=', 'e.entry_id', false);
-    $entry->whereAnd('ec.entry_lang', '=', $entry_lang);
-    $entry->whereAnd('ec.entry_visible', '=', '1');
-    $entry->limit(1);
+      $entry->whereAnd('e.entry_key', '=', 'page_' . $this->page_id);
+      $entry->whereAnd('ec.entry_id', '=', 'e.entry_id', false);
+      $entry->whereAnd('ec.entry_lang', '=', $entry_lang);
+      $entry->whereAnd('ec.entry_visible', '=', '1');
+      $entry->limit(1);
 
-    if (count($entry = $entry->get())) {
-      $ret['title'] = $entry[0]->entry_title;
-      $ret['desc']  = $entry[0]->entry_desc;
+      if (count($entry = $entry->get())) {
+        $ret['title'] = $entry[0]->entry_title;
+        $ret['desc']  = $entry[0]->entry_desc;
+
+        if ($export_html) {
+          $ret['html'] = $entry[0]->entry_text_html;
+        }
+      }
     }
 
     return $ret;
@@ -82,7 +89,8 @@ class MediaPages extends Database {
       'big' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
           'crop'   => true,
-          'width'  => 1920,
+          'width'  => 1680,
+          'height'  => 500,
           'align'  => 'center',
           'valign' => 'middle',
         )
@@ -91,7 +99,7 @@ class MediaPages extends Database {
       'small' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
           'crop'   => true,
-          'width'  => 500,
+          'width'  => 700,
           'height' => 200,
           'align'  => 'center',
           'valign' => 'middle',

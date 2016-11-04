@@ -323,7 +323,7 @@ class ApiPages_Controller extends ApiController {
       }
     }
 
-    return $this->success($page->export());
+    return $this->success($page->export(true));
   }
 
   /**

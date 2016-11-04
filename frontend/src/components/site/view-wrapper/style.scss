@@ -1,16 +1,10 @@
 @import 'styles/mixins/respond_to';
 
-$footer_size: 40px;
 $window_padding: 10px;
 
 .site-content {
 	min-width: $screen_phone;
-	padding-bottom: $footer_size + 10px;
 	padding-top: 20px;
-
-	@include respond_to(screen_phone) {
-		padding-bottom: ($footer_size * 2) + 10px;
-	}
 }
 
 .site-content__container {

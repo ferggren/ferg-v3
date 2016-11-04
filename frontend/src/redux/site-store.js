@@ -6,6 +6,7 @@ var title_reducer    = require('./reducers/title');
 var feed_reducer     = require('./reducers/feed');
 var tags_reducer     = require('./reducers/tags');
 var pages_reducer    = require('./reducers/pages');
+var page_reducer     = require('./reducers/page');
 
 var {
     applyMiddleware,
@@ -21,6 +22,7 @@ module.exports = function (initial_state = {}) {
     feed:     feed_reducer,
     tags:     tags_reducer,
     pages:    pages_reducer,
+    page:     page_reducer,
   });
 
   return createStore(
