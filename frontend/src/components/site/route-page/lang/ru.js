@@ -14,5 +14,7 @@ module.exports = {
   page_dev_empty:        'Разработки / ferg.in',
   page_dev:              '%title% / Разработки / ferg.in',
 
+  open_preview:          'Открыть изображение »',
+
   error_not_found:       'Страница не найдена',
 };

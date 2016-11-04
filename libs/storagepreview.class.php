@@ -58,6 +58,11 @@ class StoragePreview {
                 continue;
             }
 
+            if ($option == 'copyright') {
+                $link[] = 'copyright-' . rawurlencode($value);
+                continue;
+            }
+
             if ($option == 'align' || $option == 'valign') {
                 $link[] = $value;
                 continue;
@@ -110,6 +115,11 @@ class StoragePreview {
 
             if (preg_match('#^h(\d{2,5})$#', $option, $data)) {
                 $extracted['height'] = $data[1];
+                continue;
+            }
+
+            if (preg_match('#^copyright-(.{1,50})$#', $option, $data)) {
+                $extracted['copyright'] = $data[1];
                 continue;
             }
         }
@@ -203,6 +213,10 @@ class StoragePreview {
 
         if (isset($options['valign']) && in_array($options['valign'], array('top', 'middle', 'bottom'))) {
             $validated['valign'] = $options['valign'];
+        }
+
+        if (isset($options['copyright']) && preg_match('#^.{1,50}$#', $options['copyright'])) {
+            $validated['copyright'] = $options['copyright'];
         }
 
         return $validated;

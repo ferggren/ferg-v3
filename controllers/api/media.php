@@ -326,6 +326,7 @@ class ApiMedia_Controller extends ApiController {
     $text_raw = $this->_translatePhotos($text_raw);
     $text_raw = $this->_translatePhotoGrid($text_raw);
     $text_raw = $this->_translateP($text_raw);
+    $text_raw = $this->_translateCode($text_raw);
     $text_raw = $this->_removeSpaces($text_raw);
     return $text_raw;
   }
@@ -335,7 +336,7 @@ class ApiMedia_Controller extends ApiController {
    */
   protected function _translatePhotos($text_raw) {
     preg_match_all(
-      '#<Photo(Grid|Left|Right|Parallax)?\s++id=(\d++)(?:\s++file="[^"]*+")?(?:\s++desc="([^"]*+)")?\s*+/>#uis',
+      '#<Photo(Big|Small|Grid|Left|Right|Parallax)?\s++id=(\d++)(?:\s++file="[^"]*+")?(?:\s++desc="([^"]*+)")?\s*+/>#uis',
       $text_raw,
       $data,
       PREG_SET_ORDER
@@ -390,6 +391,27 @@ class ApiMedia_Controller extends ApiController {
       '<div class="page-content__photo_grid">$1<div class="page-content__clear"></div></div>',
       $text_raw
     );
+
+    return $text_raw;
+  }
+
+  /**
+   *  Translate <code>
+   */
+  protected function _translateCode($text_raw) {
+    if (!preg_match_all('#<code>(.*?)</code>#uis', $text_raw, $data, PREG_SET_ORDER)) {
+      return $text_raw;
+    }
+
+    foreach ($data as $code) {
+      $block = $code[1];
+
+      $text_raw = str_replace(
+        $code[0],
+        '<div class="page-content__code"><pre>'.$block.'</pre></div>',
+        $text_raw
+      );
+    }
 
     return $text_raw;
   }
@@ -464,16 +486,18 @@ class ApiMedia_Controller extends ApiController {
     $previews = array(
       'small' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
-          'crop'   => true,
-          'width'  => 200,
-          'height' => 150,
-          'align'  => 'center',
-          'valign' => 'middle',
+          'crop'      => true,
+          'width'     => 200,
+          'height'    => 150,
+          'align'     => 'center',
+          'valign'    => 'middle',
+          'copyright' => 'ferg.in',
       )),
 
       'medium' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
-          'width'  => 980,
+          'width'     => 980,
+          'copyright' => 'ferg.in',
       )),
 
       'big' => StoragePreview::makePreviewLink(
@@ -484,7 +508,9 @@ class ApiMedia_Controller extends ApiController {
 
     if ($type == 'left' || $type == 'right') {
       $ret  = '<div class="page-content__cover_photo page-content__cover_photo--' . $type . '">';
+      $ret .= '<a href="'.$previews['big'].'" target="_blank">';
       $ret .= '<div class="page-content__cover_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+      $ret .= '</a>';
 
       if ($desc) {
         $ret .= '<div class="page-content__cover_photo-desc">';
@@ -497,12 +523,31 @@ class ApiMedia_Controller extends ApiController {
       return $ret;
     }
 
-    if ($type == 'default') {
+    if ($type == 'default' || $type == 'big') {
       $ret  = '<div class="page-content__photo">';
+      $ret .= '<a href="'.$previews['big'].'" target="_blank">';
       $ret .= '<img src="' . $previews['medium'] . '" />';
+      $ret .= '</a>';
 
       if ($desc) {
         $ret .= '<div class="page-content__photo-desc">';
+        $ret .= htmlspecialchars($desc);
+        $ret .= '</div>';
+      }
+
+      $ret .= '</div>';
+
+      return $ret;
+    }
+
+    if ($type == 'small') {
+      $ret  = '<div class="page-content__small_photo">';
+      $ret .= '<a href="'.$previews['big'].'" target="_blank">';
+      $ret .= '<div class="page-content__small_photo-image" style="background-image: url(\''.$previews['medium'].'\')"></div>';
+      $ret .= '</a>';
+
+      if ($desc) {
+        $ret .= '<div class="page-content__small_photo-desc">';
         $ret .= htmlspecialchars($desc);
         $ret .= '</div>';
       }
@@ -516,7 +561,9 @@ class ApiMedia_Controller extends ApiController {
       $ret  = '<PhotoGrid>';
 
       $ret .= '<div class="page-content__grid_photo">';
+      $ret .= '<a href="'.$previews['big'].'" target="_blank">';
       $ret .= '<div class="page-content__grid_photo-image" style="background-image: url(\''.$previews['small'].'\')"></div>';
+      $ret .= '</a>';
 
       if ($desc) {
         $ret .= '<div class="page-content__grid_photo-desc">';
@@ -532,7 +579,9 @@ class ApiMedia_Controller extends ApiController {
 
     if ($type == 'parallax') {
       $ret  = '<div class="page-content__parallax_photo">';
+      $ret .= '<a href="'.$previews['big'].'" target="_blank">';
       $ret .= '<div class="page-content__parallax_photo-image" style="background-image: url(\''.$previews['big'].'\')"></div>';
+      $ret .= '</a>';
 
       if ($desc) {
         $ret .= '<div class="page-content__parallax_photo-desc">';

@@ -192,3 +192,41 @@ $margin_bottom: 20px;
 		text-align: center;
 		margin-bottom: $margin_bottom;
 	}
+
+/**
+ *	Photo - small
+ */
+.page-content__small_photo {
+	margin: $margin_bottom 0px;
+}
+
+	.page-content__small_photo-image {
+		height: 300px;
+		height: 40vh;
+		background: #EEE;
+		background-position: 50% 50%;
+		background-size: cover;
+		background-repeat: no-repeat;
+	}
+
+	.page-content__small_photo-desc {
+		line-height: 20px;
+		font-size: 14px;
+		text-align: center;
+	}
+
+/**
+ *	Code block
+ */
+.page-content__code {
+	margin: $margin_bottom 0px;
+	padding: 10px 0px;
+	background: #222;
+}
+
+	.page-content__code pre {
+		color: #EEE;
+		line-height: 24px;
+		font-size: 14px;
+		font-family: Courier, "DejaVu Sans Mono", monospace;
+	}

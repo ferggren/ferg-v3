@@ -14,5 +14,7 @@ module.exports = {
   page_dev_empty:        'Projects / ferg.in',
   page_dev:              '%title% / Projects / ferg.in',
 
+  open_preview:          'Open image »',
+
   error_not_found:       'Page not found',
 };

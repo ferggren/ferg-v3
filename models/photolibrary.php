@@ -55,8 +55,9 @@ class PhotoLibrary extends Database {
 
     $export['photo'] = StoragePreview::makePreviewLink(
       $this->file_hash, array(
-        'crop'   => false,
-        'width'  => 1680,
+        'crop'      => false,
+        'width'     => 1680,
+        'copyright' => 'ferg.in',
       )
     );
 

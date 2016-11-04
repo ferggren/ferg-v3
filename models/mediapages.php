@@ -88,11 +88,19 @@ class MediaPages extends Database {
     return array(
       'big' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
-          'crop'   => true,
-          'width'  => 1680,
-          'height'  => 500,
-          'align'  => 'center',
-          'valign' => 'middle',
+          'crop'      => true,
+          'width'     => 1680,
+          'height'    => 500,
+          'align'     => 'center',
+          'valign'    => 'middle',
+          'copyright' => 'ferg.in',
+        )
+      ),
+
+      'photo' => StoragePreview::makePreviewLink(
+        $photo->file_hash,array(
+          'width'     => 1680,
+          'copyright' => 'ferg.in',
         )
       ),
 

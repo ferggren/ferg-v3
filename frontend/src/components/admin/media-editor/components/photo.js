@@ -92,11 +92,12 @@ var Photo = React.createClass({
     // buttons
     if (this.state.show_tags && !photo.loading && !photo.deleted) {
       buttons = [
-        {name: "img", tag: "Photo"},
-        {name: "<", tag: "PhotoLeft"},
-        {name: ">", tag: "PhotoRight"},
-        {name: "-", tag: "PhotoGrid"},
-        {name: "pl", tag: "PhotoParallax"},
+        {name: "IMG", tag: "PhotoBig"},
+        {name: "img", tag: "PhotoSmall"},
+        {name: "<",   tag: "PhotoLeft"},
+        {name: ">",   tag: "PhotoRight"},
+        {name: "-",   tag: "PhotoGrid"},
+        {name: "pl",  tag: "PhotoParallax"},
       ];
 
       buttons = buttons.map(button => {

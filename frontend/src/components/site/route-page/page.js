@@ -170,15 +170,25 @@ var SitePage = React.createClass({
 
     var style = {};
 
-    if (page.info.preview && page.info.preview.big) {
-      style.backgroundImage = "url('" + page.info.preview.big + "')";
-    }
-
     var header = null;
     var title  = null;
     var desc   = null;
     var date   = null;
     var tags   = null;
+    var link   = null;
+
+    if (page.info.preview && page.info.preview.big) {
+      style.backgroundImage = "url('" + page.info.preview.big + "')";
+      link = (
+        <a
+          className="page__preview-link"
+          href={page.info.preview.photo}
+          target="_blank"
+        >
+          {Lang.get('page.open_preview')}
+        </a>
+      );
+    }
 
     if (page.info.desc) {
       desc = <div className="page__preview-desc">{page.info.desc}</div>;
@@ -232,6 +242,7 @@ var SitePage = React.createClass({
       <div className={"page page--" + page.info.type}>
         <div className="page__preview" style={style}>
           {header}
+          {link}
           {date}
         </div>
         <PageContent content={page.info.html} />
