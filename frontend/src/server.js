@@ -78,10 +78,12 @@ app.use((req, res) => {
     .then(html => {
       // send HTML response
       // console.log('done', store.getState());
+      store = null;
       res.status(200).end(html);
     })
     .catch(err => {
       // catch error
+      store = null;
       console.log(err);
       res.status(500).end('Internal server error');
     })
@@ -254,7 +256,15 @@ app.listen(NODE_PORT, () => {
   console.log(`Server listening on: ${NODE_PORT}`);
 });
 
+var _hashes_cache = {};
 function makeFileHash(file) {
-  var hash = md5File.sync(file);
-  return hash ? hash.substring(0, 8) : false;
+  if (typeof _hashes_cache[file] != 'undefined') {
+    return _hashes_cache[file];
+  }
+
+  if (_hashes_cache[file] = md5File.sync(file)) {
+    _hashes_cache[file] = _hashes_cache[file].substring(0, 8)
+  }
+
+  return _hashes_cache[file] ? _hashes_cache[file] : false;
 }

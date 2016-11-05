@@ -180,7 +180,11 @@ var SiteLanding = React.createClass({
     var feed = this.props.feed;
 
     if (!feed || feed.loading || feed.error) {
-      return;
+      return null;
+    }
+
+    if (feed.data.page == 1 && !feed.data.list.length) {
+      return null;
     }
 
     var tag = feed.options.tag;

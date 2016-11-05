@@ -47,7 +47,9 @@
     "build-watch": "NODE_ENV='dev' node frontend.build.js",
     "build-server": "NODE_ENV='dev-server' node frontend.build.js",
     "profile": "NODE_ENV='profile' node frontend.build.js",
-    "server": "NODE_ENV='production' NODE_PATH=./:./src node server.js",
-    "nodemon": "NODE_ENV='dev' NODE_PATH=./:./src nodemon server.js"
+    "nodemon": "NODE_ENV='dev' NODE_PATH=./:./src nodemon server.js",
+    "server-start": "NODE_ENV='production' API_HOST='https://ferg.in' NODE_PATH='./:./src' pm2 start server.js",
+    "server-restart": "NODE_ENV='production' API_HOST='https://ferg.in' NODE_PATH='./:./src' pm2 restart server.js",
+    "server-stop": "pm2 stop server"
   }
 }
