@@ -31,7 +31,7 @@ class ApiAdminPhotos_Controller extends ApiController {
       }
     }
 
-    if (!($file = StorageFiles::find($photo_id))) {
+    if (!($file = StorageFiles::find($photo->file_id))) {
       return $this->error('invalid_photo_id');
     }
 
