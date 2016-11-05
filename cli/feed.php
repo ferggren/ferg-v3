@@ -187,8 +187,8 @@ class Feed_CliController extends CliController {
       $info = array(
         'id'        => $photo->photo_id,
         'type'      => 'gallery',
-        'title_ru'  => $photo->photo_title_ru,
-        'title_en'  => $photo->photo_title_en,
+        'title_ru'  => '',
+        'title_en'  => '',
         'desc_ru'   => '',
         'desc_en'   => '',
         'preview'   => '',
@@ -206,8 +206,8 @@ class Feed_CliController extends CliController {
         $info['ratio'] = round((double)$data[1] / (double)$data[2], 1);
       }
 
-      $w = 500;
-      $h = 200;
+      $w = 700;
+      $h = 250;
 
       if ($info['ratio'] < 1) {
         $w = 500;
@@ -216,7 +216,7 @@ class Feed_CliController extends CliController {
 
       if ($info['ratio'] > 2) {
         $w = 900;
-        $h = 200;
+        $h = 250;
       }
 
       $info['preview'] = StoragePreview::makePreviewLink(
@@ -251,7 +251,7 @@ class Feed_CliController extends CliController {
       $photo->file_hash, array(
         'crop'   => true,
         'width'  => 900,
-        'height' => 200,
+        'height' => 250,
         'align'  => 'center',
         'valign' => 'middle',
       )

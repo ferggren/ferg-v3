@@ -431,7 +431,7 @@ class StoragePreview {
           'align'   => 'right',
           'text'    => $options['copyright'],
           'padding' => array(4, 8),
-          'margin'  => array(0, 0),
+          'margin'  => array(5, 5),
           'size'    => 12,
         )
       );
@@ -625,7 +625,7 @@ class StoragePreview {
     if ($text_width + $config['margin'][0] + $config['padding'][0] > $image_width) return false;
     if ($text_height + $config['margin'][1] + $config['padding'][1] > $image_height) return false;
 
-    $text_color = imageColorAllocateAlpha($image, 255, 255, 255, 50);
+    $text_color = imageColorAllocateAlpha($image, 255, 255, 255, 70);
     $back_color = imageColorAllocateAlpha($image, 0, 0, 0, 100);
 
     $x = $config['margin'][0] + $config['padding'][0];

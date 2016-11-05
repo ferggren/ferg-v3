@@ -5,16 +5,21 @@
  * @copyright 2016 ferg
  */
 
+var GALLERY_TAGS_API_KEY = 'gallery_tags';
+var GALLERY_TAGS_API_URL = '/api/tags/getTags';
+var GALLERY_API_KEY      = 'gallery';
+var GALLERY_API_URL      = '/api/gallery/getPhotos';
+
 var React        = require('react');
 var { connect }  = require('react-redux');
 var { setTitle } = require('redux/actions/title');
-var { loadTags } = require('redux/actions/tags');
 var Lang         = require('libs/lang');
 var Wrapper      = require('components/site/view-wrapper');
 var TagsCloud    = require('components/shared/tags-cloud');
 var Grid         = require('components/shared/photos-grid');
 var Paginator    = require('components/shared/paginator');
-var { loadGallery } = require('redux/actions/gallery');
+
+var { makeApiRequest, clearApiData } = require('redux/actions/api');
 
 Lang.exportStrings('gallery', require('./lang/en.js'), 'en');
 Lang.exportStrings('gallery', require('./lang/ru.js'), 'ru');
@@ -29,118 +34,119 @@ var SiteGallery = React.createClass({
 
   componentDidMount() {
     this._updateTitle();
-    this._loadGalleryIfNeeded();
+    this._updateGalleryIfNeeded();
     this._loadTagsIfNeeded();
   },
 
   componentDidUpdate(prevProps, prevState) {
     this._updateTitle();
-    this._loadGalleryIfNeeded();
+    this._updateGalleryIfNeeded();
+  },
+
+  componentWillUnmount() {
+    this.props.dispatch(clearApiData(GALLERY_API_KEY));
+    this.props.dispatch(clearApiData(GALLERY_TAGS_API_KEY));
   },
 
   /**
    *  Load gallery tags if needed
    */
   _loadTagsIfNeeded() {
-    if (typeof this.props.tags.lens != 'undefined') return;
+    if (this.props.tags && this.props.tags.options.group == 'gallery') {
+      return;
+    }
 
-    this.props.dispatch(loadTags([
-      'lens',
-      'camera',
-      'category'
-    ]));
+    this.props.dispatch(makeApiRequest(
+      GALLERY_TAGS_API_KEY, GALLERY_TAGS_API_URL, {
+        group: 'gallery'
+      }
+    ));
   },
 
   /**
    *  If needed update gallery photos
    */
-  _loadGalleryIfNeeded() {
-    var gallery = this.props.gallery;
-
-    if (gallery.loading) return;
-
+  _updateGalleryIfNeeded() {
     var query = this.props.location.query;
-    var lang  = this.props.lang;
     var page  = query.page ? parseInt(query.page) : 1;
     var tag   = query.tag ? query.tag : '';
 
-    var update = false;
-    update = update || !gallery.loaded;
-    update = update || gallery.tag  != tag;
-    update = update || gallery.lang != lang;
-    update = update || gallery.page != page;
+    if (this.props.photos) {
+      var photos = this.props.photos;
 
-    if (!update) return;
+      if (photos.loading) return;
+      if (!photos.loaded) return;
 
-    this.props.dispatch(loadGallery(page, tag));
+      var update = false;
+      update = update || photos.lang != this.props.lang;
+      update = update || photos.options.tag  != tag;
+      update = update || photos.options.page != page;
+
+      if (!update) return;
+    }
+
+    this.props.dispatch(makeApiRequest(
+      GALLERY_API_KEY, GALLERY_API_URL, {
+        page,
+        tag,
+      }
+    ));
   },
 
   /**
    *  Update page title
    */
   _updateTitle() {
-    if (!this.props.gallery.tag) {
+    var photos = this.props.photos;
+    if (!photos || !photos.options.tag) {
       this.props.dispatch(setTitle(Lang.get('gallery.title')));
       return;
     }
 
     this.props.dispatch(setTitle(Lang.get(
-      'gallery.tag_title', {tag: this.props.gallery.tag}
+      'gallery.tag_title', {tag: photos.options.tag}
     )));
-  },
-
-  /**
-   *  Make gallery tag groups
-   */
-  _makeTagGroups() {
-    if (!this.props.tags || !this.props.tags.lens) {
-      return null;
-    }
-
-    var ret = [];
-
-    for (var group in this.props.tags) {
-      var tags = this.props.tags[group];
-
-      ret.push(
-        <div
-          key={group}
-          className={"gallery__tags-group gallery__tags-group--" + group}
-        >
-          {this._makeTags(group, tags)}
-        </div>
-      );
-    };
-
-    return ret;
   },
 
   /**
    *  Make tags
    */
-  _makeTags(group, tags) {
-    if (!tags) return null;
+  _makeTagsLoader() {
+    if (this.props.tags && !this.props.tags.loading) return null;
 
-    if (tags.loading) {
-      return <div className="loader" />;
-    }
+    return <div className="loader" />;
+  },
 
-    if (tags.error) {
-      return (
-        <div className="gallery__error">
-          {Lang.get('gallery.error_' + tags.error)}
-        </div>
-      );
-    }
+  /**
+   *  Make tags
+   */
+  _makeTagsError() {
+    if (!this.props.tags) return null;
+    if (!this.props.tags.error) return null;
+
+    return (
+      <div className="gallery__error">
+        {Lang.get('gallery.error_' + this.props.tags.error)}
+      </div>
+    );
+  },
+
+  /**
+   *  Make tags
+   */
+  _makeTags() {
+    if (!this.props.tags) return null;
+    if (!this.props.tags.loaded) return null;
+    if (this.props.tags.error) return null;
 
     var url_selected = '/' + this.props.lang + '/gallery/';
     var url_common   = url_selected + '?tag=%tag%';
 
     return (
       <TagsCloud
-        group={group}
-        tags={tags.list}
-        selected={this.props.gallery.tag}
+        group="gallery"
+        tags={this.props.tags.data}
+        selected={this.props.photos ? this.props.photos.options.tag : ''}
         url={url_common}
         url_selected={url_selected}
       />
@@ -151,7 +157,7 @@ var SiteGallery = React.createClass({
    *  Make gallery loader
    */
   _makeGalleryLoader() {
-    if (!this.props.gallery.loading) return null;
+    if (this.props.photos && !this.props.photos.loading) return null;
 
     return <div className="loader" />
   },
@@ -160,11 +166,12 @@ var SiteGallery = React.createClass({
    *  Make gallery error
    */
   _makeGalleryError() {
-    if (!this.props.gallery.error) return null;
+    if (!this.props.photos) return null;
+    if (!this.props.photos.error) return null;
 
     return (
       <div className="gallery__error">
-        {Lang.get('gallery.error_' + this.props.gallery.error)}
+        {Lang.get('gallery.error_' + this.props.photos.error)}
       </div>
     );
   },
@@ -173,13 +180,13 @@ var SiteGallery = React.createClass({
    *  Make gallery
    */
   _makeGallery() {
-    var gallery = this.props.gallery;
+    if (!this.props.photos) return null;
+    if (!this.props.photos.loaded) return null;
+    if (this.props.photos.error) return null;
 
-    if (!gallery.loaded) return null;
-    if (gallery.loading) return null;
-    if (gallery.error) return null;
+    var data = this.props.photos.data;
 
-    if (!gallery.photos.length) {
+    if (!data.photos.length) {
       return (
         <div className="gallery__error">
           {Lang.get('gallery.photos_not_found')}
@@ -187,18 +194,20 @@ var SiteGallery = React.createClass({
       );
     }
 
-    var photos = gallery.photos.map(photo => {
+    var tag = this.props.photos.options.tag;
+
+    var photos = data.photos.map(photo => {
       var url = '/' + this.props.lang + '/gallery/';
       url += photo.id;
 
-      if (gallery.tag) {
-        url += '?tag=' + encodeURIComponent(gallery.tag);
+      if (tag) {
+        url += '?tag=' + encodeURIComponent(tag);
       }
 
       return {
         date:    0,
         ratio:   photo.ratio,
-        title:   photo.title,
+        title:   '',
         desc:    '',
         url:     url,
         preview: photo.preview,
@@ -214,21 +223,22 @@ var SiteGallery = React.createClass({
    *  Make gallery paginator
    */
   _makeGalleryPaginator() {
-    var gallery = this.props.gallery;
+    if (!this.props.photos) return null;
+    if (!this.props.photos.loaded) return null;
+    if (this.props.photos.error) return null;
 
-    if (!gallery.loaded) return null;
-    if (gallery.loading) return null;
-    if (gallery.error) return null;
+    var photos = this.props.photos;
+
 
     var url = '/' + this.props.lang + '/gallery/?';
-    if (gallery.tag) url += 'tag=' + encodeURIComponent(gallery.tag) + '&';
+    if (photos.options.tag) url += 'tag=' + encodeURIComponent(photos.options.tag) + '&';
     url += 'page=%page%';
 
     return (
       <div className="pages__paginator">
         <Paginator
-          page={gallery.page}
-          pages={gallery.pages}
+          page={photos.data.page}
+          pages={photos.data.pages}
           url={url}
         />
       </div>
@@ -241,15 +251,17 @@ var SiteGallery = React.createClass({
 
         <div className="gallery__tags-wrapper">
           <div className="gallery__tags">
-            {this._makeTagGroups()}
+            {this._makeTagsLoader()}
+            {this._makeTagsError()}
+            {this._makeTags()}
           </div>
         </div>
 
         <div className="gallery__grid-wrapper">
           <div className="gallery__grid">
+            {this._makeGallery()}
             {this._makeGalleryLoader()}
             {this._makeGalleryError()}
-            {this._makeGallery()}
             {this._makeGalleryPaginator()}
           </div>
         </div>
@@ -262,32 +274,28 @@ var SiteGallery = React.createClass({
 
 SiteGallery.fetchData = (store, params) => {
   return [
-    store.dispatch(loadGallery(
-      params.page ? params.page : 1,
-      params.tag ? params.tag : ''
+    store.dispatch(makeApiRequest(
+      GALLERY_API_KEY, GALLERY_API_URL, {
+        page:  params.page ? params.page : 1,
+        tag:   params.tag ? params.tag : '',
+        cache: true,
+      }
     )),
 
-    store.dispatch(loadTags(
-      ['category', 'camera', 'lens']
-    ))
+    store.dispatch(makeApiRequest(
+      GALLERY_TAGS_API_KEY, GALLERY_TAGS_API_URL, {
+        group: 'gallery',
+        cache: true,
+      }
+    )),
   ];
 }
 
 function mapStateToProps(state) {
-  var tags = {};
-
-  if (state.tags.lens) {
-    tags = {
-      category: state.tags.category,
-      camera:   state.tags.camera,
-      lens:     state.tags.lens,
-    }
-  }
-
   return {
-    lang:    state.lang,
-    gallery: state.gallery,
-    tags,
+    lang:   state.lang,
+    photos: state.api[GALLERY_API_KEY] ? state.api[GALLERY_API_KEY] : false,
+    tags:   state.api[GALLERY_TAGS_API_KEY] ? state.api[GALLERY_TAGS_API_KEY] : false,
   }
 }
 

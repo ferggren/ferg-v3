@@ -99,11 +99,13 @@ class ApiGallery_Controller extends ApiController {
       return $this->success($ret);
     }
 
-    $rpp = 20;
+    $rpp = 14;
     $ret['page'] = is_numeric($page) ? (int)$page : 1;
     $ret['pages'] = (int)($count / $rpp);
     if (($ret['pages'] * $rpp) < $count) ++$ret['pages'];
     if ($ret['page'] > $ret['pages']) $ret['page'] = $ret['pages'];
+
+    $photos->limit($rpp, (($ret['page'] - 1) * $rpp));
 
     foreach ($photos->get() as $photo) {
       $ret['photos'][] = $photo->export();

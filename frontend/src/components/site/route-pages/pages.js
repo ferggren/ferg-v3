@@ -5,20 +5,21 @@
  * @copyright 2016 ferg
  */
 
+var PAGES_TAGS_API_KEY = 'pages_tags';
+var PAGES_TAGS_API_URL = '/api/tags/getTags';
+var PAGES_API_KEY      = 'pages';
+var PAGES_API_URL      = '/api/pages/getPages';
+
 var React        = require('react');
 var { connect }  = require('react-redux');
 var Lang         = require('libs/lang');
-var { loadTags } = require('redux/actions/tags');
 var { setTitle } = require('redux/actions/title');
 var Wrapper      = require('components/site/view-wrapper');
 var TagsCloud    = require('components/shared/tags-cloud');
 var Paginator    = require('components/shared/paginator');
 var Grid         = require('components/shared/photos-grid');
 
-var {
-  loadPages,
-  setPagesType
-} = require('redux/actions/pages');
+var { makeApiRequest, clearApiData } = require('redux/actions/api');
 
 require('./styles.scss');
 require('styles/partials/loader');
@@ -50,6 +51,11 @@ var SitePages = React.createClass({
     this._updatePagesIfNeeded();
   },
 
+  componentWillUnmount() {
+    this.props.dispatch(clearApiData(PAGES_API_KEY));
+    this.props.dispatch(clearApiData(PAGES_TAGS_API_KEY));
+  },
+
   /**
    *  Update pages type
    */
@@ -62,41 +68,49 @@ var SitePages = React.createClass({
    *  Load tags if pages type is changed or tags is empty
    */
   _updateTagsIfNeeded() {
-    if (this.state.type != this.props.type) return;
-    if (typeof this.props.tags.list != 'undefined') return;
+    if (this.props.tags && this.props.tags.options.group == this.state.type) {
+      return;
+    }
 
-    this.props.dispatch(loadTags(this.state.type));
+    this.props.dispatch(makeApiRequest(
+      PAGES_TAGS_API_KEY, PAGES_TAGS_API_URL, {
+        group: this.state.type,
+      }
+    ));
   },
 
   /**
    *  Load tags if some params is changed
    */
   _updatePagesIfNeeded() {
-    var pages = this.props.pages;
-
-    if (pages.loading) return;
-
     var query = this.props.location.query;
     var lang  = this.props.lang;
     var page  = query.page ? parseInt(query.page) : 1;
     var tag   = query.tag ? query.tag : '';
-    var type  = pages.type;
+    var type  = this.state.type;
 
-    var update_needed = false;
-    update_needed = update_needed || pages.page != page;
-    update_needed = update_needed || pages.tag  != tag;
-    update_needed = update_needed || pages.lang != lang;
-    update_needed = update_needed || type != this.state.type;
+    if (this.props.pages) {
+      var pages = this.props.pages;
 
-    if (!update_needed) {
-      return;
+      if (pages.loading) return;
+      if (!pages.loaded) return;
+
+      var update = false;
+      update = update || pages.lang != this.props.lang;
+      update = update || pages.options.tag  != tag;
+      update = update || pages.options.page != page;
+      update = update || pages.options.type != type;
+
+      if (!update) return;
     }
 
-    if (this.state.type != pages.type) {
-      this.props.dispatch(setPagesType(this.state.type));
-    }
-
-    this.props.dispatch(loadPages(page, tag));
+    this.props.dispatch(makeApiRequest(
+      PAGES_API_KEY, PAGES_API_URL, {
+        type,
+        page,
+        tag,
+      }
+    ));
   },
 
   /**
@@ -128,7 +142,7 @@ var SitePages = React.createClass({
    *  Makes tags loader
    */
   _makeTagsLoader() {
-    if (!this.props.tags.loading) {
+    if (this.props.tags && !this.props.tags.loading) {
       return null;
     }
 
@@ -143,11 +157,11 @@ var SitePages = React.createClass({
   _makeTags() {
     var tags = this.props.tags;
 
-    if (!tags || !tags.list || tags.loading || tags.error) {
+    if (!tags || tags.loading || tags.error) {
       return;
     }
 
-    if (tags.list == false || !Object.keys(tags.list).length) {
+    if (tags.data == false || !Object.keys(tags.data).length) {
       return (
         <div className="pages__not_found">
           {Lang.get('pages.tags_not_found')}
@@ -163,8 +177,8 @@ var SitePages = React.createClass({
     return (
       <TagsCloud
         group={this.state.type}
-        tags={tags.list}
-        selected={this.props.pages.tag}
+        tags={tags.data}
+        selected={this.props.pages ? this.props.pages.options.tag : ''}
         url={url}
         url_selected={url_selected}
       />
@@ -175,17 +189,15 @@ var SitePages = React.createClass({
    *  Makes tags error
    */
   _makeTagsError() {
-    if (this.props.tags.loading) {
-      return;
-    }
+    var tags = this.props.tags;
 
-    if (!this.props.tags.error) {
+    if (!tags || tags.loading || !tags.error) {
       return;
     }
 
     return (
       <div className="pages__error">
-        {Lang.get('pages.error_' + this.props.tags.error)}
+        {Lang.get('pages.error_' + tags.error)}
       </div>
     );
   },
@@ -194,7 +206,7 @@ var SitePages = React.createClass({
    *  Make feed loader
    */
   _makePagesLoader() {
-    if (!this.props.pages.loading) {
+    if (this.props.pages && !this.props.pages.loading) {
       return null;
     }
 
@@ -207,11 +219,13 @@ var SitePages = React.createClass({
    *  Make pages
    */
   _makePages() {
-    if (this.props.pages.loading || this.props.pages.error) {
-      return;
+    var pages = this.props.pages;
+
+    if (!pages || !pages.loaded || pages.error) {
+      return null;
     }
 
-    if (this.props.pages.list == false || !this.props.pages.list.length) {
+    if (pages.data.list == false || !pages.data.list.length) {
       return (
         <div className="pages__not_found">
           {Lang.get('pages.pages_not_found')}
@@ -219,7 +233,7 @@ var SitePages = React.createClass({
       );
     }
 
-    var list = this.props.pages.list.map(page => {
+    var list = pages.data.list.map(page => {
       return {
         date:    page.timestamp,
         ratio:   10,
@@ -239,13 +253,15 @@ var SitePages = React.createClass({
    *  Make pages error
    */
   _makePagesError() {
-    if (!this.props.pages.error) {
-      return;
+    var pages = this.props.pages;
+
+    if (!pages || !pages.loaded || !pages.error) {
+      return null;
     }
 
     return (
       <div className="pages__error">
-        {Lang.get('pages.error_' + this.props.pages.error)}
+        {Lang.get('pages.error_' + pages.error)}
       </div>
     );
   },
@@ -254,11 +270,17 @@ var SitePages = React.createClass({
    *  Make pages paginator
    */
   _makePagesPaginator() {
-    if (this.props.pages.loading || this.props.pages.list == false) {
-      return;
+    var pages = this.props.pages;
+
+    if (!pages || !pages.loaded || pages.error) {
+      return null;
     }
 
-    var tag = this.props.pages.tag;
+    if (pages.options.page == 1 && !pages.data.list.length) {
+      return null;
+    }
+
+    var tag = pages.options.tag;
     var url = '/' + this.props.lang + '/';
     url += this.state.type + '/?'
 
@@ -268,8 +290,8 @@ var SitePages = React.createClass({
     return (
       <div className="pages__paginator">
         <Paginator
-          page={this.props.pages.page}
-          pages={this.props.pages.pages}
+          page={pages.data.page}
+          pages={pages.data.pages}
           url={url}
         />
       </div>
@@ -309,11 +331,20 @@ SitePages.fetchData = (store, params) => {
   }
 
   return [
-    store.dispatch(setPagesType(params.page_type)),
-    store.dispatch(loadTags(params.page_type)),
-    store.dispatch(loadPages(
-      params.page ? params.page : 1,
-      params.tag ? params.tag : '',
+    store.dispatch(makeApiRequest(
+      PAGES_API_KEY, PAGES_API_URL, {
+        type:  params.page_type,
+        page:  params.page ? params.page : 1,
+        tag:   params.tag ? params.tag : '',
+        cache: true,
+      }
+    )),
+
+    store.dispatch(makeApiRequest(
+      PAGES_TAGS_API_KEY, PAGES_TAGS_API_URL, {
+        group: params.page_type,
+        cache: true,
+      }
     )),
   ];
 }
@@ -321,9 +352,8 @@ SitePages.fetchData = (store, params) => {
 function mapStateToProps(state) {
   return {
     lang:  state.lang,
-    type:  state.pages.type,
-    pages: state.pages,
-    tags:  state.tags[state.pages.type] ? state.tags[state.pages.type] : {},
+    pages: state.api[PAGES_API_KEY] ? state.api[PAGES_API_KEY] : false,
+    tags:  state.api[PAGES_TAGS_API_KEY] ? state.api[PAGES_TAGS_API_KEY] : false,
   }
 }
 

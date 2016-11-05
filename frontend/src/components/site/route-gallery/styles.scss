@@ -8,15 +8,7 @@ $tags_margin: 20px;
  *  Basic wrappers
  */
 .gallery__tags-wrapper {
-	@include respond_to(screen_wide) {
-		float: right;
-		max-width: $tags_width;
-	}
 
-	@include respond_to(screen_tablet) {
-		float: right;
-		max-width: $tags_width;
-	}
 }
 
 
@@ -45,23 +37,5 @@ $tags_margin: 20px;
 	}
 
 .gallery__grid-wrapper {
-	@include respond_to(screen_wide) {
-		margin-right: $tags_width + $tags_margin;
-		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
-	}
-
-	@include respond_to(screen_tablet) {
-		margin-right: $tags_width + $tags_margin;
-		min-width: $screen_tablet - $tags_width - $tags_margin - 60px;
-	}
+	margin-top: 30px;
 }
-
-	.gallery__grid {
-		@include respond_to(screen_wide) {
-			min-width: 420px;
-		}
-
-		@include respond_to(screen_tablet) {
-			min-width: 220px;
-		}
-	}

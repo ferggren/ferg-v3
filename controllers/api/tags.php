@@ -10,66 +10,56 @@ class ApiTags_Controller extends ApiController {
    *  @param {string} groups Comma-separated groups
    *  @return {object} Tags list
    */
-  public function actionGetTags($groups) {
-    if (!preg_match('#^[0-9a-zA-Z_,.-]++$#uis', $groups)) {
+  public function actionGetTags($group) {
+    if (!preg_match('#^[0-9a-zA-Z_,.-]++$#uis', $group)) {
       return $this->error('incorrect_tag_group');
     }
 
-    $ret       = array();
-    $group2tag = array();
-    $tag2group = array();
+    if (!is_array($tags = $this->_getTags($group))) {
+      return $this->error('incorrect_tag_group');
+    };
 
-    foreach(explode(',', $groups) as $group) {
-      if (!($group = trim($group))) {
-        continue;
-      }
-
-      if (!($tag = $this->_getTag($group))) {
-        continue;
-      }
-
-      $group2tag[$group] = $tag;
-      $tag2group[$tag] = $group;
-    }
-
-    if (!count($tag2group)) {
-      return $this->success();
-    }
-
-    $tags_groups = Tags::getTags(array_keys($tag2group));
-
-    if (count($tag2group) == 1) {
-      $tags_groups = array(array_keys($tag2group)[0] => $tags_groups);
-    }
-
-    foreach ($tags_groups as $tags_group => $tags) {
-      $ret[$tag2group[$tags_group]] = $tags;
-    }
-
-    return $this->success($ret);
+    return $this->success($tags);
   }
 
+
   /**
-   *  Translate nice name into tags group name
+   *  Return tags in group
    *
-   *  @param {string} group Tags group nice name
-   *  @return {string} Tags group real name
+   *  @param {string} group Tags group 
+   *  @return {string} Tags
    */
-  protected function _getTag($group) {
+  protected function _getTags($group) {
     if ($group == 'feed') {
-      return 'feed';
+      return Tags::getTags('feed');
     }
 
-    if (in_array($group, array('blog', 'events', 'dev'))) {
-      return "pages_{$group}_visible";
-    }
-
-    if (in_array($group, array('camera', 'lens', 'category'))) {
+    if ($group == 'gallery') {
       if (!($gallery_id = $this->_getGalleryCollectionId())) {
         return false;
       }
 
-      return "photos_{$gallery_id}_{$group}";
+      $groups = Tags::getTags(array(
+        "photos_{$gallery_id}_category",
+        "photos_{$gallery_id}_lens",
+        "photos_{$gallery_id}_camera",
+      ));
+
+      if (!$groups) return false;
+
+      $ret = array();
+
+      foreach ($groups as $group => $tags) {
+        foreach ($tags as $tag => $count) {
+          $ret[$tag] = $count;
+        }
+      }
+
+      return $ret;
+    }
+
+    if (in_array($group, array('dev', 'events', 'blog'))) {
+      return Tags::getTags("pages_{$group}_visible");
     }
 
     return false;

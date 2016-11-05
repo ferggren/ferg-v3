@@ -5,6 +5,8 @@
  * @copyright 2016 ferg
  */
 
+var PHOTO_API_KEY = 'photo';
+
 var React              = require('react');
 var { connect }        = require('react-redux');
 var { Link }           = require('react-router');
@@ -13,7 +15,8 @@ var { setTitle }       = require('redux/actions/title');
 var Lang               = require('libs/lang');
 var Wrapper            = require('components/site/view-wrapper');
 var TagsCloud          = require('components/shared/tags-cloud');
-var { loadPhoto }      = require('redux/actions/photo');
+
+var { makeApiRequest, clearApiData } = require('redux/actions/api');
 
 Lang.exportStrings('gallery-photo', require('./lang/en.js'), 'en');
 Lang.exportStrings('gallery-photo', require('./lang/ru.js'), 'ru');
@@ -29,7 +32,7 @@ var GalleryPhoto = React.createClass({
 
   componentDidMount() {
     this._updateTitle();
-    this._loadPhotoIfNeeded();
+    this._updatePhotoIfNeeded();
 
     if (typeof window != 'undefined' && window.scrollTo) {
       window.scrollTo(0, 0);
@@ -44,11 +47,13 @@ var GalleryPhoto = React.createClass({
     if (typeof document != 'undefined') {
       this._removeKeysListner();
     }
+
+    this.props.dispatch(clearApiData(PHOTO_API_KEY));
   },
 
   componentDidUpdate(prevProps, prevState) {
     this._updateTitle();
-    this._loadPhotoIfNeeded();
+    this._updatePhotoIfNeeded();
 
     if (prevProps.params.page_id != this.props.params.page_id) {
       if (typeof window != 'undefined' && window.scrollTo) {
@@ -93,13 +98,20 @@ var GalleryPhoto = React.createClass({
    *  Navigate to prev photo
    */
   _showPrevPhoto() {
-    var prev = this.props.photo.prev;
+    var photo = this.props.photo;
+
+    if (!photo || photo.loading || !photo.data) {
+      return;
+    }
+
+    var prev = photo.data.prev;
+
     if (!prev.length) return;
     prev = prev[0].id;
 
     var url = '/' + this.props.lang + '/gallery/' + prev;
-    if (this.props.photo.tag) {
-      url += '?tag=' + encodeURIComponent(this.props.photo.tag);
+    if (photo.options.tag) {
+      url += '?tag=' + encodeURIComponent(photo.options.tag);
     }
 
     browserHistory.push(url);
@@ -109,13 +121,20 @@ var GalleryPhoto = React.createClass({
    *  Navigate to next photo
    */
   _showNextPhoto() {
-    var next = this.props.photo.next;
+    var photo = this.props.photo;
+
+    if (!photo || photo.loading || !photo.data) {
+      return;
+    }
+
+    var next = photo.data.next;
+
     if (!next.length) return;
     next = next[0].id;
 
     var url = '/' + this.props.lang + '/gallery/' + next;
-    if (this.props.photo.tag) {
-      url += '?tag=' + encodeURIComponent(this.props.photo.tag);
+    if (photo.options.tag) {
+      url += '?tag=' + encodeURIComponent(photo.options.tag);
     }
 
     browserHistory.push(url);
@@ -125,9 +144,11 @@ var GalleryPhoto = React.createClass({
    *  Navigate to gallery
    */
   _showGallery() {
-    var url = '/' + this.props.lang + '/gallery/';
-    if (this.props.photo.tag) {
-      url += '?tag=' + encodeURIComponent(this.props.photo.tag);
+    var photo = this.props.photo;
+    var url   = '/' + this.props.lang + '/gallery/';
+
+    if (photo && photo.options.tag) {
+      url += '?tag=' + encodeURIComponent(photo.options.tag);
     }
 
     browserHistory.push(url);
@@ -136,11 +157,7 @@ var GalleryPhoto = React.createClass({
   /**
    *  If needed update photo
    */
-  _loadPhotoIfNeeded() {
-    var photo = this.props.photo;
-
-    if (photo.loading) return;
-
+  _updatePhotoIfNeeded() {
     var query  = this.props.location.query;
     var params = this.props.params;
 
@@ -148,28 +165,39 @@ var GalleryPhoto = React.createClass({
     var lang  = this.props.lang;
     var tag   = query.tag ? query.tag : '';
 
-    var update = false;
-    update = update || !photo.loaded;
-    update = update || photo.tag  != tag;
-    update = update || photo.lang != lang;
-    update = update || photo.id != id;
+    if (this.props.photo) {
+      var photo = this.props.photo;
 
-    if (!update) return;
+      if (photo.loading) return;
+      if (!photo.loaded) return;
 
-    this.props.dispatch(loadPhoto(id, tag));
+      var update = false;
+        update = update || photo.lang != lang;
+        update = update || photo.options.tag  != tag;
+        update = update || photo.options.id != id;
+
+      if (!update) return;
+    }
+
+    this.props.dispatch(makeApiRequest(
+      PHOTO_API_KEY, '/api/gallery/getPhoto', {
+        id,
+        tag,
+      }
+    ));
   },
 
   /**
    *  Update page title
    */
   _updateTitle() {
-    if (!this.props.photo.loaded || this.props.photo.error) {
+    if (!this.props.photo || !this.props.photo.loaded || this.props.photo.error) {
       this.props.dispatch(setTitle(Lang.get(
         'gallery-photo.default_title'
       )));
     }
 
-    else if (!this.props.photo.info.title) {
+    else if (!this.props.photo.data.title) {
       this.props.dispatch(setTitle(Lang.get(
         'gallery-photo.default_title'
       )));
@@ -178,7 +206,7 @@ var GalleryPhoto = React.createClass({
     else {
       this.props.dispatch(setTitle(Lang.get(
         'gallery-photo.title',
-        {photo: this.props.photo.info.title}
+        {photo: this.props.photo.data.title}
       )));
     }
   },
@@ -186,6 +214,7 @@ var GalleryPhoto = React.createClass({
    *  Make photo loader
    */
   _makePhotoLoader() {
+    if (!this.props.photo) return null;
     if (!this.props.photo.loading) return null;
 
     return (
@@ -199,11 +228,13 @@ var GalleryPhoto = React.createClass({
    *  Make photo error
    */
   _makePhotoError() {
-    if (!this.props.photo.error) return null;
+    var photo = this.props.photo;
+
+    if (!photo || !photo.error) return null;
 
     return (
       <div className="gallery-photo__error">
-        {Lang.get('gallery-photo.error_' + this.props.photo.error)}
+        {Lang.get('gallery-photo.error_' + photo.error)}
       </div>
     );
   },
@@ -214,19 +245,22 @@ var GalleryPhoto = React.createClass({
   _makePhotoPreview() {
     var photo = this.props.photo;
 
-    if (!photo.loaded) return null;
-    if (photo.loading) return null;
+    if (!photo) return null;
+    if (!photo.data) return null;
     if (photo.error) return null;
+    if (!photo.data.info || !photo.data.info.photo) return null;
+
+    photo = photo.data.info.photo;
 
     return (
       <a
-        href={this.props.photo.info.photo}
+        href={photo}
         target="_blank"
         className="gallery-photo__header-photo_wrapper"
       >
         <img
           className="gallery-photo__header-photo"
-          src={this.props.photo.info.photo}
+          src={photo}
         />
       </a>
     );
@@ -238,34 +272,35 @@ var GalleryPhoto = React.createClass({
   _makeNavigation() {
     var photo = this.props.photo;
 
-    if (!photo.loaded) return null;
-    if (photo.loading) return null;
+    if (!photo) return null;
+    if (!photo.data) return null;
     if (photo.error) return null;
+    if (!photo.data.info || !photo.data.info.photo) return null;
 
     var nav = [];
 
-    for (var i in photo.next) nav.unshift(photo.next[i]);
-    nav.push(photo.info);
-    for (var i in photo.prev) nav.push(photo.prev[i]);
+    for (var i in photo.data.next) nav.unshift(photo.data.next[i]);
+    nav.push(photo.data.info);
+    for (var i in photo.data.prev) nav.push(photo.data.prev[i]);
 
-    nav = nav.map(photo => {
+    nav = nav.map(item => {
       var props = {
-        key:       photo.id,
         className: 'gallery-photo__navigation-link',
+        key:       item.id,
         style: {
-          backgroundImage: "url('" + photo.preview + "')",
+          backgroundImage: "url('" + item.preview + "')",
         }
       };
 
-      if (photo.id == this.props.photo.id) {
+      if (item.id == photo.options.id) {
         props.className += ' gallery-photo__navigation-link--current';
       }
 
       props.to  = '/' + this.props.lang + '/gallery/';
-      props.to += photo.id;
+      props.to += item.id;
 
-      if (this.props.photo.tag) {
-        props.to += '?tag=' + encodeURIComponent(this.props.photo.tag);
+      if (photo.options.tag) {
+        props.to += '?tag=' + encodeURIComponent(photo.options.tag);
       }
 
       return (
@@ -319,6 +354,10 @@ var GalleryPhoto = React.createClass({
    */
   _makePhotoTitle() {
     var photo = this.props.photo;
+    if (!photo || !photo.loaded || photo.error) return null;
+
+    return console.log('_makePhotoTitle');
+    var photo = this.props.photo;
 
     if (!photo.loaded) return null;
     if (photo.loading) return null;
@@ -338,12 +377,9 @@ var GalleryPhoto = React.createClass({
    */
   _makePhotoDetails() {
     var photo = this.props.photo;
+    if (!photo || !photo.loaded || photo.error) return null;
 
-    if (!photo.loaded) return null;
-    if (photo.loading) return null;
-    if (photo.error) return null;
-
-    var tags = photo.info.tags;
+    var tags = photo.data.info.tags;
 
     var keys = [
       "camera",
@@ -377,22 +413,35 @@ var GalleryPhoto = React.createClass({
    */
   _makePhotoTags() {
     var photo = this.props.photo;
+    if (!photo || !photo.loaded || photo.error) return null;
 
-    if (!photo.loaded) return null;
-    if (photo.loading) return null;
-    if (photo.error) return null;
+    var category = photo.data.info.tags.category;
+    if (!category) return null;
 
-    console.log('tags?');
+    var tags = {};
+    var url  = '/' + this.props.lang + '/gallery/?tag=%tag%';
+
+    category.split(',').forEach(key => {
+      tags[key] = 1;
+    });
+
+    return (
+      <TagsCloud
+        group="gallery"
+        tags={tags}
+        url={url}
+      />
+    );
   },
 
   render() {
     return (
       <div className="gallery-photo">
         <div className="gallery-photo__header">
-            {this._makePhotoLoader()}
             {this._makePhotoError()}
             {this._makePhotoPreview()}
             {this._makeNavigation()}
+            {this._makePhotoLoader()}
         </div>
 
         <Wrapper>
@@ -413,17 +462,19 @@ GalleryPhoto.fetchData = (store, params) => {
   }
 
   return [
-    store.dispatch(loadPhoto(
-      params.photo_id ? params.photo_id : 0,
-      params.tag ? params.tag : ''
-    )),
+    store.dispatch(makeApiRequest(
+      PHOTO_API_KEY, '/api/gallery/getPhoto', {
+        id:  params.photo_id ? params.photo_id : 0,
+        tag: params.tag ? params.tag : '',
+      }
+    ))
   ];
 }
 
 function mapStateToProps(state) {
   return {
     lang:  state.lang,
-    photo: state.photo,
+    photo: state.api[PHOTO_API_KEY] ? state.api[PHOTO_API_KEY] : false,
   }
 }
 

@@ -89,7 +89,7 @@ var PhotosGrid = React.createClass({
 
     var length    = items.length;
     var position  = 0;
-    var ratio_max = 6;
+    var ratio_max = 4;
 
     while (position < length) {
       var ratio = 0;

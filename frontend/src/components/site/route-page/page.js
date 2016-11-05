@@ -5,16 +5,20 @@
  * @copyright 2016 ferg
  */
 
+var PAGE_API_KEY = 'page';
+var PAGE_API_URL = '/api/pages/getPage';
+
 var React        = require('react');
 var { connect }  = require('react-redux');
 var { Link }     = require('react-router');
 var { setTitle } = require('redux/actions/title');
-var { loadPage } = require('redux/actions/page');
 var Lang         = require('libs/lang');
 var NiceTime     = require('libs/nice-time');
 var Wrapper      = require('components/site/view-wrapper');
 var PageContent  = require('components/shared/page-content');
 var TagsCloud    = require('components/shared/tags-cloud');
+
+var { makeApiRequest, clearApiData } = require('redux/actions/api');
 
 require('./styles.scss');
 require('styles/partials/loader');
@@ -46,6 +50,10 @@ var SitePage = React.createClass({
 
     this._updatePageIfNeeded();
     this._updateTitle();
+  },
+
+  componentWillUnmount() {
+    this.props.dispatch(clearApiData(PAGE_API_KEY));
   },
 
   /**
@@ -82,26 +90,26 @@ var SitePage = React.createClass({
 
     var page = this.props.page;
 
-    if (!page || !page.id) {
-      return this.props.dispatch(setTitle(Lang.get(
-        'page.page_' + this.state.type + '_not_found'
-      )));
-    }
-
-    if (page.loading) {
+    if (page.loading || !page.loaded) {
       return this.props.dispatch(setTitle(Lang.get(
         'page.page_' + this.state.type + '_loading'
       )));
     }
 
-    if (!page.info || !page.info.title) {
+    if (!page || !page.data.id) {
+      return this.props.dispatch(setTitle(Lang.get(
+        'page.page_' + this.state.type + '_not_found'
+      )));
+    }
+
+    if (!page.data || !page.data.title) {
       return this.props.dispatch(setTitle(Lang.get(
         'page.page_' + this.state.type + '_empty'
       )));
     }
 
     return this.props.dispatch(setTitle(Lang.get(
-      'page.page_' + this.state.type, {title: page.info.title}
+      'page.page_' + this.state.type, {title: page.data.title}
     )));
   },
 
@@ -109,29 +117,36 @@ var SitePage = React.createClass({
    *  Update page info if needed
    */
   _updatePageIfNeeded() {
-    var page = this.props.page;
-
-    if (page.loading) return;
-
     var id    = this.props.params.page_id;
     var lang  = this.props.lang;
 
-    var update_needed = false;
-    update_needed = update_needed || page.lang != lang;
-    update_needed = update_needed || page.id != id;
+    if (this.props.page) {
+      var page = this.props.page;
 
-    if (!update_needed) {
-      return;
+      if (page.loading) return;
+      if (!page.loaded) return;
+
+      var update = false;
+      update = update || page.lang != lang;
+      update = update || page.options.id != id;
+
+      if (!update) return;
     }
 
-    this.props.dispatch(loadPage(id));
+    this.props.dispatch(makeApiRequest(
+      PAGE_API_KEY, PAGE_API_URL, {
+        id
+      }
+    ));
   },
 
   /**
    *  Make page loader
    */
   _makePageLoader() {
-    if (!this.props.page.loading) return null;
+    var page = this.props.page;
+
+    if (!page || !page.loading) return null;
 
     return (
       <Wrapper>
@@ -146,8 +161,9 @@ var SitePage = React.createClass({
    *  Make page loader
    */
   _makePageError() {
-    if (this.props.page.loading) return null;
-    if (!this.props.page.error) return null;
+    var page = this.props.page;
+
+    if (!page || !page.loaded || !page.error) return null;
 
     return (
       <Wrapper>
@@ -164,9 +180,7 @@ var SitePage = React.createClass({
   _makePage() {
     var page = this.props.page;
 
-    if (page.loading) return;
-    if (page.error) return;
-    if (!page.info) return;
+    if (!page || !page.loaded || page.error) return null;
 
     var style = {};
 
@@ -177,12 +191,12 @@ var SitePage = React.createClass({
     var tags   = null;
     var link   = null;
 
-    if (page.info.preview && page.info.preview.big) {
-      style.backgroundImage = "url('" + page.info.preview.big + "')";
+    if (page.data.preview && page.data.preview.big) {
+      style.backgroundImage = "url('" + page.data.preview.big + "')";
       link = (
         <a
           className="page__preview-link"
-          href={page.info.preview.photo}
+          href={page.data.preview.photo}
           target="_blank"
         >
           {Lang.get('page.open_preview')}
@@ -190,12 +204,12 @@ var SitePage = React.createClass({
       );
     }
 
-    if (page.info.desc) {
-      desc = <div className="page__preview-desc">{page.info.desc}</div>;
+    if (page.data.desc) {
+      desc = <div className="page__preview-desc">{page.data.desc}</div>;
     }
 
-    if (page.info.title) {
-      title = <div className="page__preview-title">{page.info.title}</div>;
+    if (page.data.title) {
+      title = <div className="page__preview-title">{page.data.title}</div>;
     }
 
     if (desc || title) {
@@ -208,28 +222,28 @@ var SitePage = React.createClass({
       );
     }
 
-    if (page.info.timestamp) {
+    if (page.data.timestamp) {
       date = (
         <div className="page__preview-date">
-          {NiceTime.niceDateFormat(page.info.timestamp)}
+          {NiceTime.niceDateFormat(page.data.timestamp)}
         </div>
       );
     }
 
-    if (page.info.tags) {
+    if (page.data.tags) {
       tags = {};
-      page.info.tags.split(',').forEach(tag => {
+      page.data.tags.split(',').forEach(tag => {
         if (!(tag = tag.trim())) return;
         tags[tag] = 1;
       });
 
-      var url = '/' + this.props.lang + '/' + page.info.type + '/';
+      var url = '/' + this.props.lang + '/' + page.data.type + '/';
       url += '?tag=%tag%';
 
       tags = (
         <Wrapper>
           <TagsCloud
-            group={page.info.type}
+            group={page.data.type}
             tags={tags}
             selected={""}
             url={url}
@@ -239,13 +253,13 @@ var SitePage = React.createClass({
     }
 
     return (
-      <div className={"page page--" + page.info.type}>
+      <div className={"page page--" + page.data.type}>
         <div className="page__preview" style={style}>
           {header}
           {link}
           {date}
         </div>
-        <PageContent content={page.info.html} />
+        <PageContent content={page.data.html} />
         {tags}
       </div>
     );
@@ -272,7 +286,11 @@ SitePage.fetchData = (store, params) => {
   }
   
   return [
-    store.dispatch(loadPage(params.page_id)),
+    store.dispatch(makeApiRequest(
+      PAGE_API_KEY, PAGE_API_URL, {
+        id: params.page_id,
+      }
+    )),
   ];
 }
 
@@ -280,7 +298,7 @@ function mapStateToProps(state) {
   return {
     lang: state.lang,
     url:  state.location,
-    page: state.page,
+    page: state.api[PAGE_API_KEY] ? state.api[PAGE_API_KEY] : false,
   }
 }
 
