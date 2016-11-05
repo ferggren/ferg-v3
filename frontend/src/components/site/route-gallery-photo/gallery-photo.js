@@ -345,9 +345,7 @@ var GalleryPhoto = React.createClass({
 
     var tags = photo.info.tags;
 
-    console.log(tags);
-
-    var details = [
+    var keys = [
       "camera",
       "lens",
       "shutter_speed",
@@ -355,23 +353,23 @@ var GalleryPhoto = React.createClass({
       "iso",
     ];
 
-    details = details.map(detail => {
-      if (!tags[detail]) return null;
+    var details = [];
 
-      return (
-        <span>
-          {Lang.get('gallery-photo.detail_' + detail, {detail: tags[detail]})}
-        </span>
-      );
+    keys.forEach(key => {
+      if (!tags[key]) return;
+
+      details.push(Lang.get(
+        'gallery-photo.photo_' + key, {param: tags[key]}
+      ));
     });
+
+    if (!details.length) return; null;
 
     return (
       <div className="gallery-photo__info-details">
-        {details}
+        {details.join(', ')}
       </div>
     );
-
-    console.log('info?');
   },
 
   /**

@@ -503,6 +503,7 @@ class ApiMedia_Controller extends ApiController {
       'big' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
           'width'  => 1980,
+          'copyright' => 'ferg.in',
       )),
     );
 
