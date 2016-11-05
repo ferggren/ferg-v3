@@ -1,6 +1,7 @@
 var React           = require('react');
 var ReactDOM        = require('react-dom/server');
 var express         = require('express');
+var md5File         = require('md5-file')
 var routes          = require('routes/site');
 var { Provider }    = require('react-redux');
 var configureStore  = require('redux/site-store');
@@ -11,7 +12,6 @@ var Lang            = require('libs/lang');
 var {match, RouterContext} = require('react-router');
 
 var app = express();
-
 /**
  *  Process requests
  */
@@ -218,7 +218,10 @@ function renderHTML(component_html, store) {
   html += '<title>' + (store.title ? store.title : 'ferg.in') + '</title>';
 
   if (NODE_ENV != 'dev') {
-    html += '<link href="/assets/v_asdasdas/site/site.css" rel="stylesheet" />';
+    var hash = makeFileHash('./public/assets/site/site.css');
+    var url = hash ? ('v_' + hash + '/') : '';
+
+    html += '<link href="/assets/' + url + 'site/site.css" rel="stylesheet" />';
   }
 
   html += '</head>';
@@ -235,7 +238,10 @@ function renderHTML(component_html, store) {
     html += '<script src="/assets/site/site.js?v='+Math.random()+'" async></script>';
   }
   else {
-    html += '<script src="/assets/v_adsasdas/site/site.js" async></script>';
+    var hash = makeFileHash('./public/assets/site/site.js');
+    var url = hash ? ('v_' + hash + '/') : '';
+
+    html += '<script src="/assets/'+url+'site/site.js" async></script>';
   }
 
   html += '</body>';
@@ -247,3 +253,8 @@ function renderHTML(component_html, store) {
 app.listen(NODE_PORT, () => {
   console.log(`Server listening on: ${NODE_PORT}`);
 });
+
+function makeFileHash(file) {
+  var hash = md5File.sync(file);
+  return hash ? hash.substring(0, 8) : false;
+}

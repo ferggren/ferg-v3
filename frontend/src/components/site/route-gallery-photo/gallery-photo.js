@@ -321,15 +321,23 @@ var GalleryPhoto = React.createClass({
    *  Make next photo button
    */
   _makeNavigationNext() {
+    var photo = this.props.photo;
+
+    if (!photo || photo.loading || !photo.data || !photo.data.next.length) {
+      return null;
+    }
+
+    var next = photo.data.next[0].id;
+    var url  = '/' + this.props.lang + '/gallery/' + next;
+
+    if (photo.options.tag) {
+      url += '?tag=' + encodeURIComponent(photo.options.tag);
+    }
+
     return (
-      <div
-        className="gallery-photo__navigation-next"
-        onClick={e => {
-          this._showNextPhoto();
-        }}
-      >
+      <Link className="gallery-photo__navigation-next" to={url}>
         &lt;
-      </div>
+      </Link>
     );
   },
 
@@ -337,15 +345,23 @@ var GalleryPhoto = React.createClass({
    *  Make next photo button
    */
   _makeNavigationPrev() {
+    var photo = this.props.photo;
+
+    if (!photo || photo.loading || !photo.data || !photo.data.prev.length) {
+      return null;
+    }
+
+    var prev = photo.data.prev[0].id;
+    var url  = '/' + this.props.lang + '/gallery/' + prev;
+
+    if (photo.options.tag) {
+      url += '?tag=' + encodeURIComponent(photo.options.tag);
+    }
+
     return (
-      <div
-        className="gallery-photo__navigation-prev"
-        onClick={e => {
-          this._showPrevPhoto();
-        }}
-      >
+      <Link className="gallery-photo__navigation-prev" to={url}>
         &gt;
-      </div>
+      </Link>
     );
   },
 
