@@ -41,7 +41,7 @@ var StorageFile = React.createClass({
     }
 
     return Lang.get('storage.file_downloads', {
-      downloads: downloads,
+      downloads,
     });
   },
 

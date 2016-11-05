@@ -79,6 +79,13 @@ app.use((req, res) => {
       // send HTML response
       // console.log('done', store.getState());
       store = null;
+
+      res.set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Length': html.length,
+        'ETag': ''
+      });
+
       res.status(200).end(html);
     })
     .catch(err => {
@@ -252,10 +259,6 @@ function renderHTML(component_html, store) {
   return html;
 }
 
-app.listen(NODE_PORT, () => {
-  console.log(`Server listening on: ${NODE_PORT}`);
-});
-
 var _hashes_cache = {};
 function makeFileHash(file) {
   if (typeof _hashes_cache[file] != 'undefined') {
@@ -268,3 +271,9 @@ function makeFileHash(file) {
 
   return _hashes_cache[file] ? _hashes_cache[file] : false;
 }
+
+app.disable('x-powered-by');
+
+app.listen(NODE_PORT, () => {
+  console.log(`Server listening on: ${NODE_PORT}`);
+});

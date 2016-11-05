@@ -274,9 +274,7 @@
    *  @return {string} Escaped string
    */
   _escapeHTML(string) {
-    if (typeof string != 'string') {
-      return '';
-    }
+    string += '';
 
     return string
       .replace(/&/g, "&amp;")
