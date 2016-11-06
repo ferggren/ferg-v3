@@ -304,7 +304,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
         $preview = StoragePreview::makePreviewLink(
           $collection->collection_cover_photo_hash, array(
             'crop'   => true,
-            'width'  => 200,
+            'width'  => 400,
             'height' => 150,
             'align'  => 'center',
             'valign' => 'top',

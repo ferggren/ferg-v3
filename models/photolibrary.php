@@ -43,11 +43,17 @@ class PhotoLibrary extends Database {
       $export['ratio'] = round($data[1] / $data[2], 2);
     }
 
+    $w = 500; $h = 250;
+
+    if ($export['ratio'] <= 1.0) $w = 300; $h = 300;
+    if ($export['ratio'] > 1.5) $w = 700; $h = 250;
+    if ($export['ratio'] > 2.0) $w = 900; $h = 250;
+
     $export['preview'] = StoragePreview::makePreviewLink(
       $this->file_hash, array(
         'crop'   => true,
-        'width'  => 500,
-        'height' => 150,
+        'width'  => $w,
+        'height' => $h,
         'align'  => 'center',
         'valign' => 'middle',
       )

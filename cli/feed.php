@@ -195,6 +195,7 @@ class Feed_CliController extends CliController {
         'ratio'     => 1,
         'order'     => $photo->photo_taken_timestamp ? $photo->photo_taken_timestamp : $photo->photo_id,
         'timestamp' => 0,
+        'preview'   => $photo->export()['preview'],
         'tags'      => implode(',', array(
           $photo->photo_lens,
           $photo->photo_camera,
@@ -205,30 +206,7 @@ class Feed_CliController extends CliController {
       if (preg_match('#^(\d++)x(\d++)$#', $photo->photo_size, $data)) {
         $info['ratio'] = round((double)$data[1] / (double)$data[2], 1);
       }
-
-      $w = 700;
-      $h = 250;
-
-      if ($info['ratio'] < 1) {
-        $w = 500;
-        $h = 500;
-      }
-
-      if ($info['ratio'] > 2) {
-        $w = 900;
-        $h = 250;
-      }
-
-      $info['preview'] = StoragePreview::makePreviewLink(
-        $photo->file_hash, array(
-          'crop'   => true,
-          'width'  => $w,
-          'height' => $h,
-          'align'  => 'center',
-          'valign' => 'middle',
-        )
-      );
-
+      
       $ret[] = $info;
     }
 
