@@ -113,10 +113,11 @@ class ApiPhotoLibrary_Controller extends ApiController {
    *
    *  @param {int} page Page id
    *  @param {string} tags List of comma-seperated tags
-   *  @param {int} collection Collection id
+   *  @param {int} photo_collection Photo collection id
+   *  @param {int} tags_collection Tags collection id
    *  @return {object} Photos
    */
-  public function actionUpdatePhoto($id = 0, $collection = 0) {
+  public function actionUpdatePhoto($id = 0, $photo_collection = 0, $tags_collection = 0) {
     if (!is_string($id) || !preg_match('#^\d{1,10}$#', $id)) {
       return $this->error('invalid_photo_id');
     }
@@ -135,7 +136,11 @@ class ApiPhotoLibrary_Controller extends ApiController {
       return $this->error('invalid_photo_id');
     }
 
-    if ($collection && !$this->_checkCollectionId($collection)) {
+    if ($photo_collection && !$this->_checkCollectionId($photo_collection)) {
+      return $this->error('invalid_collection_id');
+    }
+
+    if ($tags_collection && !$this->_checkCollectionId($tags_collection)) {
       return $this->error('invalid_collection_id');
     }
 
@@ -185,12 +190,34 @@ class ApiPhotoLibrary_Controller extends ApiController {
       $photo->$key = trim($_POST[$field]);
     }
 
-    $photo->save();
-    $this->_updatePhotoTags($photo);
+    if ($photo->photo_collection_id != $photo_collection) {
+      $old = $photo->photo_collection_id;
+      $new = $photo_collection;
+
+      $this->_removePhotoTags($photo);
+
+      if ($old != 0) {
+        $photo->photo_collection_id = 0;
+        $photo->save();
+        $this->_updateCollection($old);
+      }
+
+      if ($new != 0) {
+        $photo->photo_collection_id = $new;
+        $photo->save();
+        $this->_updateCollection($new);
+      }
+
+      $this->_updatePhotoTags($photo);
+    }
+    else {
+      $photo->save();
+      $this->_updatePhotoTags($photo);
+    }
 
     return $this->success(array(
-      'collection' => $collection,
-      'tags'       => $this->_getCollectionTags($collection),
+      'collection' => $tags_collection,
+      'tags'       => $this->_getCollectionTags($tags_collection),
     ));
   }
 
@@ -609,6 +636,39 @@ class ApiPhotoLibrary_Controller extends ApiController {
       'cover'   => $preview,
       'updated' => $collection->collection_updated,
     );
+  }
+
+  protected function _removePhotoTags($photo) {
+    $user_id = User::get_user_id();
+
+    $tags = array(
+      'iso',
+      'shutter_speed',
+      'aperture',
+      'camera',
+      'lens',
+      'category',
+      'fl',
+      'efl',
+    );
+
+    foreach ($tags as $tag) {
+      $key    = 'photo_' . $tag;
+
+      Tags::attachTags(
+        "photos_{$user_id}_0_{$tag}",
+        $photo->photo_id,
+        array()
+      );
+
+      if ($photo->photo_collection_id) {
+        Tags::attachTags(
+          "photos_{$photo->photo_collection_id}_{$tag}",
+          $photo->photo_id,
+          array()
+        );
+      }
+    }
   }
 
   protected function _updatePhotoTags($photo) {

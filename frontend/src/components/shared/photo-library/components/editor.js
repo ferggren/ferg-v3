@@ -56,12 +56,20 @@ var PhotoEditor = React.createClass({
       return;
     }
 
+    var collection = 0;
+    var select     = this.refs.collection;
+
+    if (select) {
+      collection = parseInt(select[select.selectedIndex].value);
+    }
+
     var info = {
-      title_ru: this.refs.title_ru.value,
-      title_en: this.refs.title_en.value,
-      gps:      this.refs.gps.value,
-      taken:    this.refs.taken.value,
-      tags:     this.state.tags,
+      collection: collection,
+      title_ru:   this.refs.title_ru.value,
+      title_en:   this.refs.title_en.value,
+      gps:        this.refs.gps.value,
+      taken:      this.refs.taken.value,
+      tags:       this.state.tags,
     }
 
     this.props.onUpdate(this.props.photo, info);
@@ -76,6 +84,40 @@ var PhotoEditor = React.createClass({
     tags[tag] = value;
 
     this.setState(tags);
+  },
+
+  _makeCollectionSelect() {
+    var ret = [
+      <option key="0" value="0">
+        {Lang.get('photolibrary.photo_remove_category')}
+      </option>
+    ];
+
+    this.props.collections.forEach(collection => {
+      if (collection.id <= 0) {
+        return;
+      }
+
+      ret.push(
+        <option key={collection.id} value={collection.id}>
+          {collection.name}
+        </option>
+      );
+    });
+
+    if (!ret.length) {
+      return null;
+    }
+
+    return (
+      <select
+        name="collection"
+        ref="collection"
+        defaultValue={this.props.photo.collection_id}
+      >
+        {ret}
+      </select>
+    );
   },
 
   render() {
@@ -192,6 +234,10 @@ var PhotoEditor = React.createClass({
                   placeholder={Lang.get('photolibrary.photo_taken')}
                   disabled={this.props.loading}
                 />
+
+                <br />
+
+                {this._makeCollectionSelect()}
               </form>
             </div>
           </div>

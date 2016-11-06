@@ -434,6 +434,10 @@ $collection_title_bg: (60, 60, 60, 0.7);
 		}
 	}
 
+	.photolibrary__editor-info select {
+		width: 100%;
+	}
+
 	.photolibrary__editor-info input[type="text"] {
 		margin-bottom: 10px;
 		padding: 2px 5px;

@@ -776,10 +776,14 @@ var PhotoLibrary = React.createClass({
           success: response => {
             photo.loading = false;
 
+            var update = photo.collection_id != info.collection;
+
             photo.title_ru = info.title_ru;
             photo.title_en = info.title_en;
             photo.gps      = info.gps;
             photo.taken    = info.taken;
+
+            photo.collection_id = info.collection;
 
             photo.tags.aperture      = info.tags.aperture;
             photo.tags.shutter_speed = info.tags.shutter_speed;
@@ -796,12 +800,25 @@ var PhotoLibrary = React.createClass({
             this._requests[request] = null;
             delete this._requests[request];
 
-            this.setState({
-              photos:         this.state.photos,
-              editor_loading: false,
-              editor_photo:   false,
-              tags,
-            });
+            if (!update) {
+              this.setState({
+                photos:         this.state.photos,
+                editor_loading: false,
+                editor_photo:   false,
+                tags,
+              });
+            }
+            else {
+              this.setState({
+                photos:         this.state.photos,
+                editor_loading: false,
+                editor_photo:   false,
+                tags,
+              }, () => {
+                this._loadPhotos();
+                this._loadCollections();
+              });
+            }
           },
 
           error: error => {
@@ -819,7 +836,6 @@ var PhotoLibrary = React.createClass({
 
           data: {
             id:            photo.id,
-            collection:    this.state.collection,
             title_ru:      info.title_ru,
             title_en:      info.title_en,
             gps:           info.gps,
@@ -832,6 +848,9 @@ var PhotoLibrary = React.createClass({
             category:      info.tags.category,
             fl:            info.tags.fl,
             efl:           info.tags.efl,
+
+            photo_collection: info.collection,
+            tags_collection:  this.state.collection,
           }
         }
       );
@@ -954,6 +973,7 @@ var PhotoLibrary = React.createClass({
           loading={this.state.editor_loading}
           error={this.state.editor_error}
           tags={this.state.tags[this.state.collection]}
+          collections={this.state.collections}
         />
       );
     }

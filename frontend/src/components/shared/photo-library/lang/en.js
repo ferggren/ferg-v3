@@ -9,6 +9,7 @@ module.exports = {
   photo_delete:           'x',
   photo_edit:             '?',
   photo_update:           'Update photo',
+  photo_remove_category:  'Without category',
   selected_photos_attach: 'Attach %selected% photo',
   selected_photos_abort:  'Cancel',
   collection_restore:     'restore',
