@@ -193,7 +193,7 @@ class Feed_CliController extends CliController {
         'desc_en'   => '',
         'preview'   => '',
         'ratio'     => 1,
-        'order'     => $photo->photo_taken_timestamp ? $photo->photo_taken_timestamp : $photo->photo_id,
+        'order'     => $photo->photo_orderby,
         'timestamp' => 0,
         'preview'   => $photo->export()['preview'],
         'tags'      => implode(',', array(
