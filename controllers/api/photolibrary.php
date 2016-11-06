@@ -162,6 +162,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
     );
 
     $photo->photo_taken_timestamp = 0;
+    $photo->photo_orderby = $photo->photo_id;
 
     foreach ($fields as $field => $regexp) {
       $key = 'photo_' . $field;
@@ -181,10 +182,9 @@ class ApiPhotoLibrary_Controller extends ApiController {
       }
 
       if ($field == 'taken') {
-        $photo->photo_taken_timestamp = mktime(
-          0, 0, 0,
-          $data[2], $data[3], $data[1]
-        );
+        $time = mktime(0, 0, 0, $data[2], $data[3], $data[1]);
+        $photo->photo_taken_timestamp = $time;
+        $photo->photo_orderby = $time + (int)$photo->photo_id;
       }
 
       $photo->$key = trim($_POST[$field]);
@@ -261,7 +261,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
       $where[] = "photo_collection_id = '".Database::escape($collection)."'";
     }
 
-    $photos = PhotoLibrary::orderBy('photo_id', 'desc');
+    $photos = PhotoLibrary::orderBy('photo_added', 'desc');
     $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
@@ -543,6 +543,9 @@ class ApiPhotoLibrary_Controller extends ApiController {
     $photo->photo_added = time();
     $photo->save();
 
+    $photo->photo_orderby = $photo->photo_id;
+    $photo->save();
+
     $ret = array(
       'photo'      => $photo->export(true),
       'collection' => false,
@@ -621,7 +624,7 @@ class ApiPhotoLibrary_Controller extends ApiController {
       $preview = StoragePreview::makePreviewLink(
         $photo[0]->file_hash, array(
           'crop'   => true,
-          'width'  => 200,
+          'width'  => 400,
           'height' => 150,
           'align'  => 'center',
           'valign' => 'middle',

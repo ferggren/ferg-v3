@@ -46,9 +46,9 @@ class ApiGallery_Controller extends ApiController {
     }
 
     return $this->success(array(
-      'next' => $this->_getPhotoNeighbors($id, $tag, 'next'),
+      'next' => $this->_getPhotoNeighbors($photo, $tag, 'next'),
       'info' => $photo->export(),
-      'prev' => $this->_getPhotoNeighbors($id, $tag, 'prev'),
+      'prev' => $this->_getPhotoNeighbors($photo, $tag, 'prev'),
     ));
   }
 
@@ -91,8 +91,7 @@ class ApiGallery_Controller extends ApiController {
     $where[] = "photo_collection_id = '".Database::escape($collection_id)."'";
     $where[] = "photo_deleted = 0";
 
-    $photos = PhotoLibrary::orderBy('photo_taken_timestamp', 'desc');
-    $photos->orderBy('photo_id', 'desc');
+    $photos = PhotoLibrary::orderBy('photo_orderby', 'desc');
     $photos->whereRaw(implode(' AND ', $where));
 
     if (!($count = $photos->count())) {
@@ -182,12 +181,12 @@ class ApiGallery_Controller extends ApiController {
   /**
    *  Return photo neighbors
    *
-   *  @param {int} id Photo id
+   *  @param {object} photo Photo object
    *  @param {string} tag Photos tag
    *  @param {string} type Neighbors type
    *  @return {object} Photos list
    */
-  protected function _getPhotoNeighbors($id, $tag, $type) {
+  protected function _getPhotoNeighbors($photo, $tag, $type) {
     $where = array();
 
     if ($tag) {
@@ -206,12 +205,12 @@ class ApiGallery_Controller extends ApiController {
       return array();
     }
 
-    $where[] = "photo_id ".($type == 'next' ? '>' : '<').' "'.Database::escape($id).'"';
+    $where[] = 'photo_id != "'.Database::escape($photo->photo_id).'"';
+    $where[] = "photo_orderby ".($type == 'next' ? '>' : '<').' "'.Database::escape($photo->photo_orderby).'"';
     $where[] = "photo_collection_id = '".Database::escape($collection_id)."'";
     $where[] = "photo_deleted = 0";
 
-    $photos = PhotoLibrary::orderBy('photo_taken_timestamp', $type == 'next' ? 'asc' : 'desc');
-    $photos->orderBy('photo_id', $type == 'next' ? 'asc' : 'desc');
+    $photos = PhotoLibrary::orderBy('photo_orderby', $type == 'next' ? 'asc' : 'desc');
     $photos->whereRaw(implode(' AND ', $where));
     $photos->limit(3);
 

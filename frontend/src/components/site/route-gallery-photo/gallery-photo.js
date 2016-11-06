@@ -245,7 +245,7 @@ var GalleryPhoto = React.createClass({
   _makePhotoPreview() {
     var photo = this.props.photo;
 
-    if (!photo) return null;
+    if (!photo || !photo.loaded) return null;
     if (!photo.data) return null;
     if (photo.error) return null;
     if (!photo.data.info || !photo.data.info.photo) return null;
