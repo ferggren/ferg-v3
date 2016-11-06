@@ -1,8 +1,10 @@
 <?php
 class Index_Controller extends BaseController {
   public function actionIndex() {
-    $view = new Template('site');
-    $view->printView();
+    header('Location: /');
+    exit;
+    // $view = new Template('site');
+    // $view->printView();
   }
 }
 ?>
