@@ -48,7 +48,7 @@ var GalleryPhoto = React.createClass({
       this._removeKeysListner();
     }
 
-    this.props.dispatch(clearApiData(PHOTO_API_KEY));
+    // this.props.dispatch(clearApiData(PHOTO_API_KEY));
   },
 
   componentDidUpdate(prevProps, prevState) {

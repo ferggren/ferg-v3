@@ -52,8 +52,8 @@ var SitePages = React.createClass({
   },
 
   componentWillUnmount() {
-    this.props.dispatch(clearApiData(PAGES_API_KEY));
-    this.props.dispatch(clearApiData(PAGES_TAGS_API_KEY));
+    // this.props.dispatch(clearApiData(PAGES_API_KEY));
+    // this.props.dispatch(clearApiData(PAGES_TAGS_API_KEY));
   },
 
   /**

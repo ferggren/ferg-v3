@@ -44,8 +44,8 @@ var SiteGallery = React.createClass({
   },
 
   componentWillUnmount() {
-    this.props.dispatch(clearApiData(GALLERY_API_KEY));
-    this.props.dispatch(clearApiData(GALLERY_TAGS_API_KEY));
+    // this.props.dispatch(clearApiData(GALLERY_API_KEY));
+    // this.props.dispatch(clearApiData(GALLERY_TAGS_API_KEY));
   },
 
   /**

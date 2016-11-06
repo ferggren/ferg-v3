@@ -50,8 +50,8 @@ var SiteLanding = React.createClass({
   },
 
   componentWillUnmount() {
-    this.props.dispatch(clearApiData(FEED_TAGS_API_KEY));
-    this.props.dispatch(clearApiData(FEED_API_KEY));
+    // this.props.dispatch(clearApiData(FEED_TAGS_API_KEY));
+    // this.props.dispatch(clearApiData(FEED_API_KEY));
   },
 
   /**
