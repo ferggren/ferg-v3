@@ -16,21 +16,24 @@ var app = express();
  *  Process requests
  */
 app.use((req, res) => {
-  match({routes, location: req.url}, (error, redirect, render_props) => {
+  // make store
+  var store = configureStore();
+
+  match({routes: routes(store), location: req.url}, (error, redirect, render_props) => {
     if (redirect) {
+      store = null;
       return res.redirect(301, redirect.pathname + redirect.search);
     }
 
     if (error) {
+      store = null;
       return res.status(500).end('Internal server error');
     }
 
     if (!render_props) {
+      store = null;
       return res.status(404).end('Not found')
     }
-
-    // make store
-    var store = configureStore();
 
     // parse lang
     var lang = getUserLang(req);

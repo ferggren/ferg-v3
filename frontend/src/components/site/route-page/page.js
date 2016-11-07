@@ -277,21 +277,36 @@ var SitePage = React.createClass({
 });
 
 SitePage.fetchData = (store, params) => {
-  if (!params.page_type) {
-    return [];
-  }
-
   if (!params.page_id) {
     return [];
   }
-  
-  return [
-    store.dispatch(makeApiRequest(
-      PAGE_API_KEY, PAGE_API_URL, {
-        id: params.page_id,
-      }
-    )),
-  ];
+
+  var state  = store.getState();
+  var ret    = [];
+  var update = false;
+
+  if (!state.api[PAGE_API_KEY]) {
+    update = true;
+  }
+  else {
+    var page = state.api[PAGE_API_KEY];
+
+    if (!page || !page.options || page.options.id != params.page_id) {
+      update = true;
+    }
+  }
+
+  if (update) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        PAGE_API_KEY, PAGE_API_URL, {
+          id: params.page_id,
+        }
+      ))
+    );
+  }
+
+  return ret;
 }
 
 function mapStateToProps(state) {

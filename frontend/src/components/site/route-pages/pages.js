@@ -52,8 +52,8 @@ var SitePages = React.createClass({
   },
 
   componentWillUnmount() {
-    // this.props.dispatch(clearApiData(PAGES_API_KEY));
-    // this.props.dispatch(clearApiData(PAGES_TAGS_API_KEY));
+    this.props.dispatch(clearApiData(PAGES_API_KEY));
+    this.props.dispatch(clearApiData(PAGES_TAGS_API_KEY));
   },
 
   /**
@@ -330,23 +330,34 @@ SitePages.fetchData = (store, params) => {
     return [];
   }
 
-  return [
-    store.dispatch(makeApiRequest(
-      PAGES_API_KEY, PAGES_API_URL, {
-        type:  params.page_type,
-        page:  params.page ? params.page : 1,
-        tag:   params.tag ? params.tag : '',
-        cache: true,
-      }
-    )),
+  var state = store.getState();
+  var ret   = [];
 
-    store.dispatch(makeApiRequest(
-      PAGES_TAGS_API_KEY, PAGES_TAGS_API_URL, {
-        group: params.page_type,
-        cache: true,
-      }
-    )),
-  ];
+  if (!state.api[PAGES_TAGS_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        PAGES_TAGS_API_KEY, PAGES_TAGS_API_URL, {
+          group: params.page_type,
+          cache: true,
+        }
+      )),
+    );
+  }
+
+  if (!state.api[PAGES_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        PAGES_API_KEY, PAGES_API_URL, {
+          type:  params.page_type,
+          page:  params.page ? params.page : 1,
+          tag:   params.tag ? params.tag : '',
+          cache: true,
+        }
+      )),
+    );
+  }
+
+  return ret;
 }
 
 function mapStateToProps(state) {

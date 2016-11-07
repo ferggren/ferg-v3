@@ -40,7 +40,7 @@ onready(() => {
   ReactDOM.render(
     <Provider store={store}>
       <Router history={browserHistory}>
-        {routes}
+        {routes(store)}
       </Router>
     </Provider>,
     document.getElementById('react-root')

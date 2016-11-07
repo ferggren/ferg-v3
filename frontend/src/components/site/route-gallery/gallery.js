@@ -273,22 +273,33 @@ var SiteGallery = React.createClass({
 });
 
 SiteGallery.fetchData = (store, params) => {
-  return [
-    store.dispatch(makeApiRequest(
-      GALLERY_API_KEY, GALLERY_API_URL, {
-        page:  params.page ? params.page : 1,
-        tag:   params.tag ? params.tag : '',
-        cache: true,
-      }
-    )),
+  var state = store.getState();
+  var ret   = [];
 
-    store.dispatch(makeApiRequest(
-      GALLERY_TAGS_API_KEY, GALLERY_TAGS_API_URL, {
-        group: 'gallery',
-        cache: true,
-      }
-    )),
-  ];
+  if (!state.api[GALLERY_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        GALLERY_API_KEY, GALLERY_API_URL, {
+          page:  params.page ? params.page : 1,
+          tag:   params.tag ? params.tag : '',
+          cache: true,
+        }
+      ))
+    );
+  }
+
+  if (!state.api[GALLERY_TAGS_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        GALLERY_TAGS_API_KEY, GALLERY_TAGS_API_URL, {
+          group: 'gallery',
+          cache: true,
+        }
+      ))
+    );
+  }
+
+  return ret;
 }
 
 function mapStateToProps(state) {

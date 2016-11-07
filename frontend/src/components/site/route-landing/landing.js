@@ -297,22 +297,33 @@ var SiteLanding = React.createClass({
 });
 
 SiteLanding.fetchData = (store, params) => {
-  return [
-    store.dispatch(makeApiRequest(
-      FEED_API_KEY, FEED_API_URL, {
-        page:  params.page ? params.page : 1,
-        tag:   params.tag ? params.tag : '',
-        cache: true,
-      }
-    )),
+  var state = store.getState();
+  var ret   = [];
 
-    store.dispatch(makeApiRequest(
-      FEED_TAGS_API_KEY, FEED_TAGS_API_URL, {
-        group: 'feed',
-        cache: true,
-      }
-    )),
-  ];
+  if (!state.api[FEED_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        FEED_API_KEY, FEED_API_URL, {
+          page:  params.page ? params.page : 1,
+          tag:   params.tag ? params.tag : '',
+          cache: true,
+        }
+      ))
+    );
+  }
+
+  if (!state.api[FEED_TAGS_API_KEY]) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        FEED_TAGS_API_KEY, FEED_TAGS_API_URL, {
+          group: 'feed',
+          cache: true,
+        }
+      ))
+    );
+  }
+
+  return ret;
 }
 
 function mapStateToProps(state) {

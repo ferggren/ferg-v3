@@ -26,26 +26,91 @@ var App = (props) => {
   );
 }
 
-var routes = [
-  <IndexRoute component={Landing} key="index" />,
-  <Route path='gallery' component={Gallery} key="gallery" />,
-  <Route path='gallery/:photo_id' component={Photo} key="gallery_photo" />,
-  <Route path='events' component={Pages} key="events" />,
-  <Route path='events/:page_id' component={Page} key="events_page" />,
-  <Route path='blog' component={Pages} key="blog" />,
-  <Route path='blog/:page_id' component={Page} key="blog_page" />,
-  <Route path='dev' component={Pages} key="dev" />,
-  <Route path='dev/:page_id' component={Page} key="dev_page"/>,
-  <Route path='storage' component={Storage} key="storage" />,
-];
+function makeFetchParams(location, params) {
+  var ret = {};
 
-routes = (
-  <Route path='/' component={App}>
-    {routes}
-    <Route path='ru/'>{routes}</Route>
-    <Route path='en/'>{routes}</Route>
-    <Route path='*' component={Landing} />
-  </Route>
-);
+  var match = location.pathname.match(
+    /\/(?:ru|en)\/(blog|events|dev)/
+  );
 
-module.exports = routes;
+  if (match) {
+    ret.page_type = match[1];
+  }
+
+  if (location.query) {
+    for (var key in location.query) {
+      ret[key] = location.query[key];
+    }
+  }
+
+  if (params) {
+    for (var key in params) {
+      ret[key] = params[key];
+    }
+  }
+
+  return ret;
+}
+
+module.exports = (store) => {
+  var fetchData = function(nextState, replace, callback) {
+    if (SCRIPT_ENV == 'server') {
+      return callback();
+    }
+
+    var needs = [];
+    var params = makeFetchParams(nextState.location, nextState.params);
+
+    nextState.routes.forEach(route => {
+      var component = route.component;
+
+      if (!component) {
+        return;
+      }
+
+      if (component.wrappedComponent) {
+        component = component.wrappedComponent;
+      }
+
+      if (!component.fetchData) {
+        return;
+      }
+
+      needs = needs.concat(component.fetchData(store, params));
+    });
+
+    if (!needs.length) {
+      return callback();
+    }
+
+    Promise.all(needs)
+    .then(() => {
+      callback();
+    })
+    .catch(() => {
+      callback();
+    });
+  }
+
+  var routes = [
+    <IndexRoute component={Landing} key="index" onEnter={fetchData} />,
+    <Route path='gallery' component={Gallery} key="gallery" onEnter={fetchData} />,
+    <Route path='gallery/:photo_id' component={Photo} key="gallery_photo" onEnter={fetchData} />,
+    <Route path='events' component={Pages} key="events" onEnter={fetchData} />,
+    <Route path='events/:page_id' component={Page} key="events_page" onEnter={fetchData} />,
+    <Route path='blog' component={Pages} key="blog" onEnter={fetchData} />,
+    <Route path='blog/:page_id' component={Page} key="blog_page" onEnter={fetchData} />,
+    <Route path='dev' component={Pages} key="dev" onEnter={fetchData} />,
+    <Route path='dev/:page_id' component={Page} key="dev_page" onEnter={fetchData} />,
+    <Route path='storage' component={Storage} key="storage" onEnter={fetchData} />,
+  ];
+
+  return routes = (
+    <Route path='/' component={App}>
+      {routes}
+      <Route path='ru/'>{routes}</Route>
+      <Route path='en/'>{routes}</Route>
+      <Route path='*' component={Landing} />
+    </Route>
+  );
+}

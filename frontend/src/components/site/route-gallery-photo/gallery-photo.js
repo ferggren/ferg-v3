@@ -477,14 +477,33 @@ GalleryPhoto.fetchData = (store, params) => {
     return [];
   }
 
-  return [
-    store.dispatch(makeApiRequest(
-      PHOTO_API_KEY, '/api/gallery/getPhoto', {
-        id:  params.photo_id ? params.photo_id : 0,
-        tag: params.tag ? params.tag : '',
-      }
-    ))
-  ];
+  var state  = store.getState();
+  var ret    = [];
+  var update = false;
+
+  if (!state.api[PHOTO_API_KEY]) {
+    update = true;
+  }
+  else {
+    var photo = state.api[PHOTO_API_KEY];
+
+    if (!photo || !photo.options || photo.options.id != params.photo_id) {
+      update = true;
+    }
+  }
+
+  if (update) {
+    ret.push(
+      store.dispatch(makeApiRequest(
+        PHOTO_API_KEY, '/api/gallery/getPhoto', {
+          id:  params.photo_id ? params.photo_id : 0,
+          tag: params.tag ? params.tag : '',
+        }
+      ))
+    );
+  }
+
+  return ret;
 }
 
 function mapStateToProps(state) {
