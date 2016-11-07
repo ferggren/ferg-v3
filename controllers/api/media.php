@@ -491,7 +491,6 @@ class ApiMedia_Controller extends ApiController {
           'height'    => 150,
           'align'     => 'center',
           'valign'    => 'middle',
-          'copyright' => 'ferg.in',
       )),
 
       'medium' => StoragePreview::makePreviewLink(
@@ -502,7 +501,7 @@ class ApiMedia_Controller extends ApiController {
 
       'big' => StoragePreview::makePreviewLink(
         $photo->file_hash,array(
-          'width'  => 1980,
+          'width'  => 1680,
           'copyright' => 'ferg.in',
       )),
     );

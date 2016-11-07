@@ -9,6 +9,7 @@ class PhotoLibrary extends Database {
       'id'            => (int)$this->photo_id,
       'gps'           => $this->photo_gps ? $this->photo_gps : "",
       'taken'         => $this->photo_taken ? $this->photo_taken : "",
+      'timestamp'     => (int)$this->photo_taken_timestamp,
       
       'tags' => array(
         'iso'           => $this->photo_iso ? $this->photo_iso : "",

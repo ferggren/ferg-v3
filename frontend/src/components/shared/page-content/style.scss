@@ -1,6 +1,6 @@
 @import 'styles/mixins/respond_to';
 $window_padding: 10px;
-$margin_bottom: 30px;
+$margin_bottom: 20px;
 
 /**
  *	Common
@@ -27,9 +27,8 @@ $margin_bottom: 30px;
 .page-content__h {
 	font-family: 'Fira Sans',sans-serif;
 	margin: 0px 0px $margin_bottom 0px;
-	font-size: 28px;
-	line-height: 34px;
-	letter-spacing: 1px;
+	font-size: 26px;
+	line-height: 30px;
 	color: #555;
 }
 
@@ -62,8 +61,8 @@ $margin_bottom: 30px;
  */
 .page-content__paragraph {
 	color: #000;
-	font-size: 14px;
-	line-height: 22px;
+	font-size: 16px;
+	line-height: 26px;
 	letter-spacing: -0.003em;
 	font-style: normal;
 	margin-bottom: $margin_bottom;
@@ -110,7 +109,7 @@ $margin_bottom: 30px;
 		background-position: 50% 50%;
 		background-size: cover;
 		background-repeat: no-repeat;
-		margin: 0px auto 15px auto;
+		margin: 0px auto 10px auto;
 	}
 
 	.page-content__grid_photo-desc {
@@ -142,7 +141,7 @@ $margin_bottom: 30px;
 		background-position: 50% 50%;
 		background-size: cover;
 		background-repeat: no-repeat;
-		margin-bottom: 15px;
+		margin-bottom: 10px;
 	}
 
 	.page-content__cover_photo--right .page-content__cover_photo-image {
