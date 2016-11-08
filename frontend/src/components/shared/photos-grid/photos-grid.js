@@ -19,7 +19,6 @@ var PhotosGrid = React.createClass({
     var title  = null;
     var desc   = null;
     var date   = null;
-    var type   = 'photo';
 
     var item_props  = {
       to:        item.url,
@@ -73,10 +72,9 @@ var PhotosGrid = React.createClass({
     }
 
     if (header || date) {
-      type = 'page';
+      item_props.className += ' photo-grid__item--detailed';
     }
 
-    item_props.className += ' photo-grid__item--' + type;
 
     return (
       <div {...wrapper_props}>
