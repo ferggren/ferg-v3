@@ -129,10 +129,12 @@ class Storage_Controller extends BaseController {
 
     self::_enableHTTPCaching();
 
+    $type = preg_match('#\.png$#', $file->file_name) ? 'png' : 'jpg';
+
     // file redirect
-    header('Content-type: image/jpeg');
+    header('Content-type: image/' . ($type == 'png' ? 'png' : 'jpeg'));
     header('Content-Length: ' . filesize(ROOT_PATH . $preview));
-    header('Content-Disposition: filename="preview.jpg"');
+    header('Content-Disposition: filename="preview.'.$type.'"');
     header('X-Accel-Redirect: ' . $preview);
 
     exit;

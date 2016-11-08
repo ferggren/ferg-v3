@@ -174,7 +174,7 @@ class StoragePreview {
       return false;
     }
 
-    if (!($preview = self::_savePreview($hash, $preview))) {
+    if (!($preview = self::_savePreview($file, $hash, $preview))) {
       return false;
     }
 
@@ -267,6 +267,10 @@ class StoragePreview {
       
       case 3: {
         $img = imagecreatefrompng($img_path);
+
+        imageAlphaBlending($img, true);
+        imageSaveAlpha($img, true);
+
         break;
       }
     }
@@ -286,6 +290,7 @@ class StoragePreview {
       
       $img = imagecreatetruecolor($w, $h);
       imagesavealpha($img, true);
+      imageAlphaBlending($img, true);
       imageCopyResampled($img, $tmp, 0, 0, 0, 0, $w, $h, $w, $h);
       imageDestroy($tmp);
     }
@@ -382,7 +387,8 @@ class StoragePreview {
     $config = Config::get('storage.image_preview');
 
     $image_source = self::_createImage(
-      ROOT_PATH . $file->file_path
+      ROOT_PATH . $file->file_path,
+      true
     );
 
     if (!$image_source) {
@@ -455,7 +461,8 @@ class StoragePreview {
    */
   protected static function _cropImage($image_source, $options) {
     $image_new = imagecreatetruecolor($options['width'], $options['height']);
-    imagesavealpha($image_new, true);
+    imageAlphaBlending($image_new, true);
+    imageSaveAlpha($image_new, true);
 
     $color = imageColorAllocateAlpha($image_new, 255, 255, 255, 127);
     imagefill($image_new, 0, 0, $color);
@@ -518,7 +525,8 @@ class StoragePreview {
    */
   protected static function _resizeImage($image_source, $options) {
     $image_new = imagecreatetruecolor($options['width'], $options['height']);
-    imagesavealpha($image_new, true);
+    imageAlphaBlending($image_new, true);
+    imageSaveAlpha($image_new, true);
 
     $color = imageColorAllocateAlpha($image_new, 255, 255, 255, 127);
     imagefill($image_new, 0, 0, $color);
@@ -663,7 +671,7 @@ class StoragePreview {
    *  @param {resource} image Image resource
    *  @return {string} Preview path
    */
-  protected static function _savePreview($hash, $image) {
+  protected static function _savePreview($file, $hash, $image) {
     $path = '/tmp/previews/';
 
     for ($i = 0; $i < 2; ++$i) {
@@ -685,7 +693,12 @@ class StoragePreview {
 
     $path .= $hash;
 
-    imagejpeg($image, ROOT_PATH . $path, 90);
+    if (preg_match('#\.png$#', $file->file_name)) {
+      imagepng($image, ROOT_PATH . $path, 8);
+    }
+    else {
+      imagejpeg($image, ROOT_PATH . $path, 85);
+    }
 
     if (!file_exists(ROOT_PATH . $path)) {
       return false;
