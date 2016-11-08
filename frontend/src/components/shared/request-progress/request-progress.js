@@ -50,7 +50,7 @@ var RequestProgress = React.createClass({
   },
 
   _watchProgress() {
-    var real_progress    = this._calcProgress(Request.getTotalProgress());
+    var real_progress = this._calcProgress(Request.getTotalProgress());
 
     if (real_progress == this.state.real_progress) {
       return;
