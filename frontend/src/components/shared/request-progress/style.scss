@@ -1,7 +1,7 @@
 @import 'styles/mixins/background_rgba';
 @import 'styles/mixins/respond_to';
 
-$progress_height: 2px;
+$progress_height: 3px;
 $bg_color: (162, 1, 1, .8);
 
 .request-progress__wrapper {
