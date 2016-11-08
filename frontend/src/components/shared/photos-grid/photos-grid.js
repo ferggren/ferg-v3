@@ -66,7 +66,7 @@ var PhotosGrid = React.createClass({
     if (item.date) {
       date = (
         <div className="photo-grid__item-date">
-          {NiceTime.niceDateFormat(item.date)}
+          {NiceTime.niceMonthFormat(item.date)}
         </div>
       );
     }

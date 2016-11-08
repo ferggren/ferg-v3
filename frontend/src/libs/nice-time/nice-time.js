@@ -53,13 +53,32 @@ var NiceTime = {
 
     var ret = date.getDate();
     ret += ' ';
-    ret += Lang.get('nice-time.' + NiceTime._month_map[date.getMonth()]);
+    ret += Lang.get(
+      'nice-time.date_' + NiceTime._month_map[date.getMonth()]
+    );
 
     if ((today - time) > (86400 * 365)) {
       ret += ' ' + date.getFullYear();
     }
 
     return ret;
+  },
+
+  /**
+   *  Makes nice month string fron unix timestamp
+   *
+   *  @param {number} time Unix timestamp
+   *  @return {string} Nice formatted month
+   */
+  niceMonthFormat: function(time) {
+    var today = NiceTime._getTodayTime();
+    var date  = new Date(time * 1000);
+
+    var ret = Lang.get(
+      'nice-time.month_' + NiceTime._month_map[date.getMonth()]
+    );
+    
+    return ret + ' ' + date.getFullYear();
   },
 
   _month_map: {
