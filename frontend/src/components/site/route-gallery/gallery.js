@@ -205,6 +205,7 @@ var SiteGallery = React.createClass({
       }
 
       return {
+        type:    'gallery',
         date:    0,
         ratio:   photo.ratio,
         title:   '',

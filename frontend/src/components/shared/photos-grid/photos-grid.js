@@ -19,6 +19,7 @@ var PhotosGrid = React.createClass({
     var title  = null;
     var desc   = null;
     var date   = null;
+    var type   = 'photo';
 
     var item_props  = {
       to:        item.url,
@@ -70,6 +71,12 @@ var PhotosGrid = React.createClass({
         </div>
       );
     }
+
+    if (header || date) {
+      type = 'page';
+    }
+
+    item_props.className += ' photo-grid__item--' + type;
 
     return (
       <div {...wrapper_props}>
@@ -124,6 +131,8 @@ var PhotosGrid = React.createClass({
     var list = clone(this.props.list);
 
     this._updateWidth(list);
+
+    console.log(list);
 
     var list = list.map(item => {
       return this._makeItem(item);

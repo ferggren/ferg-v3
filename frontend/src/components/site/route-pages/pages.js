@@ -235,6 +235,7 @@ var SitePages = React.createClass({
 
     var list = pages.data.list.map(page => {
       return {
+        type:    page.type,
         date:    page.timestamp,
         ratio:   10,
         title:   page.title,
