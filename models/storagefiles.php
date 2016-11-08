@@ -117,6 +117,10 @@ class StorageFiles extends Database {
             return false;
         }
 
+        if (User::isAuthenticated() && User::hasAccess('admin')) {
+            return false;
+        }
+
         if (!($ip = Session::getSessionIp())) {
             return false;
         }

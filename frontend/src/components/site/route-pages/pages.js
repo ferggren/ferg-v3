@@ -111,6 +111,18 @@ var SitePages = React.createClass({
         tag,
       }
     ));
+
+    var pages = this.refs.pages;
+
+    if (!pages || !pages.offsetTop || !window.scrollTo || !window.pageYOffset) {
+      return;
+    }
+
+    if (window.pageYOffset < pages.offsetTop) {
+      return;
+    }
+
+    window.scrollTo(0, Math.max(0, pages.offsetTop - 50));
   },
 
   /**
@@ -211,7 +223,9 @@ var SitePages = React.createClass({
     }
 
     return (
-      <div className="loader" />
+      <div className="pages__loader">
+        <div className="loader" />
+      </div>
     );
   },
 
@@ -221,7 +235,7 @@ var SitePages = React.createClass({
   _makePages() {
     var pages = this.props.pages;
 
-    if (!pages || !pages.loaded || pages.error) {
+    if (!pages || !pages.data || !pages.data.list) {
       return null;
     }
 
@@ -246,7 +260,9 @@ var SitePages = React.createClass({
     });
 
     return (
-      <Grid list={list}/>
+      <div ref="pages">
+        <Grid list={list}/>
+      </div>
     );
   },
 
@@ -313,10 +329,10 @@ var SitePages = React.createClass({
 
         <div className="pages__grid-wrapper">
           <div className="pages__grid">
-            {this._makePagesLoader()}
-            {this._makePagesError()}
             {this._makePages()}
             {this._makePagesPaginator()}
+            {this._makePagesLoader()}
+            {this._makePagesError()}
           </div>
         </div>
 

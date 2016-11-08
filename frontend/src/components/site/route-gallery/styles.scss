@@ -39,3 +39,8 @@ $tags_margin: 20px;
 .gallery__grid-wrapper {
 	margin-top: 30px;
 }
+
+.gallery__paginator, .gallery__loader {
+	margin-top: 10px;
+	min-height: 30px;
+}

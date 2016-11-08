@@ -130,8 +130,6 @@ var PhotosGrid = React.createClass({
 
     this._updateWidth(list);
 
-    console.log(list);
-
     var list = list.map(item => {
       return this._makeItem(item);
     });

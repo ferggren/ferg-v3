@@ -3,8 +3,9 @@
 	font-weight: bold;
 }
 
-.landing__paginator {
+.landing__paginator, .landing__loader {
 	margin-top: 10px;
+	min-height: 30px;
 }
 
 .landing-tags {

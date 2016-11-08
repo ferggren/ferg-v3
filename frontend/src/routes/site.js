@@ -80,14 +80,17 @@ module.exports = (store) => {
     });
 
     if (!needs.length) {
+      if (window.scrollTo) window.scrollTo(0, 0);
       return callback();
     }
 
     Promise.all(needs)
     .then(() => {
+      if (window.scrollTo) window.scrollTo(0, 0);
       callback();
     })
     .catch(() => {
+      if (window.scrollTo) window.scrollTo(0, 0);
       callback();
     });
   }

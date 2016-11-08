@@ -91,6 +91,18 @@ var SiteGallery = React.createClass({
         tag,
       }
     ));
+
+    var gallery = this.refs.gallery;
+
+    if (!gallery || !gallery.offsetTop || !window.scrollTo || !window.pageYOffset) {
+      return;
+    }
+
+    if (window.pageYOffset < gallery.offsetTop) {
+      return;
+    }
+
+    window.scrollTo(0, Math.max(0, gallery.offsetTop - 50));
   },
 
   /**
@@ -114,7 +126,11 @@ var SiteGallery = React.createClass({
   _makeTagsLoader() {
     if (this.props.tags && !this.props.tags.loading) return null;
 
-    return <div className="loader" />;
+    return (
+      <div className="gallery__loader">
+        <div className="loader" />
+      </div>
+    );
   },
 
   /**
@@ -180,13 +196,13 @@ var SiteGallery = React.createClass({
    *  Make gallery
    */
   _makeGallery() {
-    if (!this.props.photos) return null;
-    if (!this.props.photos.loaded) return null;
-    if (this.props.photos.error) return null;
+    var photos = this.props.photos;
 
-    var data = this.props.photos.data;
+    if (!photos || !photos.data || !photos.data.photos) {
+      return null;
+    }
 
-    if (!data.photos.length) {
+    if (!photos.data.photos.length) {
       return (
         <div className="gallery__error">
           {Lang.get('gallery.photos_not_found')}
@@ -194,9 +210,9 @@ var SiteGallery = React.createClass({
       );
     }
 
-    var tag = this.props.photos.options.tag;
+    var tag = photos.options.tag;
 
-    var photos = data.photos.map(photo => {
+    photos = photos.data.photos.map(photo => {
       var url = '/' + this.props.lang + '/gallery/';
       url += photo.id;
 
@@ -216,7 +232,9 @@ var SiteGallery = React.createClass({
     });
 
     return (
-      <Grid list={photos}/>
+      <div ref="gallery">
+        <Grid list={photos}/>
+      </div>
     );
   },
 
@@ -236,7 +254,7 @@ var SiteGallery = React.createClass({
     url += 'page=%page%';
 
     return (
-      <div className="pages__paginator">
+      <div className="gallery__paginator">
         <Paginator
           page={photos.data.page}
           pages={photos.data.pages}
@@ -261,9 +279,9 @@ var SiteGallery = React.createClass({
         <div className="gallery__grid-wrapper">
           <div className="gallery__grid">
             {this._makeGallery()}
+            {this._makeGalleryPaginator()}
             {this._makeGalleryLoader()}
             {this._makeGalleryError()}
-            {this._makeGalleryPaginator()}
           </div>
         </div>
 

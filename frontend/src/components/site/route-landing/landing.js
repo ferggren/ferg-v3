@@ -82,6 +82,18 @@ var SiteLanding = React.createClass({
         tag,
       }
     ));
+
+    var feed = this.refs.feed;
+
+    if (!feed || !feed.offsetTop || !window.scrollTo || !window.pageYOffset) {
+      return;
+    }
+
+    if (window.pageYOffset < feed.offsetTop) {
+      return;
+    }
+
+    window.scrollTo(0, Math.max(0, feed.offsetTop - 50));
   },
 
   /**
@@ -115,7 +127,9 @@ var SiteLanding = React.createClass({
     }
 
     return (
-      <div className="loader" />
+      <div className="landing__loader">
+        <div className="loader" />
+      </div>
     );
   },
 
@@ -125,7 +139,7 @@ var SiteLanding = React.createClass({
   _makeFeed() {
     var feed = this.props.feed;
 
-    if (!feed || feed.loading || feed.error) {
+    if (!feed || !feed.data || !feed.data.list) {
       return;
     }
 
@@ -150,7 +164,7 @@ var SiteLanding = React.createClass({
     }
 
     return (
-      <div className="landing__grid">
+      <div className="landing__grid" ref="feed">
         <Grid list={list}/>
       </div>
     );
@@ -284,10 +298,10 @@ var SiteLanding = React.createClass({
           <br />
 
           <div className="landing-feed">
-            {this._makeFeedLoader()}
-            {this._makeFeedError()}
             {this._makeFeed()}
             {this._makeFeedPaginator()}
+            {this._makeFeedLoader()}
+            {this._makeFeedError()}
           </div>
 
         </ContentWrapper>

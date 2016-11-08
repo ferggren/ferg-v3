@@ -57,3 +57,8 @@ $tags_margin: 20px;
 .pages__not-found, .pages__error {
 	
 }
+
+.pages__paginator, .pages__loader {
+	margin-top: 10px;
+	min-height: 30px;
+}
