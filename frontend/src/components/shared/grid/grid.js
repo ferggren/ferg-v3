@@ -1,6 +1,6 @@
 /**
- * @file Photos Grid
- * @name PhotosGrid
+ * @file Grid
+ * @name Grid
  * @author ferg <me@ferg.in>
  * @copyright 2016 ferg
  */
@@ -13,7 +13,7 @@ var NiceTime = require('libs/nice-time');
 require('./style.scss');
 require('styles/partials/floating_clear');
 
-var PhotosGrid = React.createClass({
+var Grid = React.createClass({
   _makeItem(item) {
     var header = null;
     var title  = null;
@@ -143,4 +143,4 @@ var PhotosGrid = React.createClass({
   }
 });
 
-module.exports = PhotosGrid;
+module.exports = Grid;

@@ -7,7 +7,11 @@ var { Provider }    = require('react-redux');
 var configureStore  = require('redux/site-store');
 var { setLang }     = require('redux/actions/lang');
 var { setLocation } = require('redux/actions/location');
+var { setIp }       = require('redux/actions/ip');
+var { setSession }  = require('redux/actions/session');
+var { userLogin }   = require('redux/actions/user');
 var Lang            = require('libs/lang');
+var Request         = require('libs/request');
 
 var {match, RouterContext} = require('react-router');
 
@@ -19,84 +23,127 @@ app.use((req, res) => {
   // make store
   var store = configureStore();
 
-  match({routes: routes(store), location: req.url}, (error, redirect, render_props) => {
-    if (redirect) {
-      store = null;
-      return res.redirect(301, redirect.pathname + redirect.search);
+  var user_ip      = false;
+  var user_session = false;
+
+  if (req.headers && req.headers['x-real-ip']) {
+    user_ip = req.headers['x-real-ip'];
+  }
+
+  if (req.headers && req.headers.cookie) {
+    var session = req.headers.cookie.match(/__session_id=([^;\s]+)/);
+    if (session) user_session = session[1]
+  }
+
+  store.dispatch(setIp(user_ip));
+  store.dispatch(setSession(user_session));
+
+  new Promise(function(resolve, reject) {
+    Request.fetch(
+      '/api/user/getInfo', {
+
+      success: user => {
+        resolve(user);
+      },
+
+      error: error => {
+        reject(error);
+      },
+
+      cache:     false,
+      remote_ip: user_ip,
+      session:   user_session,
+    });
+  })
+  .then(user => {
+    if (user && user.id) {
+      store.dispatch(userLogin(user));
     }
 
-    if (error) {
-      store = null;
-      return res.status(500).end('Internal server error');
-    }
+    match({routes: routes(store), location: req.url}, (error, redirect, render_props) => {
+      if (redirect) {
+        store = null;
+        return res.redirect(301, redirect.pathname + redirect.search);
+      }
 
-    if (!render_props) {
-      store = null;
-      return res.status(404).end('Not found')
-    }
+      if (error) {
+        store = null;
+        return res.status(500).end('Internal server error');
+      }
 
-    // parse lang
-    var lang = getUserLang(req);
+      if (!render_props) {
+        store = null;
+        return res.status(404).end('Not found')
+      }
 
-    // dispatch lang into store
-    store.dispatch(setLang(lang));
+      // parse lang
+      var lang = getUserLang(req);
 
-    // Set lang (if components needed)
-    Lang.setLang(lang);
+      // dispatch lang into store
+      store.dispatch(setLang(lang));
 
-    // get current location
-    var loc = getLocation(req)
-
-    // dispatch location info store
-    store.dispatch(setLocation(loc));
-
-    // make fetch params
-    var fetch_params = makeFetchParams(
-      req,
-      loc,
-      render_props.params
-    );
-
-    // fetch components data (if needed)
-    fetchComponentsData(
-      store,
-      render_props.components,
-      fetch_params
-    )
-    .then(() => {
-      // set lang
+      // Set lang (if components needed)
       Lang.setLang(lang);
 
-      // make component
-      return ReactDOM.renderToString(
-        <Provider store={store}>
-          <RouterContext {...render_props} />
-        </Provider>
+      // get current location
+      var loc = getLocation(req)
+
+      // dispatch location info store
+      store.dispatch(setLocation(loc));
+
+      // make fetch params
+      var fetch_params = makeFetchParams(
+        req,
+        loc,
+        render_props.params
+      );
+
+      // fetch components data (if needed)
+      fetchComponentsData(
+        store,
+        render_props.components,
+        fetch_params
       )
-    })
-    .then(html => {
-      // make HTML response
-      return renderHTML(html, store.getState());
-    })
-    .then(html => {
-      // send HTML response
-      // console.log('done', store.getState());
-      store = null;
+      .then(() => {
+        // set lang
+        Lang.setLang(lang);
 
-      res.set({
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Length': html.length,
-        'ETag': ''
-      });
+        // make component
+        return ReactDOM.renderToString(
+          <Provider store={store}>
+            <RouterContext {...render_props} />
+          </Provider>
+        )
+      })
+      .then(html => {
+        // make HTML response
+        return renderHTML(html, store.getState());
+      })
+      .then(html => {
+        // send HTML response
+        // console.log('done', store.getState());
+        store = null;
 
-      res.status(200).end(html);
-    })
-    .catch(err => {
-      // catch error
-      store = null;
-      console.log(err);
-      res.status(500).end('Internal server error');
-    })
+        res.set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Length': html.length,
+          'ETag': ''
+        });
+
+        res.status(200).end(html);
+      })
+      .catch(err => {
+        // catch error
+        store = null;
+        console.log(err);
+        res.status(500).end('Internal server error');
+      })
+    });
+  })
+  .catch(err => {
+    store = null;
+    console.log(err);
+    res.status(500).end('Internal server error');
   });
 });
 

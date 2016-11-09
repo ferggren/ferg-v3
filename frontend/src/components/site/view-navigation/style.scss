@@ -102,3 +102,24 @@ $link_padding: 10px;
 				@include background_rgba(255, 255, 255, .8);
 				color: $link_color_hover !important;
 			}
+
+.oauth-popup {
+
+}
+
+.oauth-popup__link {
+	display: block;
+	float: left;
+	width: 30px;
+	height: 30px;
+	margin: 0px 3px;
+	background-size: 30px 30px;
+	opacity: .85;
+}
+	.oauth-popup__link:hover {
+		opacity: 1;
+	}
+
+	.oauth-popup__link--vkontakte {
+		background-image: url('./media/vkontakte.png');
+	}

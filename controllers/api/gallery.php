@@ -45,6 +45,16 @@ class ApiGallery_Controller extends ApiController {
       return $this->error('not_found');
     }
 
+    if (!User::isAuthenticated() || !User::hasAccess('admin')) {
+      $user_ip = ip2decimal(Session::getSessionIp());
+
+      if ($photo->photo_last_view_ip != $user_ip) {
+        $photo->photo_last_view_ip = $user_ip;
+        $photo->photo_views++;
+        $photo->save();
+      }
+    }
+
     return $this->success(array(
       'next' => $this->_getPhotoNeighbors($photo, $tag, 'next'),
       'info' => $photo->export(),

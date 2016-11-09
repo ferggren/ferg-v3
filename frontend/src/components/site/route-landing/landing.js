@@ -19,7 +19,7 @@ var ContentWrapper = require('components/site/view-wrapper');
 var SiteHeader     = require('components/site/view-header');
 var TagsCloud      = require('components/shared/tags-cloud');
 var Paginator      = require('components/shared/paginator');
-var Grid           = require('components/shared/photos-grid');
+var Grid           = require('components/shared/grid');
 
 var { makeApiRequest, clearApiData } = require('redux/actions/api');
 

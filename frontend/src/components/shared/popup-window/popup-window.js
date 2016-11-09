@@ -22,6 +22,7 @@ var PopupWindow = React.createClass({
     this._popup   = Popups.createPopup({
       content: this._content,
       onclose: this.props.onClose,
+      title:   this.props.title,
     });
 
     this.componentDidUpdate();

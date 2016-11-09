@@ -57,7 +57,8 @@ export function makeApiRequest(key, url, options, cache) {
 
     dispatch(cancelRequest(key));
 
-    var lang    = getState().lang;
+    var state = getState();
+    var lang    = state.lang;
     var request = false;
 
     options.USER_LANG = lang;
@@ -75,8 +76,10 @@ export function makeApiRequest(key, url, options, cache) {
           resolve();
         },
 
-        data:  options,
-        cache: !!cache,
+        data:         options,
+        cache:        !!cache,
+        remote_ip:    state.ip,
+        session:      state.session,
         cache_expire: cache ? 3600 : 0,
       });
     });

@@ -16,7 +16,7 @@ var { setTitle } = require('redux/actions/title');
 var Lang         = require('libs/lang');
 var Wrapper      = require('components/site/view-wrapper');
 var TagsCloud    = require('components/shared/tags-cloud');
-var Grid         = require('components/shared/photos-grid');
+var Grid         = require('components/shared/grid');
 var Paginator    = require('components/shared/paginator');
 
 var { makeApiRequest, clearApiData } = require('redux/actions/api');

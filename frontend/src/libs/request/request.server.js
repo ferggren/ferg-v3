@@ -28,7 +28,7 @@ var Request = {
     options = Request._validateOptions(options);
 
     var url     = Request._makeUrl(url);
-    var headers = Request._makeHeaders();
+    var headers = Request._makeHeaders(options);
     var body    = Request._makeBody(options.data);
 
     fetch(url, {method: 'POST', body, headers})
@@ -56,16 +56,26 @@ var Request = {
   /**
    *  Make fetch headers
    *
+   *  @param {data} options Request options
    *  @return {object} Fetch headers
    */
-  _makeHeaders() {
+  _makeHeaders(options) {
     var csrf_token = Request._getCSRFToken();
 
+    var cookie = [
+      '__csrf_token=' + csrf_token,
+    ]
+
+    if (options.session) {
+      cookie.push('__session_id=' + options.session);
+    }
+
     return {
+      'Content-Type':     'application/x-www-form-urlencoded; charset=UTF-8',
+      'Cookie':           cookie.join('; '),
       'X-Requested-With': 'XMLHttpRequest',
       'X-Csrf-Token':     csrf_token,
-      'Content-Type':     'application/x-www-form-urlencoded; charset=UTF-8',
-      'Cookie':           '__csrf_token=' + csrf_token,
+      'X-Forwarded-For':  options.remote_ip,
     }
   },
 
@@ -188,6 +198,14 @@ var Request = {
 
     if (typeof options.data == 'undefined') {
       options.data = {};
+    }
+
+    if (typeof options.remote_ip == 'undefined') {
+      options.remote_ip = '0.0.0.0';
+    }
+
+    if (typeof options.session == 'undefined') {
+      options.session = '';
     }
 
     if (typeof options.timeout == 'undefined') {

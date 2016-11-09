@@ -323,6 +323,16 @@ class ApiPages_Controller extends ApiController {
       }
     }
 
+    if (!User::isAuthenticated() || !User::hasAccess('admin')) {
+      $user_ip = ip2decimal(Session::getSessionIp());
+
+      if ($page->page_last_view_ip != $user_ip) {
+        $page->page_last_view_ip = $user_ip;
+        $page->page_views++;
+        $page->save();
+      }
+    }
+
     return $this->success($page->export(true));
   }
 

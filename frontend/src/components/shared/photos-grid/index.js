@@ -1,1 +1,0 @@
-module.exports = require('./photos-grid');

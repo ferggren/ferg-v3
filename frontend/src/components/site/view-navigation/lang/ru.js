@@ -5,4 +5,6 @@ module.exports = {
   blog:    'Блог',
   events:  'События',
   dev:     'Разработки',
+  admin:   'Админка',
+  signin:  'Войти',
 };
