@@ -31,33 +31,41 @@ app.use((req, res) => {
   }
 
   if (req.headers && req.headers.cookie) {
-    var session = req.headers.cookie.match(/__session_id=([^;\s]+)/);
+    var session = req.headers.cookie.match(/__session_id=([^;:\s\n\r\t]+)/);
     if (session) user_session = session[1]
   }
 
   store.dispatch(setIp(user_ip));
   store.dispatch(setSession(user_session));
 
-  new Promise(function(resolve, reject) {
-    Request.fetch(
-      '/api/user/getInfo', {
+  var promise = [];
 
-      success: user => {
-        resolve(user);
-      },
+  if (session) {
+    promise.push(
+      new Promise(function(resolve, reject) {
+        Request.fetch(
+          '/api/user/getInfo', {
 
-      error: error => {
-        reject(error);
-      },
+          success: user => {
+            resolve(user);
+          },
 
-      cache:     false,
-      remote_ip: user_ip,
-      session:   user_session,
-    });
-  })
+          error: error => {
+            reject(error);
+          },
+
+          cache:     false,
+          remote_ip: user_ip,
+          session:   user_session,
+        });
+      })
+    );
+  }
+
+  Promise.all(promise)
   .then(user => {
-    if (user && user.id) {
-      store.dispatch(userLogin(user));
+    if (typeof user != 'undefined' && user.length && user[0].id) {
+      store.dispatch(userLogin(user[0]));
     }
 
     match({routes: routes(store), location: req.url}, (error, redirect, render_props) => {
