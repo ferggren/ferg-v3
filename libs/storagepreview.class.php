@@ -412,6 +412,16 @@ class StoragePreview {
       $options['height'] = round($options['width'] / $source_r);
     }
 
+    if ($options['width'] > $source_w) {
+      $options['width'] = $source_w;
+      $options['height'] = round($source_w / $source_r);
+    }
+
+    if ($options['height'] > $source_h) {
+      $options['height'] = $source_h;
+      $options['width'] = round($source_h * $source_r);
+    }
+
     if ($options['width'] > $config['max_width']) {
       $options['width'] = $config['max_width'];
       $options['height'] = round($options['width'] / $source_r);
