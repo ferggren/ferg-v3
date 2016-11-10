@@ -225,7 +225,7 @@ var SitePage = React.createClass({
     if (page.data.timestamp) {
       date = (
         <div className="page__preview-date">
-          {NiceTime.niceDateFormat(page.data.timestamp)}
+          {NiceTime.niceMonthFormat(page.data.timestamp)}
         </div>
       );
     }
