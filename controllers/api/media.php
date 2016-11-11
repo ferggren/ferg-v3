@@ -399,16 +399,27 @@ class ApiMedia_Controller extends ApiController {
    *  Translate <code>
    */
   protected function _translateCode($text_raw) {
-    if (!preg_match_all('#<code>(.*?)</code>#uis', $text_raw, $data, PREG_SET_ORDER)) {
+    if (!preg_match_all('#([ ]*+)<code(?: desc="([^"]++)")?>(?:[ ]*+)(.*?)\s*+</code>#uis', $text_raw, $data, PREG_SET_ORDER)) {
       return $text_raw;
     }
 
     foreach ($data as $code) {
-      $block = $code[1];
+      $code[3] = preg_replace('#^'.$code[1].'#muis', '', $code[3]);
+
+      $block  = '<div class="page-content__code">';
+      if ($code[2]) {
+        $block .= '<div class="page-content__code-desc">';
+        $block .= htmlspecialchars($code[2]);
+        $block .= '</div>';
+      }
+      $block .= '<pre>';
+      $block .= $this->_makeNiceCode($code[3]);
+      $block .= '</pre>';
+      $block .= '</div>';
 
       $text_raw = str_replace(
         $code[0],
-        '<div class="page-content__code"><pre>'.$block.'</pre></div>',
+        $block,
         $text_raw
       );
     }
@@ -456,7 +467,6 @@ class ApiMedia_Controller extends ApiController {
       'img',
       'br',
       'p',
-      'a',
       'h[123456]',
     ));
 
@@ -595,5 +605,89 @@ class ApiMedia_Controller extends ApiController {
     }
 
     return '';
+  }
+
+  /**
+   *  Make nice code
+   */
+  protected function _makeNiceCode($code) {
+    // "..."
+    $code = preg_replace(
+      '#"((?:(?:(?<=[\\\\])")|[^"])++)"#uis',
+      '<span class="page-content__code-string">"$1"</span>',
+      $code
+    );
+
+    // '...'
+    $code = preg_replace(
+      "#'((?:(?:(?<=[\\\\])')|[^'])++)'#uis",
+      '<span class="page-content__code-string">\'$1\'</span>',
+      $code
+    );
+
+    // /** */
+    $code = preg_replace(
+      '#(/\\*.*?\\*/)#uis',
+      '<span class="page-content__code-comment">$1</span>',
+      $code
+    );
+
+    // //
+    $code = preg_replace(
+      '#(//.*?)$#uism',
+      '<span class="page-content__code-comment">$1</span>',
+      $code
+    );
+
+    // $a = 
+    $code = preg_replace(
+      '#([a-zA-Z][a-zA-Z0-9_]*+\s++)=#uis',
+      '$1<span class="page-content__code-static">=</span>',
+      $code
+    );
+
+    // $a->b $a->$b
+    $code = preg_replace(
+      '#([$][a-zA-Z][a-zA-Z0-9_]*+)(->|[.])([$]?[a-zA-Z][a-zA-Z0-9_]*+)#uis',
+      '<span class="page-content__code-variable">$1</span><span class="page-content__code-static">$2</span><span class="page-content__code-variable">$3</span>',
+      $code
+    );
+
+    // $a
+    $code = preg_replace(
+      '#([$][a-zA-Z][a-zA-Z0-9_]*+)#u',
+      '<span class="page-content__code-variable">$1</span>',
+      $code
+    );
+
+    // static or functions
+    $code = preg_replace(
+      '#(?<=^|\W|[^$])((?:new|function|class|extends)\s++)([a-zA-Z_][a-zA-Z0-9_]++)#us',
+      '$1<span class="page-content__code-function">$2</span>',
+      $code
+    );
+
+    // Database::from Request.get
+    $code = preg_replace(
+      '#(?<=^|\W|[^$])([A-Z][a-zA-Z0-9_]*+)([.]|::)([$]?[a-zA-Z0-9_]++)#us',
+      '<span class="page-content__code-class">$1</span><span class="page-content__code-static">$2</span>$3',
+      $code
+    );
+
+    // public static return new 
+    $code = preg_replace(
+      '#(?<=^|\W|[^$])(return|public|static|new|function|class|foreach|if|else|protected|extends)(?=\s)#us',
+      '<span class="page-content__code-static">$1</span>',
+      $code
+    );
+
+    // constants
+    $code = preg_replace(
+      '#(?<=^|\W|[^$])(true|false|[A-Z_]++|\d++)(?=\W)#u',
+      '<span class="page-content__code-constant">$1</span>',
+      $code
+    );
+
+    return $code;
   }
 }

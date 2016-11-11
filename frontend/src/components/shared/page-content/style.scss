@@ -220,13 +220,49 @@ $margin_bottom: 20px;
  */
 .page-content__code {
 	margin: $margin_bottom 0px;
-	padding: 10px 0px;
-	background: #222;
 }
 
+	.page-content__code-desc {
+		line-height: 16px;
+		font-size: 12px;
+		margin-bottom: 8px;
+		font-weight: bold;
+	}
+
 	.page-content__code pre {
+		padding: 5px 10px;
+		border-radius: 3px;
+		background: #262626;
 		color: #EEE;
 		line-height: 24px;
 		font-size: 14px;
 		font-family: Courier, "DejaVu Sans Mono", monospace;
 	}
+
+		.page-content__code-comment, .page-content__code-comment span {
+			color: rgb(96, 96, 96) !important;
+		}
+
+		.page-content__code-string, .page-content__code-string span {
+			color: rgb(140, 158, 110) !important;
+		}
+
+		.page-content__code-variable {
+			color: rgb(114, 135, 164);
+		}
+
+		.page-content__code-static {
+			color: rgb(210, 168, 111);
+		}
+
+		.page-content__code-constant {
+			color: rgb(218, 104, 81);
+		}
+
+		.page-content__code-function {
+			color: rgb(160, 112, 68);
+		}
+
+		.page-content__code-class {
+			color: rgb(158, 132, 137);
+		}
