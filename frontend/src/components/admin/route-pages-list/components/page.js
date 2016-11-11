@@ -69,7 +69,7 @@ var Page = React.createClass({
   _makeDate() {
     return (
       <div className="pages-list__page-button pages-list__page-date">
-        {NiceTime.niceDateFormat(this.props.page.timestamp)}
+        {NiceTime.niceMonthFormat(this.props.page.timestamp)}
       </div>
     );
   },
@@ -81,17 +81,46 @@ var Page = React.createClass({
   },
 
   _makeTitle() {
-    return (
-      <div className="pages-list__page-title">
-        {this.props.page.title}
-      </div>
-    );
+    return ;
   },
 
   _makeDesc() {
     return (
       <div className="pages-list__page-desc">
         {this.props.page.desc}
+      </div>
+    );
+  },
+
+  _makeHeader() {
+    var page  = this.props.page;
+    var title = null;
+    var desc  = null;
+
+    if (page.title) {
+      title = (
+        <div className="pages-list__page-title">
+          {page.title}
+        </div>
+      )
+    }
+
+    if (page.desc) {
+      desc = (
+        <div className="pages-list__page-desc">
+          {page.desc}
+        </div>
+      )
+    }
+
+    if (!title && !desc) {
+      return null;
+    }
+
+    return (
+      <div className="pages-list__page-header">
+        {title}
+        {desc}
       </div>
     );
   },
@@ -111,18 +140,9 @@ var Page = React.createClass({
     var versions       = null;
     var date           = null;
     var ico_hidden     = null;
-    var title          = null;
-    var desc           = null;
+    var header         = null;
 
-    // title
-    if (page.title) {
-      title = this._makeTitle();
-    }
-
-    // desc
-    if (page.desc) {
-      desc = this._makeDesc();
-    }
+    var header = this._makeHeader();
 
     // button delete
     if (!page.deleted && !page.loading) {
@@ -198,8 +218,7 @@ var Page = React.createClass({
         onClick={e => {
           this.props.onSelect(page);
         }}>
-        {title}
-        {desc}
+        {header}
         {button_delete}
         {button_restore}
         {button_show}

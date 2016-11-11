@@ -70,7 +70,7 @@ var TagsCloud = React.createClass({
       tags_max_amount = tags_amounts[offset];
     }
 
-    var em_max_gain = 0.5;
+    var em_max_gain = 0.4;
     var em_base     = 0.7;
 
     for (var tag in tags) {
