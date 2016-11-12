@@ -48,7 +48,7 @@ var GalleryPhoto = React.createClass({
       this._removeKeysListner();
     }
 
-    // this.props.dispatch(clearApiData(PHOTO_API_KEY));
+    this.props.dispatch(clearApiData(PHOTO_API_KEY));
   },
 
   componentDidUpdate(prevProps, prevState) {
@@ -214,9 +214,6 @@ var GalleryPhoto = React.createClass({
    *  Make photo loader
    */
   _makePhotoLoader() {
-    if (!this.props.photo) return null;
-    if (!this.props.photo.loading) return null;
-
     return (
       <div className="gallery-photo__loader">
         <div className="loader" />
@@ -454,10 +451,10 @@ var GalleryPhoto = React.createClass({
     return (
       <div className="gallery-photo">
         <div className="gallery-photo__header">
+            {this._makePhotoLoader()}
             {this._makePhotoError()}
             {this._makePhotoPreview()}
             {this._makeNavigation()}
-            {this._makePhotoLoader()}
         </div>
 
         <Wrapper>
@@ -482,17 +479,6 @@ GalleryPhoto.fetchData = (store, params) => {
   var update = false;
 
   if (!state.api[PHOTO_API_KEY]) {
-    update = true;
-  }
-  else {
-    var photo = state.api[PHOTO_API_KEY];
-
-    if (!photo || !photo.options || photo.options.id != params.photo_id) {
-      update = true;
-    }
-  }
-
-  if (update) {
     ret.push(
       store.dispatch(makeApiRequest(
         PHOTO_API_KEY, '/api/gallery/getPhoto', {
