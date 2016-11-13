@@ -676,7 +676,7 @@ class ApiMedia_Controller extends ApiController {
 
     // public static return new 
     $code = preg_replace(
-      '#(?<=^|\W|[^$])(return|public|let|for|while|static|new|function|class|foreach|if|else|protected|extends)(?=\s)#us',
+      '#(?<=^|\W|[^$])(return|public|let|var|for|while|static|new|function|class|foreach|if|else|protected|extends)(?=\s)#us',
       '<span class="page-content__code-static">$1</span>',
       $code
     );

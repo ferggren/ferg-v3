@@ -237,37 +237,37 @@ $margin_bottom: 20px;
 	.page-content__code pre {
 		padding: 5px 10px;
 		border-radius: 3px;
-		background: #262626;
-		color: #EEE;
+		background: #f5f2f0;
+		color: #333;
 		line-height: 24px;
 		font-size: 14px;
 		font-family: Courier, "DejaVu Sans Mono", monospace;
 	}
 
 		.page-content__code-comment, .page-content__code-comment span {
-			color: rgb(96, 96, 96) !important;
+			color: #708090 !important;
 		}
 
 		.page-content__code-string, .page-content__code-string span {
-			color: rgb(140, 158, 110) !important;
+			color: #690 !important;
 		}
 
 		.page-content__code-variable {
-			color: rgb(114, 135, 164);
+			color: #0086b3;
 		}
 
 		.page-content__code-static {
-			color: rgb(210, 168, 111);
+			color: #458;
 		}
 
 		.page-content__code-constant {
-			color: rgb(218, 104, 81);
+			color: #905;
 		}
 
 		.page-content__code-function {
-			color: rgb(160, 112, 68);
+			color: #302d8a;
 		}
 
 		.page-content__code-class {
-			color: rgb(158, 132, 137);
+			color: #458;
 		}
