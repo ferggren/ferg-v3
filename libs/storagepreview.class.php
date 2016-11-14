@@ -734,7 +734,7 @@ class StoragePreview {
 
     $res->orderBy('preview_downloads', 'DESC');
     $res->orderBy('preview_last_access', 'DESC');
-    $res->limit(300, 300);
+    $res->limit(100, 900);
 
     $res = $res->get();
 
