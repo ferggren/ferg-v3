@@ -662,28 +662,28 @@ class ApiMedia_Controller extends ApiController {
 
     // static or functions
     $code = preg_replace(
-      '#(?<=^|\W|[^$])((?:new|function|class|extends)\s++)([a-zA-Z_][a-zA-Z0-9_]++)#us',
+      '#(?<=^|[^\w$])((?:new|function|class|extends)\s++)([a-zA-Z_][a-zA-Z0-9_]++)#us',
       '$1<span class="page-content__code-function">$2</span>',
       $code
     );
 
     // Database::from Request.get
     $code = preg_replace(
-      '#(?<=^|\W|[^$])([A-Z][a-zA-Z0-9_]*+)([.]|::)([$]?[a-zA-Z0-9_]++)#us',
+      '#(?<=^|[^\w$])([A-Z][a-zA-Z0-9_]*+)([.]|::)([$]?[a-zA-Z0-9_]++)#us',
       '<span class="page-content__code-class">$1</span><span class="page-content__code-static">$2</span>$3',
       $code
     );
 
     // public static return new 
     $code = preg_replace(
-      '#(?<=^|\W|[^$])(return|public|let|var|for|while|static|new|function|class|foreach|if|else|protected|extends)(?=\s)#us',
+      '#(?<=^|[^\w$])(return|export default|export|import|public|let|var|for|while|static|new|const|function|class|foreach|if|else|protected|extends)(?=\s)#us',
       '<span class="page-content__code-static">$1</span>',
       $code
     );
 
     // constants
     $code = preg_replace(
-      '#(?<=^|\W|[^$])(true|false|[A-Z_]++|\d++)(?=\W)#u',
+      '#(?<=^|[^\w$])(true|false|[A-Z_]++|\d++)(?=\W)#u',
       '<span class="page-content__code-constant">$1</span>',
       $code
     );
