@@ -188,7 +188,10 @@ $margin_bottom: 20px;
 		background-position: 50% 50%;
 		background-size: cover;
 		background-repeat: no-repeat;
-		background-attachment: fixed;
+
+		@include respond_to(screen_wide) {
+			background-attachment: fixed;
+		}
 	}
 
 	.page-content__parallax_photo-desc {
