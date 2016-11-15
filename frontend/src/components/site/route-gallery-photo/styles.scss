@@ -2,6 +2,8 @@
 @import 'styles/mixins/background_rgba';
 
 $header_bg: (90, 90, 90);
+$details_width:  220px;
+$details_margin: 20px;
 
 .gallery-photo {
 
@@ -12,7 +14,7 @@ $header_bg: (90, 90, 90);
 		margin: -30px auto 50px auto;
 		width: 100%;
 		height: 500px;
-		height: 100vh;
+		height: 80vh;
 		border-bottom: 1px solid #CCC;
 		position: relative;
 		background: #222;
@@ -23,8 +25,8 @@ $header_bg: (90, 90, 90);
 
 		@include respond_to(screen_phone) {
 			margin-top: -60px;
-			height: 400px;
-			height: 100vh;
+			height: 300px;
+			height: 80vh;
 		}
 	}
 
@@ -50,14 +52,14 @@ $header_bg: (90, 90, 90);
     display: block;
     height: 100%;
     width: 100%;
-		height: 100vh;
+		height: 80vh;
 		width: 100vw;
 	}
 
 	.gallery-photo__header-photo {
 		max-width: 100%;
 		max-height: 100%;
-		max-height: 100vh;
+		max-height: 80vh;
 		max-width: 100vw;
 		position: absolute;
 		left: 50%;
@@ -148,26 +150,73 @@ $header_bg: (90, 90, 90);
 			left: 0px;
 		}
 
+/**
+ *	Info section
+ */
 .gallery-photo__info {
 	margin-top: -30px;
 	margin-bottom: 30px;
 	position: relative;
-	min-height: 30px;
 }
 
-	.gallery-photo__info-title {
-		font-size: 24px;
-		line-height: 30px;
-		color: #333;
+/**
+ *	Wrappers
+ */
+.gallery-photo__common-wrapper {
+	@include respond_to(screen_wide) {
+		margin-right: $details_width + $details_margin;
+		min-width: $screen_tablet - $details_width - $details_margin - 60px;
 	}
 
-	.gallery-photo__info-details {
-		position: absolute;
-		top: 0px;
-		right: 0px;
-		font-size: 12px;
+	@include respond_to(screen_tablet) {
+		margin-right: $details_width + $details_margin;
+		min-width: $screen_tablet - $details_width - $details_margin - 60px;
+	}
+}
+
+	.gallery-photo__common {
+		@include respond_to(screen_wide) {
+			min-width: 420px;
+		}
+
+		@include respond_to(screen_tablet) {
+			min-width: 220px;
+		}
 	}
 
-	.gallery-photo__info-tags {
-
+.gallery-photo__details-wrapper {
+	@include respond_to(screen_wide) {
+		float: right;
+		max-width: $details_width;
 	}
+
+	@include respond_to(screen_tablet) {
+		float: right;
+		max-width: $details_width;
+	}
+}
+
+	.gallery-photo__details {
+		min-width: $details_width;
+	}
+
+/**
+ *	Title
+ */
+.gallery-photo__title {
+	font-size: 24px;
+	line-height: 30px;
+	color: #666;
+}
+
+/**
+ *	Details
+ */
+.gallery-photo__detail {
+	min-width: $details_width - 45px;
+	text-align: center;
+	padding: 0px 0px 0px 45px;
+	margin-bottom: 10px;
+	font-size: 12px;
+	line-height: 24px;
+}

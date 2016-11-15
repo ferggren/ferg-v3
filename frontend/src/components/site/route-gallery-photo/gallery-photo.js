@@ -369,21 +369,43 @@ var GalleryPhoto = React.createClass({
     var photo = this.props.photo;
     if (!photo || !photo.loaded || photo.error) return null;
 
-    return console.log('_makePhotoTitle');
     var photo = this.props.photo;
 
-    if (!photo.loaded) return null;
-    if (photo.loading) return null;
-    if (photo.error) return null;
-    if (!photo.info.title) return null;
+    if (!photo.loaded || photo.error) return null;
+    if (!photo.data.info.title) return null;
 
     return (
-      <div className="gallery-photo__info-title">
-        {photo.info.title}
+      <div className="gallery-photo__title">
+        {photo.data.info.title ? photo.data.info.title : 'Untitled'}
       </div>
     );
   },
 
+  /**
+   *  Make photo comments
+   */
+  _makePhotoComments() {
+    var photo = this.props.photo;
+
+    if (!photo || !photo.loaded || photo.error) {
+      return null;
+    }
+
+    return null;
+  },
+
+  /**
+   *  Make photo location
+   */
+  _makePhotoLocation() {
+    var photo = this.props.photo;
+
+    if (!photo || !photo.loaded || photo.error) {
+      return null;
+    }
+
+    return null;
+  },
 
   /**
    *  Make photo info
@@ -394,31 +416,37 @@ var GalleryPhoto = React.createClass({
 
     var tags = photo.data.info.tags;
 
-    var keys = [
-      "camera",
-      "lens",
-      "shutter_speed",
-      "aperture",
-      "iso",
-    ];
+    var details = {
+      camera: tags.camera,
+      lens:   tags.lens,
+      info:   [],
+    };
 
-    var details = [];
-
-    keys.forEach(key => {
+    ['shutter_speed','aperture','iso'].forEach(key => {
       if (!tags[key]) return;
 
-      details.push(Lang.get(
+      details.info.push(Lang.get(
         'gallery-photo.photo_' + key, {param: tags[key]}
       ));
     });
 
-    if (!details.length) return; null;
+    details.info = details.info.join(', ');
 
-    return (
-      <div className="gallery-photo__info-details">
-        {details.join(', ')}
-      </div>
-    );
+    var ret = [];
+
+    for (var key in details) {
+      if (!details[key]) {
+        continue;
+      }
+
+      ret.push(
+        <div key={key} className={"gallery-photo__detail gallery-photo__detail--" + key}>
+          {details[key]}
+        </div>
+      );
+    }
+
+    return ret;
   },
 
   /**
@@ -439,11 +467,13 @@ var GalleryPhoto = React.createClass({
     });
 
     return (
-      <TagsCloud
-        group="gallery"
-        tags={tags}
-        url={url}
-      />
+      <div key="tags" className="gallery-photo__detail gallery-photo__detail--tags">
+        <TagsCloud
+          group="gallery"
+          tags={tags}
+          url={url}
+        />
+      </div>
     );
   },
 
@@ -459,9 +489,23 @@ var GalleryPhoto = React.createClass({
 
         <Wrapper>
           <div className="gallery-photo__info">
-            {this._makePhotoTitle()}
-            {this._makePhotoDetails()}
-            {this._makePhotoTags()}
+
+            <div className="gallery-photo__details-wrapper">
+              <div className="gallery-photo__details">
+                {this._makePhotoLocation()}
+                {this._makePhotoDetails()}
+                {this._makePhotoTags()}
+              </div>
+            </div>
+
+            <div className="gallery-photo__common-wrapper">
+              <div className="gallery-photo__common">
+                {this._makePhotoTitle()}
+                {this._makePhotoComments()}
+              </div>
+            </div>
+
+            <div className="floating-clear" />
           </div>
         </Wrapper>
       </div>

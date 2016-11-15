@@ -11,31 +11,6 @@ $tags_margin: 20px;
 
 }
 
-
-	.gallery__tags-group {
-		background-repeat: no-repeat;
-		background-position: 50% 0%;
-		min-width: $tags_width;
-		text-align: center;
-		padding-top: 32px;
-		background-size: 32px 32px;
-		border-bottom: 1px solid #CCC;
-		padding-bottom: 10px;
-		margin-bottom: 10px;
-	}
-
-	.gallery__tags-group--camera {
-		background-image: url('./media/camera.png');
-	}
-
-	.gallery__tags-group--category {
-		background-image: url('./media/cloud.png');
-	}
-
-	.gallery__tags-group--lens {
-		background-image: url('./media/lens.png');
-	}
-
 .gallery__grid-wrapper {
 	margin-top: 30px;
 }

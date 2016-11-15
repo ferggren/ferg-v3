@@ -32,10 +32,10 @@ class PhotoLibrary extends Database {
     }
 
     if (Lang::getLang() == 'ru') {
-      $export['title'] = $this->photo_title_ru ? $this->photo_title_ru : "";
+      $export['title'] = $this->photo_title_ru ? $this->photo_title_ru : $this->photo_title_en;
     }
     else {
-      $export['title'] = $this->photo_title_en ? $this->photo_title_en : "";
+      $export['title'] = $this->photo_title_en ? $this->photo_title_en : $this->photo_title_ru;
     }
 
     $export['ratio'] = 1;
