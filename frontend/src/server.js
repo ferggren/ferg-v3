@@ -34,8 +34,20 @@ app.use((req, res) => {
     }
 
     if (req.headers['user-agent']) {
-      old_browser = !!req.headers['user-agent'].match(
-        /MSIE\s+\d+/i
+      old_browser = old_browser || !!req.headers['user-agent'].match(
+        /MSIE\s*\d+/i
+      );
+
+      old_browser = old_browser || !!req.headers['user-agent'].match(
+        /Trident\/\s*\d+/i
+      );
+
+      old_browser = old_browser || !!req.headers['user-agent'].match(
+        /Opera Mini\/\s*\d+/i
+      );
+
+      old_browser = old_browser || !!req.headers['user-agent'].match(
+        /UCWEB\/\s*\d+/i
       );
     }
   }

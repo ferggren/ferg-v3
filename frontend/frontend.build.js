@@ -104,10 +104,6 @@ for (let section in site_sections) {
         },
       }),
 
-      new webpack.ProvidePlugin({
-        Promise: 'imports?this=>global!exports?global.Promise!es6-promise'
-      }),
-
       // new webpack.optimize.CommonsChunkPlugin({
       //      name: section + "-common",
       //      minChunks: 3,
