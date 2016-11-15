@@ -26,9 +26,18 @@ app.use((req, res) => {
 
   var user_ip      = false;
   var user_session = false;
+  var old_browser  = false;
 
-  if (req.headers && req.headers['x-real-ip']) {
-    user_ip = req.headers['x-real-ip'];
+  if (req.headers) {
+    if (req.headers['x-real-ip']) {
+      user_ip = req.headers['x-real-ip'];
+    }
+
+    if (req.headers['user-agent']) {
+      old_browser = !!req.headers['user-agent'].match(
+        /MSIE\s+\d+/i
+      );
+    }
   }
 
   if (req.headers && req.headers.cookie) {
@@ -126,7 +135,7 @@ app.use((req, res) => {
       })
       .then(html => {
         // make HTML response
-        return renderHTML(html, store.getState());
+        return renderHTML(html, store.getState(), !old_browser);
       })
       .then(html => {
         // send HTML response
@@ -271,7 +280,32 @@ function getLocation(req) {
  *  @param {string} componentHTML Injected HTML
  *  @param {store} store App store
  */
-function renderHTML(component_html, store) {
+function renderHTML(component_html, store, scripts_enabled = true) {
+  var scripts = '';
+  var styles  = '';
+
+  if (scripts_enabled) {
+    scripts += '<script>window.REDUX_INITIAL_STATE = ' + JSON.stringify(store) + ';</script>';
+    scripts += '<script>window.__CURRENT_LANG = "' + store.lang + '";</script>';
+
+    if (NODE_ENV == 'dev') {
+      scripts += '<script src="/assets/site/site.js?v='+Math.random()+'" async defer></script>';
+    }
+    else {
+      var hash = makeFileHash('./public/assets/site/site.js');
+      var url = hash ? ('v_' + hash + '/') : '';
+
+      scripts += '<script src="/assets/'+url+'site/site.js" async defer></script>';
+    }
+  }
+
+  if (NODE_ENV != 'dev') {
+    var hash = makeFileHash('./public/assets/site/site.css');
+    var url = hash ? ('v_' + hash + '/') : '';
+
+    styles += '<link href="/assets/' + url + 'site/site.css" rel="stylesheet" />';
+  }
+
   var html = '';
 
   html += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
@@ -284,34 +318,13 @@ function renderHTML(component_html, store) {
   html += '<link rel="alternate" hreflang="ru-ru" href="//ferg.in/ru/" />';
   html += '<link rel="alternate" hreflang="en-us" href="//ferg.in/en/" />';
   html += '<title>' + (store.title ? store.title : 'ferg.in') + '</title>';
-
-  if (NODE_ENV != 'dev') {
-    var hash = makeFileHash('./public/assets/site/site.css');
-    var url = hash ? ('v_' + hash + '/') : '';
-
-    html += '<link href="/assets/' + url + 'site/site.css" rel="stylesheet" />';
-  }
-
+  html += styles;
   html += '</head>';
-
   html += '<body>';
   html += '<div class="site" id="react-root">';
   html += component_html;
   html += '</div>';
-
-  html += '<script>window.REDUX_INITIAL_STATE = ' + JSON.stringify(store) + ';</script>';
-  html += '<script>window.__CURRENT_LANG = "' + store.lang + '";</script>';
-
-  if (NODE_ENV == 'dev') {
-    html += '<script src="/assets/site/site.js?v='+Math.random()+'" async></script>';
-  }
-  else {
-    var hash = makeFileHash('./public/assets/site/site.js');
-    var url = hash ? ('v_' + hash + '/') : '';
-
-    html += '<script src="/assets/'+url+'site/site.js" async></script>';
-  }
-
+  html += scripts;
   html += '</body>';
   html += '</html>';
 

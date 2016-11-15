@@ -653,11 +653,16 @@ var Request = {
 
       crypto.getRandomValues(random);
 
-      random.forEach(num => {
-        token.push(set.charAt(num % set.length));
-      });
+      for (var i = 0; i < 32; ++i) {
+        if (typeof random[i] == 'undefined') {
+          break;
+        }
+
+        token.push(set.charAt(random[i] % set.length));
+      }
     }
-    else {
+
+    if (!token.length) {
       for (var i = 0; i < 32; ++i) {
         token.push(set.charAt(Math.floor(Math.random() * set.length)));
       }
