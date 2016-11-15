@@ -13,6 +13,7 @@ var { Link }           = require('react-router');
 var { browserHistory } = require('react-router');
 var { setTitle }       = require('redux/actions/title');
 var Lang               = require('libs/lang');
+var NiceTime           = require('libs/nice-time');
 var Wrapper            = require('components/site/view-wrapper');
 var TagsCloud          = require('components/shared/tags-cloud');
 
@@ -382,6 +383,25 @@ var GalleryPhoto = React.createClass({
   },
 
   /**
+   *  Make photo date
+   */
+  _makePhotoDate() {
+    var photo = this.props.photo;
+    if (!photo || !photo.loaded || photo.error) return null;
+
+    var photo = this.props.photo;
+
+    if (!photo.loaded || photo.error) return null;
+    if (!photo.data.info.timestamp) return null;
+
+    return (
+      <div className="gallery-photo__date">
+        {NiceTime.niceDateFormat(photo.data.info.timestamp)}
+      </div>
+    );
+  },
+
+  /**
    *  Make photo comments
    */
   _makePhotoComments() {
@@ -501,6 +521,7 @@ var GalleryPhoto = React.createClass({
             <div className="gallery-photo__common-wrapper">
               <div className="gallery-photo__common">
                 {this._makePhotoTitle()}
+                {this._makePhotoDate()}
                 {this._makePhotoComments()}
               </div>
             </div>
