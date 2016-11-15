@@ -223,9 +223,8 @@ $details_margin: 20px;
  *	Details
  */
 .gallery-photo__detail {
-	min-width: $details_width - 45px;
+	min-width: $details_width;
 	text-align: center;
-	padding: 0px 0px 0px 45px;
 	margin-bottom: 10px;
 	font-size: 12px;
 	line-height: 24px;
