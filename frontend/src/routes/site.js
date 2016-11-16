@@ -10,6 +10,7 @@ var Photo    = require('components/site/route-gallery-photo');
 var Menu     = require('components/site/view-navigation');
 var Footer   = require('components/site/view-footer');
 var Title    = require('components/site/view-title-updater');
+var Tracker  = require('components/site/view-tracker');
 var Lang     = require('components/site/view-lang-updater');
 var Progress = require('components/shared/request-progress');
 
@@ -22,6 +23,7 @@ var App = (props) => {
       <Progress />
       {props.children ? React.cloneElement(props.children, props) : null}
       <Footer />
+      <Tracker />
     </div>
   );
 }

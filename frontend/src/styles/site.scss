@@ -29,3 +29,10 @@ body, input, textarea {
 	min-height: 100%;
 	position: relative;
 }
+
+.site-counters {
+	position: absolute;
+	height: 1px;
+	width: 1px;
+	margin-left: -9999px;
+}

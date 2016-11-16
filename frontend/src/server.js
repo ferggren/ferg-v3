@@ -12,6 +12,7 @@ var { setSession }  = require('redux/actions/session');
 var { userLogin }   = require('redux/actions/user');
 var Lang            = require('libs/lang');
 var Request         = require('libs/request');
+var SiteAnalytics   = require('./config/analytics');
 
 var {match, RouterContext} = require('react-router');
 
@@ -293,8 +294,9 @@ function getLocation(req) {
  *  @param {store} store App store
  */
 function renderHTML(component_html, store, scripts_enabled = true) {
-  var scripts = '';
-  var styles  = '';
+  var scripts  = '';
+  var styles   = '';
+  var counters = '';
 
   if (scripts_enabled) {
     scripts += '<script>window.REDUX_INITIAL_STATE = ' + JSON.stringify(store) + ';</script>';
@@ -318,6 +320,10 @@ function renderHTML(component_html, store, scripts_enabled = true) {
     styles += '<link href="/assets/' + url + 'site/site.css" rel="stylesheet" />';
   }
 
+  SiteAnalytics.forEach(counter => {
+    counters += counter;
+  });
+
   var html = '';
 
   html += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
@@ -337,6 +343,9 @@ function renderHTML(component_html, store, scripts_enabled = true) {
   html += component_html;
   html += '</div>';
   html += scripts;
+  html += '<div class="site-counters">';
+  html += counters;
+  html += '</div>';
   html += '</body>';
   html += '</html>';
 
