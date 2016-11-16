@@ -20,8 +20,8 @@ var Tracker = React.createClass({
     }
 
     if (typeof window.ga != 'undefined') {
-      ga('set', 'page', this.props.location);
-      ga('set', 'referrer', 'http://example.com');
+      ga('set', 'referrer', this.props.location);
+      ga('set', 'page', next_props.location);
       ga('send', 'pageview');
     }
 
