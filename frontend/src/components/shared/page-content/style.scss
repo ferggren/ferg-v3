@@ -238,6 +238,7 @@ $margin_bottom: 20px;
 	}
 
 	.page-content__code pre {
+		display: block;
 		padding: 5px 10px;
 		border-radius: 3px;
 		background: #f5f2f0;
@@ -245,6 +246,8 @@ $margin_bottom: 20px;
 		line-height: 24px;
 		font-size: 14px;
 		font-family: Courier, "DejaVu Sans Mono", monospace;
+		overflow-x: scroll;
+
 	}
 
 		.page-content__code-comment, .page-content__code-comment span {
