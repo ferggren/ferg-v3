@@ -197,8 +197,8 @@ class Feed_CliController extends CliController {
         'timestamp' => 0,
         'preview'   => $photo->export()['preview'],
         'tags'      => implode(',', array(
-          $photo->photo_lens,
-          $photo->photo_camera,
+          // $photo->photo_lens,
+          // $photo->photo_camera,
           $photo->photo_category,
         )),
       );
