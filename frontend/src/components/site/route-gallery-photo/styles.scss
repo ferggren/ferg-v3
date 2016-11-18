@@ -22,6 +22,7 @@ $details_margin: 20px;
 		background-repeat: no-repeat;
 		background-position: 50% 50%;
 		text-align: center;
+		overflow: hidden;
 
 		@include respond_to(screen_phone) {
 			margin-top: -60px;
