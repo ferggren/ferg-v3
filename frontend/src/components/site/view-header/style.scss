@@ -68,7 +68,7 @@ $window_padding: 10px;
 			height: 26px;
 			margin: 0px 3px;
 			background-size: 26px 26px;
-			opacity: .85;
+			opacity: .9;
 		}
 
 			.site-header__contact:hover {
@@ -105,4 +105,13 @@ $window_padding: 10px;
 
 			.site-header__contact--steam {
 				background-image: url('./media/contacts/steam.png');
+			}
+
+			.site-header__contact--flickr {
+				background-image: url('./media/contacts/flickr.png');
+				border-radius: 12px;
+			}
+
+			.site-header__contact--500px {
+				background-image: url('./media/contacts/500px.png');
 			}

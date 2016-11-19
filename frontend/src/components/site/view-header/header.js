@@ -26,13 +26,6 @@ var SiteHeader = React.createClass({
             />
 
             <a
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-              href="https://github.com/ferggren" 
-              className="site-header__contact site-header__contact--github"
-            />
-
-            <a
               href="skype:ferggren?chat"
               className="site-header__contact site-header__contact--skype"
             />
@@ -40,15 +33,15 @@ var SiteHeader = React.createClass({
             <a
               target="_blank"
               rel="nofollow noopener noreferrer"
-              href="https://instagram.com/ferggren/"
-              className="site-header__contact site-header__contact--instagram"
+              href="https://github.com/ferggren" 
+              className="site-header__contact site-header__contact--github"
             />
 
             <a
               target="_blank"
               rel="nofollow noopener noreferrer"
-              href="https://telegram.me/ferggren"
-              className="site-header__contact site-header__contact--telegram"
+              href="https://www.facebook.com/ferggren"
+              className="site-header__contact site-header__contact--facebook"
             />
 
             <a
@@ -61,8 +54,22 @@ var SiteHeader = React.createClass({
             <a
               target="_blank"
               rel="nofollow noopener noreferrer"
-              href="https://www.facebook.com/ferggren"
-              className="site-header__contact site-header__contact--facebook"
+              href="https://500px.com/ferggren"
+              className="site-header__contact site-header__contact--500px"
+            />
+
+            <a
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              href="https://www.flickr.com/photos/ferggren/"
+              className="site-header__contact site-header__contact--flickr"
+            />
+
+            <a
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              href="https://instagram.com/ferggren/"
+              className="site-header__contact site-header__contact--instagram"
             />
 
             <a
