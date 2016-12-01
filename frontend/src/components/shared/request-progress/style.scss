@@ -30,4 +30,5 @@ $bg_color: (92, 165, 193, 1);
 	height: $progress_height;
 	border-radius: 0px 3px 3px 0px;
 	overflow: hidden;
+	transition: all 0.4s ease-in-out;
 }
